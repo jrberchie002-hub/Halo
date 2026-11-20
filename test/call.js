@@ -1,0 +1,11 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3121); const b = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] }); const U = 'http://localhost:3121';
+ async function mk(name, un) { const c = await b.newContext({ viewport: { width: 390, height: 800 }, permissions: ['camera', 'microphone'] }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); await p.goto(U); await p.click('[data-s=new]'); await p.fill('#a_n', name); await p.fill('#a_u', un); await p.click('#a_go'); await p.click('[data-a=enter]'); await p.waitForSelector('.nav'); return { p, errs }; }
+ const A = await mk('Ama', 'ama.t'), B = await mk('Kofi', 'kofi.t');
+ await A.p.click('.top [data-a=add]'); await A.p.fill('#sq', 'kofi'); await A.p.waitForSelector('[data-a=req]'); await A.p.waitForTimeout(500); await A.p.click('[data-a=req]', { force: true });
+ await B.p.waitForSelector('[data-a=notifs] .dot', { timeout: 6000 }); await B.p.click('.top [data-a=notifs]'); await B.p.click('[data-a=accept]');
+ await B.p.waitForSelector('[data-a=chat]', { timeout: 6000 }); await A.p.click('#sr [data-a=close]'); await A.p.waitForSelector('[data-a=chat]', { timeout: 6000 });
+ await A.p.click('[data-a=chat]'); await A.p.click('[data-a=call][data-id]:not([data-v])');
+ await B.p.waitForSelector('[data-c=accept]', { timeout: 8000 }); await B.p.click('[data-c=accept]');
+ const t0 = Date.now(); let ok = false; for (let i = 0; i < 40; i++) { await A.p.waitForTimeout(500); const ta = await A.p.textContent('#cst').catch(() => ''), tb = await B.p.textContent('#cst').catch(() => ''); if (/^\d+:\d\d$/.test(ta) && /^\d+:\d\d$/.test(tb)) { ok = true; break; } }
+ console.log('both sides connected:', ok, 'in', Date.now() - t0, 'ms', A.errs, B.errs); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
