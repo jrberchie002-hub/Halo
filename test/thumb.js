@@ -1,0 +1,5 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { await start(3156); const b = await chromium.launch(); const p = await (await b.newContext()).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.goto('http://localhost:3156/?demo=1'); await p.waitForSelector('.nav');
+ const r = await p.evaluate(async () => { const c = document.createElement('canvas'); c.width = 160; c.height = 120; const x = c.getContext('2d'); const st = c.captureStream(15), mr = new MediaRecorder(st, { mimeType: 'video/webm' }), ch = []; mr.ondataavailable = e => ch.push(e.data); mr.start(100); for (let i = 0; i < 15; i++) { x.fillStyle = 'hsl(' + i * 24 + ',80%,50%)'; x.fillRect(0, 0, 160, 120); await new Promise(r => setTimeout(r, 100)); } const d = new Promise(r => mr.onstop = r); mr.stop(); await d; const url = URL.createObjectURL(new Blob(ch, { type: 'video/webm' })); return new Promise(res => window.haloThumb(url, t => res(t ? t.slice(0, 22) + ' len ' + t.length : null))); });
+ console.log('thumb', r, errs); await b.close(); process.exit(0); })();
