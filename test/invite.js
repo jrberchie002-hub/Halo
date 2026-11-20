@@ -1,10 +1,10 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js');
 (async () => { const srv = await start(3113); const b = await chromium.launch(); const U = 'http://localhost:3113';
  const a = await (await b.newContext({ viewport: { width: 390, height: 800 } })).newPage(); const errs = []; a.on('pageerror', e => errs.push(e.message));
- await a.goto(U); await a.click('[data-s=new]'); await a.fill('#a_n', 'Ama'); await a.fill('#a_u', 'ama.t'); await a.click('#a_go');   await a.click('[data-a=enter]'); await a.waitForSelector('.nav');
+ await a.goto(U); await a.click('[data-s=new]'); await a.fill('#a_n', 'Ama'); await a.fill('#a_u', 'ama.t'); await a.fill('#a_p', 'pass1234'); await a.click('#a_go');   await a.click('[data-a=enter]'); await a.waitForSelector('.nav');
  await a.click('[data-t=me]'); await a.click('[data-a=invite]'); await a.waitForSelector('.qrc svg'); await a.waitForTimeout(400); await a.screenshot({ path: '/tmp/inv.png' });
  const c = await b.newContext({ viewport: { width: 390, height: 800 } }); const p = await c.newPage(); p.on('pageerror', e => errs.push(e.message));
  await p.goto(U + '/i/ama.t'); await p.waitForSelector('.spin'); await p.screenshot({ path: '/tmp/spin.png' }); await p.waitForSelector('[data-s=new]', { timeout: 4000 }); console.log('chip:', await p.textContent('.chip'));
- await p.click('[data-s=new]'); await p.fill('#a_n', 'Kofi'); await p.fill('#a_u', 'kofi.t'); await p.click('#a_go');   await p.click('[data-a=enter]');
+ await p.click('[data-s=new]'); await p.fill('#a_n', 'Kofi'); await p.fill('#a_u', 'kofi.t'); await p.fill('#a_p', 'pass1234'); await p.click('#a_go');   await p.click('[data-a=enter]');
  await p.waitForSelector('#pr', { timeout: 6000 }); console.log('profile opened:', await p.textContent('#pr .hero h2')); await p.waitForTimeout(800); console.log('state:', await p.textContent('#pr .cta')); await a.click('#iv [data-a=close]'); await a.click('[data-t=chats]');
  await a.waitForSelector('[data-a=notifs] .dot', { timeout: 6000 }); console.log('Ama got request. errors:', errs); await a.screenshot({ path: '/tmp/ama.png' }); await b.close(); process.exit(0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
