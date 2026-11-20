@@ -92,6 +92,14 @@ function signup() {
 }
 function doLogin() { var u = $('#l_u').value.trim(), k = $('#l_k').value.trim(); api('POST', '/api/login', { username: u, key: k }).then(function (j) { S.tok = j.token; LS.set('halo.tok', j.token); LS.set('halo.key', k.toUpperCase()); S.me = j.me; start(); }).catch(function (e) { $('#l_e').textContent = e.message; }); }
 
+/* ---------- Spotify strip ---------- */
+var MINI = document.createElement('div'); MINI.className = 'mini'; MINI.style.cssText = 'margin:0 16px 8px;background:var(--ink);color:#fff;border-radius:18px;overflow:hidden;flex:none'; var miniSig = '', miniOpen = false;
+function paintMini() {
+  var np = S.me && S.me.np, sig = np ? np.song + '|' + np.artist + '|' + np.link : 'none'; if (sig + miniOpen === miniSig) return; miniSig = sig + miniOpen;
+  if (!np || !np.song) { MINI.innerHTML = '<button data-a="miniset" style="display:flex;gap:10px;align-items:center;width:100%;padding:10px 14px;color:#fff;text-align:left"><span style="font-size:18px">🎧</span><span style="flex:1;font-size:14px;font-weight:600">Share what you are listening to</span><span class="pill sp" style="padding:5px 12px">Add</span></button>'; return; }
+  var e = np.link && embedFor(np.link);
+  MINI.innerHTML = '<div style="display:flex;gap:10px;align-items:center;padding:9px 12px"><div class="eq"><i></i><i></i><i></i></div><div style="flex:1;min-width:0;line-height:1.25"><b style="font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(np.song) + '</b><span style="font-size:12px;opacity:.75">' + esc(np.artist || 'Your music') + '</span></div>' + (e ? '<button class="pill sp" style="padding:6px 14px" data-a="miniplay">' + (miniOpen ? 'Hide' : 'Play') + '</button>' : '') + '<button class="pill" style="padding:6px 12px;background:rgba(255,255,255,.16);color:#fff" data-a="miniset">Change</button></div>' + (e && miniOpen ? '<iframe src="' + e.src + '" style="width:100%;height:' + e.h + 'px;border:0;display:block" allow="autoplay;encrypted-media" loading="lazy"></iframe>' : '');
+}
 /* ---------- main shell ---------- */
 function start() { S.first = true; S.stamp = 0; drawMain(); poll(); }
 function drawMain() {
@@ -101,7 +109,7 @@ function drawMain() {
   var searchBar = S.tab === 'chats' ? '<button class="search" data-a="search">' + I('search') + 'Search people and messages</button>' : '';
   var nav = ['chats', 'stories', 'calls', 'me'].map(function (t) { var n = t === 'chats' ? totalUnread() : 0; return '<button data-a="tab" data-t="' + t + '" class="' + (S.tab === t ? 'on' : '') + '">' + I({ chats: 'chat', stories: 'story', calls: 'phone', me: 'me' }[t]) + { chats: 'Chats', stories: 'Stories', calls: 'Calls', me: 'You' }[t] + (n ? '<span class="badge">' + n + '</span>' : '') + '</button>'; }).join('');
   var keep = []; app.querySelectorAll('.sheet,.sv,.call,.toast').forEach(function (e) { keep.push(e); });
-  app.innerHTML = head + searchBar + '<div class="body" id="bd">' + tabBody() + '</div><nav class="nav">' + nav + '</nav>'; keep.forEach(function (e) { app.appendChild(e); });
+  paintMini(); app.innerHTML = head + searchBar + '<div class="body" id="bd">' + tabBody() + '</div><nav class="nav">' + nav + '</nav>'; var bdEl = $('#bd'); if (S.tab !== 'me') app.insertBefore(MINI, bdEl); keep.forEach(function (e) { app.appendChild(e); });
 }
 function notifCount() { var n = (S.me.reqIn || []).length; Object.keys(S.calls).forEach(function (id) { var c = S.calls[id]; if (c.to === S.me.id && c.missed && c.t > S.seenNotif) n++; }); return n; }
 function refreshLive() {
@@ -163,10 +171,10 @@ function openChat(fid) {
 var lastSig = '';
 function paintThread(force) {
   var el = $('#ms'); if (!el || !S.view) return; var cid = S.view.chat, fid = S.view.fid, c = S.chats[cid] || {}, list = chatList(cid), rd = (c.r && c.r[fid]) || 0, typing = S.typing[fid] && Date.now() - S.typing[fid] < 5000;
-  var sig = list.map(function (m) { return m.id + (m.r ? JSON.stringify(m.r) : ''); }).join() + '|' + rd + '|' + typing; if (!force && sig === lastSig) return; lastSig = sig;
+  var sig = list.map(function (m) { return m.id + (m.r ? JSON.stringify(m.r) : ''); }).join() + '|' + typing; if (!force && sig === lastSig) return; lastSig = sig;
   var near = el.scrollHeight - el.scrollTop - el.clientHeight < 140, h = '', last = 0, lastMine = -1; list.forEach(function (m, i) { if (m.from === S.me.id) lastMine = i; });
   var emb = {}; Array.prototype.forEach.call(el.querySelectorAll('.emb'), function (e) { if (e.innerHTML) emb[e.dataset.for] = e.innerHTML; });
-  list.forEach(function (m, i) { if (m.t - last > 18e5) { h += '<div class="time">' + new Date(m.t).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) + '</div>'; last = m.t; } var rx = m.r ? Object.keys(m.r).map(function (k) { return m.r[k]; }).join('') : ''; h += '<div class="b ' + (m.from === S.me.id ? 'me' : 'th') + (rx ? ' hasr' : '') + '" data-id="' + esc(m.id) + '" ' + (force ? 'style="animation:none"' : '') + '>' + (m.img ? '<img class="img" data-a="lb" src="' + m.img + '" alt="Photo">' : '') + (m.x ? fmt(m.x, m.id) : '') + (rx ? '<span class="rx">' + rx + '</span>' : '') + '</div>'; if (i === lastMine && rd >= m.t) h += '<div class="seen">Seen</div>'; });
+  list.forEach(function (m, i) { if (m.t - last > 18e5) { h += '<div class="time">' + new Date(m.t).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) + '</div>'; last = m.t; } var rx = m.r ? Object.keys(m.r).map(function (k) { return m.r[k]; }).join('') : ''; h += '<div class="b ' + (m.from === S.me.id ? 'me' : 'th') + (rx ? ' hasr' : '') + '" data-id="' + esc(m.id) + '" ' + (force ? 'style="animation:none"' : '') + '>' + (m.img ? '<img class="img" data-a="lb" src="' + m.img + '" alt="Photo">' : '') + (m.x ? fmt(m.x, m.id) : '') + (rx ? '<span class="rx">' + rx + '</span>' : '') + '</div>'; if (i === lastMine) h += '<div class="seen">Sent</div>'; });
   if (typing) h += '<div class="typing"><i></i><i></i><i></i></div>'; if (!list.length) h = '<div class="empty" style="margin:auto">Say hi to ' + esc(person(fid).name.split(' ')[0]) + ' 👋</div>';
   el.innerHTML = h; Object.keys(emb).forEach(function (k) { var t = el.querySelector('.emb[data-for="' + k + '"]'); if (t) t.innerHTML = emb[k]; }); if (force || near) el.scrollTop = el.scrollHeight;
   var sub = $('#sub'); if (sub) sub.textContent = typing ? 'typing…' : '@' + person(fid).username;
@@ -284,6 +292,8 @@ app.addEventListener('click', function (e) {
   else if (k === 'req') { api('POST', '/api/friend', { to: id }).then(function (j) { S.me[j.state === 'friends' ? 'friends' : 'reqOut'] = (S.me[j.state === 'friends' ? 'friends' : 'reqOut'] || []).concat(id); toast(null, j.state === 'friends' ? 'You are friends now' : 'Request sent'); poll(); var sr = $('#sr'); if (sr) { var inp = $('#sq'); inp && inp.dispatchEvent(new Event('input')); } if ($('#pr')) openPerson(id); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'accept') { api('POST', '/api/friend', { to: id }).then(function () { S.me.reqIn = (S.me.reqIn || []).filter(function (x) { return x !== id; }); S.me.friends = (S.me.friends || []).concat(id); S.resync = true; poll(); toast(null, 'You and ' + person(id).name.split(' ')[0] + ' are friends'); closeAll(); drawMain(); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'decline') { api('POST', '/api/friend/decline', { to: id }).then(function () { S.me.reqIn = (S.me.reqIn || []).filter(function (x) { return x !== id; }); var nt = $('#nt'); if (nt) { nt.remove(); openNotifs(); } drawMain(); }).catch(function () {}); }
+  else if (k === 'miniplay') { miniOpen = !miniOpen; miniSig = ''; paintMini(); }
+  else if (k === 'miniset') { S.tab = 'me'; drawMain(); setTimeout(function () { var m = $('#ml'); if (m) { m.scrollIntoView({ block: 'center' }); m.focus(); } }, 50); }
   else if (k === 'invite') invite();
   else if (k === 'story') openStory(id, a.dataset.i);
   else if (k === 'compose') openCompose();
@@ -295,7 +305,7 @@ app.addEventListener('click', function (e) {
   else if (k === 'post') { var t = ($('#ct').value || '').trim(); if (!t && !C.img && !C.stk.length) return toast(null, 'Add something first'); a.disabled = true; api('POST', '/api/story', { text: t, bg: C.bg, img: C.img || undefined, stickers: C.stk }).then(function (j) { S.stories[j.story.id] = j.story; closeTop(); toast(null, 'Your story is live'); drawMain(); }).catch(function (x) { a.disabled = false; toast(null, x.message); }); }
   else if (k === 'call') startCall(id, !!a.dataset.v);
   else if (k === 'pic') $('#pf').click();
-  else if (k === 'npsave') { var song = $('#ms').value.trim(); if (!song) return toast(null, 'Add a song name'); api('POST', '/api/profile', { np: { song: song, artist: $('#ma').value.trim(), link: $('#ml').value.trim() } }).then(function (j) { S.me = j.me; S.people[S.me.id] = S.me; toast(null, 'Friends can see what you are playing'); var bd = $('#bd'); bd.innerHTML = meV(); }).catch(function (x) { toast(null, x.message); }); }
+  else if (k === 'npsave') { var song = $('#ms').value.trim(); if (!song) return toast(null, 'Add a song name'); api('POST', '/api/profile', { np: { song: song, artist: $('#ma').value.trim(), link: $('#ml').value.trim() } }).then(function (j) { S.me = j.me; S.people[S.me.id] = S.me; toast(null, 'Friends can see what you are playing'); miniOpen = true; miniSig = ''; var bd = $('#bd'); bd.innerHTML = meV(); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'npclear') { api('POST', '/api/profile', { np: null }).then(function (j) { S.me = j.me; S.people[S.me.id] = S.me; $('#bd').innerHTML = meV(); }).catch(function () {}); }
   else if (k === 'socsave') { api('POST', '/api/profile', { soc: { wa: $('#s_wa').value, sc: $('#s_sc').value, ig: $('#s_ig').value, tt: $('#s_tt').value } }).then(function (j) { S.me = j.me; toast(null, 'Saved'); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'contactsave') { api('POST', '/api/profile', { phone: $('#c_p').value, email: $('#c_e').value }).then(function (j) { S.me = j.me; toast(null, 'Saved'); }).catch(function (x) { toast(null, x.message); }); }
