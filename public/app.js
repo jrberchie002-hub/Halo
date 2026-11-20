@@ -37,8 +37,8 @@ function demoApi(method, path, b) {
   return Promise.resolve({ ok: true });
 }
 function startDemo() {
-  var t = Date.now(), M = 6e4, P = [['k', 'Kofi', 'kofi.t'], ['a', 'Ama', 'ama.t'], ['n', 'Nana', 'nana.b'], ['e', 'Esi', 'esi.x']];
-  S.demo = true; S.tok = 'demo'; S.me = { id: 'me', name: 'You', username: 'you', bio: '', friends: ['k', 'a', 'n', 'e'], reqIn: [], reqOut: [], np: null, soc: {} };
+  var t = Date.now(), M = 6e4, P = [['k', 'Kofi', 'kofi.t'], ['a', 'Ama', 'ama.t'], ['n', 'Nana', 'nana.b'], ['e', 'Esi', 'esi.x'], ['q', 'Quincy', 'quincy.d'], ['r', 'Rita', 'rita.o']];
+  S.demo = true; S.tok = 'demo'; S.me = { id: 'me', name: 'You', username: 'you', bio: '', friends: ['k', 'a', 'n', 'e'], reqIn: ['q'], reqOut: ['r'], np: null, soc: {} };
   S.people = {}; P.forEach(function (x) { S.people[x[0]] = { id: x[0], name: x[1], username: x[2], pic: null, bio: '', np: x[0] === 'a' ? { song: 'Blinding Lights', artist: 'The Weeknd', link: '' } : null, soc: {} }; }); S.people.me = S.me;
   function msg(f, o, mins, x, extra) { var cid = pair('me', f), m = Object.assign({ id: cid + '~' + (t - mins * M), chat: cid, from: o, t: t - mins * M, x: x }, extra || {}); (S.msgs[cid] = S.msgs[cid] || []).push(m); }
   msg('k', 'k', 42, 'yo are you coming tonight?'); msg('k', 'me', 40, 'yeah just finishing something'); msg('k', 'k', 3, 'this video 😂 https://www.youtube.com/watch?v=dQw4w9WgXcQ');
@@ -230,9 +230,15 @@ function refreshLive() {
 function tabBody() { return S.tab === 'chats' ? chatsV() : S.tab === 'stories' ? storiesV() : S.tab === 'calls' ? callsV() : meV(); }
 function storyUsers() { var by = {}; Object.keys(S.stories).forEach(function (id) { var s = S.stories[id]; (by[s.uid] = by[s.uid] || []).push(s); }); Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return a.t - b.t; }); }); return by; }
 function ringState(uid) { var l = storyUsers()[uid]; if (!l) return ''; return l.some(function (s) { return s.uid !== S.me.id && (s.views || []).indexOf(S.me.id) < 0; }) ? 'new' : 'seen'; }
+function reqSec() {
+  var rin = S.me.reqIn || [], rout = S.me.reqOut || []; if (!rin.length && !rout.length) return '';
+  var inn = rin.map(function (id) { return '<div class="row">' + av(id) + '<div class="m"><b>' + esc(person(id).name) + '</b><div class="s">' + ((S.me.reqNote || {})[id] ? '“' + esc(S.me.reqNote[id]) + '”' : 'wants to be your friend') + '</div></div><button class="pill pk" data-a="accept" data-id="' + id + '">Accept</button><button class="ic" data-a="decline" data-id="' + id + '" aria-label="Decline">' + I('x') + '</button></div>'; }).join('');
+  var out = rout.map(function (id) { return '<div class="row">' + av(id) + '<div class="m"><b>' + esc(person(id).name) + '</b><div class="s">Requested · waiting for them to accept</div></div><button class="pill soft" data-a="cancelreq" data-id="' + id + '">Cancel</button></div>'; }).join('');
+  return '<div class="reqs">' + (inn ? '<div class="sec">Friend requests · ' + rin.length + '</div>' + inn : '') + (out ? '<div class="sec">Requested</div>' + out : '') + '</div>';
+}
 function chatsV() {
   var by = storyUsers(), ids = friends().slice().sort(function (a, b) { var la = lastMsg(pair(S.me.id, a)), lb = lastMsg(pair(S.me.id, b)); return ((lb && lb.t) || 0) - ((la && la.t) || 0); });
-  var h = installCard() + '<div class="stories"><button class="st" data-a="compose"><div class="add">+</div><span>Your moment</span></button>' + friends().filter(function (f) { return by[f]; }).map(function (f) { return '<button class="st" data-a="story" data-id="' + f + '"><div class="ringw ' + (ringState(f) === 'new' ? 'new' : '') + '">' + av(f) + '</div><span>' + esc(person(f).name.split(' ')[0]) + '</span></button>'; }).join('') + '</div>';
+  var h = installCard() + reqSec() + '<div class="stories"><button class="st" data-a="compose"><div class="add">+</div><span>Your moment</span></button>' + friends().filter(function (f) { return by[f]; }).map(function (f) { return '<button class="st" data-a="story" data-id="' + f + '"><div class="ringw ' + (ringState(f) === 'new' ? 'new' : '') + '">' + av(f) + '</div><span>' + esc(person(f).name.split(' ')[0]) + '</span></button>'; }).join('') + '</div>';
   if (!(S.me.np && S.me.np.song)) h += '<button class="sharem" data-a="miniset"><span class="mic">' + SPLOGO + '</span><span class="m"><b>Share what you are playing</b><small>Spotify, Apple Music, YouTube, SoundCloud</small></span><span class="plusb">+</span></button>';
   if (!ids.length) return h + '<div class="empty"><div style="font-size:40px">👋</div><h2 style="font-size:22px;margin:8px 0">Add your first friend</h2><p style="margin:0 0 16px">Search their username, or send them your invite link.</p><button class="pill pk" data-a="add">Find friends</button> <button class="pill soft" data-a="invite">Invite link</button></div>';
   return h + ids.map(function (f) { var id = pair(S.me.id, f), c = S.chats[id], m = lastMsg(id), p = person(f), n = unread(id), s = streakOf(c);
@@ -588,6 +594,7 @@ app.addEventListener('click', function (e) {
   else if (k === 'reqgo') { var nid = a.dataset.id, nt = ($('#rnote') || {}).value || ''; var mq = $('.modal'); if (mq) mq.remove(); sendReq(nid, nt, true); }
   else if (k === 'reqold') { api('POST', '/api/friend', { to: id }).then(function (j) { S.me[j.state === 'friends' ? 'friends' : 'reqOut'] = (S.me[j.state === 'friends' ? 'friends' : 'reqOut'] || []).concat(id); toast(null, j.state === 'friends' ? 'You are friends now' : 'Request sent'); poll(); var sr = $('#sr'); if (sr) { var inp = $('#sq'); inp && inp.dispatchEvent(new Event('input')); } if ($('#pr')) openPerson(id); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'accept') { api('POST', '/api/friend', { to: id }).then(function () { S.me.reqIn = (S.me.reqIn || []).filter(function (x) { return x !== id; }); S.me.friends = (S.me.friends || []).concat(id); S.resync = true; poll(); toast(null, 'You and ' + person(id).name.split(' ')[0] + ' are friends'); closeAll(); drawMain(); }).catch(function (x) { toast(null, x.message); }); }
+  else if (k === 'cancelreq') { api('POST', '/api/friend/decline', { to: id }).then(function () { S.me.reqOut = (S.me.reqOut || []).filter(function (x) { return x !== id; }); S.resync = true; drawMain(); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'decline') { api('POST', '/api/friend/decline', { to: id }).then(function () { S.me.reqIn = (S.me.reqIn || []).filter(function (x) { return x !== id; }); var nt = $('#nt'); if (nt) { nt.remove(); openNotifs(); } drawMain(); }).catch(function () {}); }
   else if (k === 'install') doInstall(); else if (k === 'noinst') { LS.set('halo.noinst', String(Date.now() + 3650 * 864e5)); refreshLive(); } else if (k === 'modalx') { var mm = $('.modal'); if (mm) mm.remove(); }
   else if (k === 'miniplay') { miniOpen = !miniOpen; miniSig = ''; paintMini(); }
