@@ -1,6 +1,6 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js');
 (async () => { const srv = await start(3111); const b = await chromium.launch(); const U = 'http://localhost:3111';
- async function mk(name, un) { const c = await b.newContext({ viewport: { width: 390, height: 800 } }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); await p.goto(U); await p.click('[data-s=new]'); await p.fill('#a_n', name); await p.fill('#a_u', un); await p.click('#a_go'); await p.waitForSelector('.key'); await p.click('[data-a=tocolor]'); await p.click('[data-a=enter]'); await p.waitForSelector('.nav'); return { p, errs }; }
+ async function mk(name, un) { const c = await b.newContext({ viewport: { width: 390, height: 800 } }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); await p.goto(U); await p.click('[data-s=new]'); await p.fill('#a_n', name); await p.fill('#a_u', un); await p.click('#a_go');   await p.click('[data-a=enter]'); await p.waitForSelector('.nav'); return { p, errs }; }
  const A = await mk('Ama', 'ama.t'), B = await mk('Kofi', 'kofi.t');
  await A.p.click('.top [data-a=add]'); await A.p.fill('#sq', 'kofi'); await A.p.waitForSelector('[data-a=req]'); await A.p.waitForTimeout(500); await A.p.click('[data-a=req]', { force: true });
  await B.p.waitForSelector('[data-a=notifs] .dot', { timeout: 6000 }); await B.p.click('.top [data-a=notifs]'); await B.p.click('[data-a=accept]');
