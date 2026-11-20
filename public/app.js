@@ -109,7 +109,7 @@ function merge(j) {
     else if (r.c === 'ice') { if (d.to === S.me.id && !S.ice[r.id]) { S.ice[r.id] = d; iceIn(d); } }
     else if (r.c === 'typing') { S.typing[d.from] = d.t; }
   });
-  if (prevMe && !S.first) (S.me.friends || []).forEach(function (f) { if ((prevMe.friends || []).indexOf(f) < 0 && (prevMe.reqOut || []).indexOf(f) >= 0) { var pp = S.people[f]; toast(f, (pp ? pp.name.split(' ')[0] : 'Someone') + ' accepted your request 🎉', 1); sysNotify('Halo', (pp ? pp.name : 'Someone') + ' accepted your friend request'); } });
+  if (prevMe && !S.first) (S.me.friends || []).forEach(function (f) { if ((prevMe.friends || []).indexOf(f) < 0 && (prevMe.reqOut || []).indexOf(f) >= 0) { var pp = S.people[f]; toast(f, (pp ? pp.name.split(' ')[0] : 'Someone') + ' accepted your request', 1); sysNotify('Halo', (pp ? pp.name : 'Someone') + ' accepted your friend request'); } });
   S.stamp = j.stamp; var firstTime = S.first; S.first = false;
   newIn.forEach(function (m) { var open = S.view && S.view.chat === pair(S.me.id, m.from); if (open) { api('POST', '/api/read', { chat: m.chat }).catch(function () {}); beep(); } else { beep(); toast(m.from, lt(m), 1); sysNotify(person(m.from).name, lt(m)); } });
   return firstTime;
