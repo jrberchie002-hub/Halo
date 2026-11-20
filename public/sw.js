@@ -4,7 +4,7 @@ self.addEventListener('push', function (e) {
   var d = {}; try { d = e.data.json(); } catch (x) {}
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cl) {
     if (cl.some(function (c) { return c.focused && c.visibilityState === 'visible'; })) return;
-    return self.registration.showNotification(d.title || 'Halo', { body: d.body || '', icon: '/icon.svg', badge: '/icon.svg', tag: d.tag || 'halo', renotify: true, data: { url: d.url || '/' } });
+    return self.registration.showNotification(d.title || 'Halo', { body: d.body || '', icon: '/icon-192.png', badge: '/icon-192.png', tag: d.tag || 'halo', renotify: true, requireInteraction: /^call/.test(d.tag || ''), vibrate: /^call/.test(d.tag || '') ? [400, 200, 400, 200, 400] : [120], data: { url: d.url || '/' } });
   }));
 });
 self.addEventListener('notificationclick', function (e) {
