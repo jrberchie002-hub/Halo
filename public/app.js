@@ -509,8 +509,29 @@ var MIC = { s: null, t: 0 };
 function micFree() { clearTimeout(MIC.t); if (MIC.s) { MIC.s.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); MIC.s = null; } }
 function micGet() { clearTimeout(MIC.t); MIC.t = setTimeout(micFree, 240000); if (MIC.s && MIC.s.getAudioTracks().length && MIC.s.getAudioTracks().every(function (t) { return t.readyState === 'live'; })) return Promise.resolve(MIC.s.clone()); return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) { MIC.s = st; return st.clone(); }); }
 document.addEventListener('visibilitychange', function () { if (document.hidden && !CALL) micFree(); });
+
+function webmPackets(u8) {
+  var out = { pk: [], priv: null }, M = { 0x18538067: 1, 0x1F43B675: 1, 0xA0: 1, 0x1654AE6B: 1, 0xAE: 1 };
+  function vint(o, keep) { var b = u8[o], n = 1, m = 0x80; while (n <= 8 && !(b & m)) { n++; m >>= 1; } if (n > 8) return null; var v = keep ? b : (b & (m - 1)), unk = (b & (m - 1)) === m - 1; for (var i = 1; i < n; i++) { v = v * 256 + u8[o + i]; if (u8[o + i] !== 255) unk = false; } return { v: v, n: n, unk: unk && !keep }; }
+  function walk(o, end) { while (o < end && o < u8.length) { var id = vint(o, true), sz; if (!id) return; sz = vint(o + id.n, false); if (!sz) return; var d = o + id.n + sz.n, e = sz.unk ? end : Math.min(end, d + sz.v);
+      if (M[id.v]) walk(d, e); else if (id.v === 0xA3 || id.v === 0xA1) { var tn = vint(d, false); if (tn) out.pk.push(u8.subarray(d + tn.n + 3, e)); } else if (id.v === 0x63A2 && !out.priv) out.priv = u8.slice(d, e);
+      if (sz.unk && M[id.v]) return; o = e; } }
+  walk(0, u8.length); return out;
+}
+function webmDecode(url, cb) {
+  if (!window.AudioDecoder || !window.EncodedAudioChunk) return cb(null);
+  fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (ab) {
+    var w = webmPackets(new Uint8Array(ab)); if (!w.pk.length) return cb(null);
+    var ch = w.priv && w.priv.length > 9 ? w.priv[9] : 1, rate = 48000, parts = [], total = 0, failed = false;
+    var dec = new AudioDecoder({ output: function (ad) { var f = new Float32Array(ad.numberOfFrames); ad.copyTo(f, { planeIndex: 0, format: 'f32-planar' }); parts.push(f); total += f.length; ad.close(); }, error: function () { failed = true; cb(null); } });
+    dec.configure({ codec: 'opus', sampleRate: rate, numberOfChannels: ch, description: w.priv || undefined });
+    w.pk.forEach(function (pk, i) { dec.decode(new EncodedAudioChunk({ type: 'key', timestamp: i * 20000, data: pk })); });
+    return dec.flush().then(function () { if (failed) return; var AC = window.AudioContext || window.webkitAudioContext, ctx = new AC(), buf = ctx.createBuffer(1, Math.max(1, total), rate), d = buf.getChannelData(0), o = 0; parts.forEach(function (f) { d.set(f, o); o += f.length; }); cb({ ctx: ctx, buf: buf }); });
+  }).catch(function () { cb(null); });
+}
+window.haloWebm = webmDecode;
 var VNX = null;
-function vnFallback(url, why) { try { var AC = window.AudioContext || window.webkitAudioContext, ctx = new AC(); if (VNX) { try { VNX.stop(); } catch (e) {} } fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (b) { return new Promise(function (ok, no) { ctx.decodeAudioData(b, ok, no); }); }).then(function (buf) { var src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); VNX = src; if (ctx.resume) ctx.resume(); src.start(0); }).catch(function () { toast(null, 'Cannot play this voice note (' + ((/^data:([^;,]+)/.exec(url) || [])[1] || 'link') + ', ' + (why || 'error') + ')'); }); } catch (e) { toast(null, 'Could not play this voice note'); } }
+function vnFallback(url, why) { try { var AC = window.AudioContext || window.webkitAudioContext, ctx = new AC(); if (VNX) { try { VNX.stop(); } catch (e) {} } fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (b) { return new Promise(function (ok, no) { ctx.decodeAudioData(b, ok, no); }); }).then(function (buf) { var src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); VNX = src; if (ctx.resume) ctx.resume(); src.start(0); }).catch(function () { webmDecode(url, function (r) { if (r) { var src = r.ctx.createBufferSource(); src.buffer = r.buf; src.connect(r.ctx.destination); VNX = src; if (r.ctx.resume) r.ctx.resume(); src.start(0); return; } toast(null, 'Cannot play this voice note (' + ((/^data:([^;,]+)/.exec(url) || [])[1] || 'link') + ', ' + (why || 'error') + ')'); }); }); } catch (e) { toast(null, 'Could not play this voice note'); } }
 function vnUpdate() { document.querySelectorAll('.vn').forEach(function (el) { var on = VN && VN.id === el.dataset.id, f = on && VN.au.duration ? VN.au.currentTime / VN.au.duration : 0, bars = el.querySelectorAll('.wv i'); bars.forEach(function (b, i) { b.classList.toggle('on', on && i < f * bars.length); }); var btn = el.querySelector('.vp'); btn.textContent = on && !VN.au.paused ? '❚❚' : '▶'; }); }
 /* friends */
 function relation(id) { if (friends().indexOf(id) > -1) return 'friends'; if ((S.me.reqIn || []).indexOf(id) > -1) return 'in'; if ((S.me.reqOut || []).indexOf(id) > -1) return 'out'; return 'none'; }
