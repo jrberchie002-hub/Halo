@@ -755,7 +755,11 @@ app.addEventListener('contextmenu', function (e) { var b = e.target.closest && e
 var tapT = 0; app.addEventListener('touchend', function (e) { var b = e.target.closest && e.target.closest('.b'); if (!b) return; var n = Date.now(); if (n - tapT < 320) { e.preventDefault(); b.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); tapT = 0; } else tapT = n; });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && app.querySelector('.sheet,.sv')) closeTop(); });
 function isDark() { var t = LS.get('halo.theme') || 'light'; return t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
-function applyTheme() { var t = LS.get('halo.theme') || 'light'; if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); applyAccent(); }
+function hexOf(c) { var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(c || ''); if (!m || (m[4] !== undefined && +m[4] < .5)) return ''; return '#' + [m[1], m[2], m[3]].map(function (x) { return ('0' + (+x).toString(16)).slice(-2); }).join(''); }
+var scT = 0;
+function syncStatus() { clearTimeout(scT); scT = setTimeout(function () { try { var els = app.querySelectorAll('.sheet .bar, .sv, .cx, .lock, .top'), el = els.length ? els[els.length - 1] : app, c = ''; for (var n = el; n && !c; n = n.parentElement) c = hexOf(getComputedStyle(n).backgroundColor); if (!c) c = isDark() ? '#0f0c10' : '#efedea'; var m = document.querySelector('meta[name=theme-color]'); if (m && m.content !== c) m.content = c; document.documentElement.style.background = c; } catch (e) {} }, 120); }
+try { new MutationObserver(syncStatus).observe(app, { childList: true, subtree: true }); } catch (e) {}
+function applyTheme() { syncStatus(); var t = LS.get('halo.theme') || 'light'; if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); applyAccent(); }
 /* swipe between tabs */
 var dbgN = 0, dbgT = 0;
 var TABS = ['chats', 'stories', 'calls', 'me'], tsw = null;
