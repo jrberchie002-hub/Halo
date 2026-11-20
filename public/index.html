@@ -280,10 +280,18 @@ h1,h2,.hd{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;mar
 .tg.mo button{height:84px!important;flex-direction:column;gap:6px!important;font-size:12px!important;border-radius:18px;background:var(--bg);color:var(--ink)}
 .tg.mo button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .gt{margin:18px 20px 8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+#splash{position:fixed;inset:0;z-index:99999;background:#0a090b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .45s ease}
+#splash.out{opacity:0;pointer-events:none}
+.sring{width:150px;height:44px;border:8px solid #e8c76a;border-radius:50%;box-shadow:0 0 40px rgba(232,199,106,.75),0 0 90px rgba(232,199,106,.35),inset 0 0 18px rgba(232,199,106,.4);animation:sdrop 1s cubic-bezier(.2,.9,.3,1.2) both,sglow 2.2s ease-in-out 1s infinite}
+.sword{color:#fff;font-weight:800;letter-spacing:.42em;font-size:22px;padding-left:.42em;animation:sfade .9s ease .35s both}
+@keyframes sdrop{from{transform:translateY(-90px) scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes sglow{50%{box-shadow:0 0 56px rgba(232,199,106,.95),0 0 120px rgba(232,199,106,.5),inset 0 0 22px rgba(232,199,106,.55)}}
+@keyframes sfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.prow{display:flex;align-items:center;gap:12px;padding:8px 16px}.prow .pa{width:52px;height:52px;border-radius:10px;border:0;background:#333 center/cover;color:#fff;position:relative;flex:none}.prow .pa span{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.35);border-radius:10px;font-size:16px}.prow.on .pa span{background:rgba(10,141,255,.55)}.prow .m{flex:1;min-width:0}.prow .m b,.prow .s{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.prow .s{color:var(--mute);font-size:13px}
 </style>
 </head>
 <body>
-<div class="stage"><div class="app" id="app"></div></div>
+<div id="splash"><div class="sring"></div><div class="sword">HALO</div></div><div class="stage"><div class="app" id="app"></div></div>
 <script src="/qr.js"></script><script src="/app.js"></script>
 </body>
 </html>
