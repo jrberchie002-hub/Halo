@@ -346,6 +346,13 @@ video.mv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .bar .nm b{font-size:14px!important;font-weight:700}.bar .nm small,.gt,.sec,.reqs .sec,.time,.s,small{font-size:13px}.m b,.row b,.sr span,.mt2 b,.cta,.pill{font-size:14px}.top .t{font-size:20px}.bub,.msg .b,.mine,.theirs{font-size:14px}.compose textarea{font-size:14px!important}
 .sheet.wpon,.msgs{transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden}.msgs{will-change:scroll-position;contain:paint}
 @media (display-mode:standalone){html::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 4px);background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,0));z-index:99998;pointer-events:none}}
+/* chat list: flat rows, status line, filter chips */
+.chips{display:flex;gap:8px;padding:2px 16px 8px;overflow-x:auto;scrollbar-width:none}.chip{flex:none;display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:var(--bg);color:var(--ink);font-weight:700;font-size:13px;border:0}.chip.on{background:var(--pink);color:var(--on)}.chip b{background:#fff;color:#141214;border-radius:999px;font-size:11px;padding:1px 7px}
+.row.crow.crow2{background:transparent!important;box-shadow:none!important;border-radius:0;margin:0;width:100%;padding:11px 16px;gap:14px}.row.crow.crow2:active{background:var(--bg)!important;transform:none}
+.crow2 .m b{font-size:15px;font-weight:700}.crow2 .s2{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;color:var(--mute);white-space:nowrap}.crow2 .s2.u{color:var(--pink);font-weight:700}.crow2 .s2 .sti{display:inline-flex;color:var(--pink)}.crow2 .s2 .sti:empty{display:none}.crow2 .dt{opacity:.6}.crow2 .fire{margin-left:2px;color:var(--ink);font-weight:700}.crow2 .pv{font-size:13px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw}
+.crow2 .act{margin-left:auto;display:grid;place-items:center;color:var(--mute);min-width:40px}.crow2 .act .unread{min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px}
+:root[data-theme="dark"] .app{background:linear-gradient(180deg,color-mix(in srgb,var(--pink) 26%,#0b0910),#0b0910 70%)!important}
+.sharem{padding:9px 12px!important;margin:0 16px 8px!important}.sharem small{display:none}.sharem b{font-size:14px}.stories{padding-bottom:4px!important}
 </style>
 </head>
 <body>
