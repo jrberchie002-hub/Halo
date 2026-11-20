@@ -13,7 +13,7 @@ var BG = ['linear-gradient(160deg,#ffcf4d,#ff8a1f)', 'linear-gradient(160deg,#17
 var AVC = ['#c98a0a', '#171316', '#b4541a', '#7a5c2e', '#d4572a', '#4a3b30', '#a37400', '#3a3633'];
 var STK = ['🔥', '😂', '😍', '🥹', '😎', '💀', '🙌', '❤️', '✨', '🎧', '📍', '🍕', '🎉', '👀', '💯', '🫶'];
 
-var S = { tok: LS.get('halo.tok'), me: null, people: {}, chats: {}, msgs: {}, stories: {}, calls: {}, ice: {}, typing: {}, stamp: 0, resync: false, tab: 'chats', view: null, q: '', first: true, seenNotif: +LS.get('halo.sn') || 0, online: true, sig: '' };
+var S = { tok: LS.get('halo.tok'), ranks: {}, rmsgs: {}, me: null, people: {}, chats: {}, msgs: {}, stories: {}, calls: {}, ice: {}, typing: {}, stamp: 0, resync: false, tab: 'chats', view: null, q: '', first: true, seenNotif: +LS.get('halo.sn') || 0, online: true, sig: '' };
 
 /* ---------- api ---------- */
 function api(method, path, body) {
@@ -22,7 +22,7 @@ function api(method, path, body) {
     return r.json().catch(function () { return { ok: false, error: 'Server problem (' + r.status + '). Try again in a minute.' }; }).then(function (j) { if (r.status === 401 && S.tok && j.code === 'auth') { logout(true); } if (!r.ok) { var e = new Error(j.error || 'Something went wrong'); e.status = r.status; throw e; } return j; });
   });
 }
-function logout(silent) { miniOpen = false; miniSig = ''; MINI.hidden = true; app.classList.remove('hasmini'); S.demo = false; S.tok = null; S.me = null; LS.del('halo.tok'); S.tok = null; idbTok(); try { localStorage.removeItem('halo.snap'); } catch (e) {} S.people = {}; S.chats = {}; S.msgs = {}; S.stories = {}; S.calls = {}; S.stamp = 0; S.first = true; if (!silent) LS.del('halo.key'); drawAuth(); }
+function logout(silent) { miniOpen = false; miniSig = ''; MINI.hidden = true; app.classList.remove('hasmini'); S.demo = false; S.tok = null; S.me = null; LS.del('halo.tok'); S.tok = null; idbTok(); try { localStorage.removeItem('halo.snap'); } catch (e) {} S.people = {}; S.ranks = {}; S.rmsgs = {}; S.chats = {}; S.msgs = {}; S.stories = {}; S.calls = {}; S.stamp = 0; S.first = true; if (!silent) LS.del('halo.key'); drawAuth(); }
 
 /* ---------- preview mode (no account, sample data) ---------- */
 function demoApi(method, path, b) {
@@ -120,6 +120,8 @@ function merge(j) {
     else if (r.c === 'stories') { if (d.t === 0 || Date.now() - d.t > 864e5) delete S.stories[d.id]; else S.stories[d.id] = d; }
     else if (r.c === 'calls') { S.calls[d.id] = d; callEvent(d); }
     else if (r.c === 'ice') { if (d.to === S.me.id && !S.ice[r.id]) { S.ice[r.id] = d; iceIn(d); } }
+    else if (r.c === 'ranks') { if ((d.members || []).indexOf(S.me.id) < 0) { delete S.ranks[d.id]; } else S.ranks[d.id] = d; }
+    else if (r.c === 'rmsgs') { var rl = S.rmsgs[d.rank] = S.rmsgs[d.rank] || []; rl = S.rmsgs[d.rank] = rl.filter(function (m) { return !(m.tmp && d.from === S.me.id && m.x === (d.x || '')); }); if (!rl.some(function (m) { return m.id === d.id; })) { rl.push(d); rl.sort(function (a, b) { return a.t - b.t; }); if (d.from !== S.me.id) newIn.push(d); } }
     else if (r.c === 'typing') { S.typing[d.from] = d.t; }
   });
   if (prevMe && !S.first) (S.me.friends || []).forEach(function (f) { if ((prevMe.friends || []).indexOf(f) < 0 && (prevMe.reqOut || []).indexOf(f) >= 0) { var pp = S.people[f]; toast(f, (pp ? pp.name.split(' ')[0] : 'Someone') + ' accepted your request', 1); sysNotify('Halo', (pp ? pp.name : 'Someone') + ' accepted your friend request'); } });
@@ -253,7 +255,7 @@ function refreshLive() {
   var bd = $('#bd'); if (bd && S.tab !== 'me' && !(document.activeElement && bd.contains(document.activeElement))) { var nh = tabBody(); if (bd._h !== nh) { var st = bd.scrollTop; bd.innerHTML = nh; bd._h = nh; bd.scrollTop = st; } }
   var nav = $('.nav'); if (nav) { var b = nav.querySelector('[data-t=chats]'); var n = totalUnread(); var bd2 = b && b.querySelector('.badge'); if (b) { if (n && !bd2) b.insertAdjacentHTML('beforeend', '<span class="badge">' + n + '</span>'); else if (n && bd2) bd2.textContent = n; else if (!n && bd2) bd2.remove(); } }
   var dot = $('.top .ic[data-a=settings] .dot'), bell = $('.top .ic[data-a=settings]'); if (bell) { if (notifCount() && !dot) bell.insertAdjacentHTML('beforeend', '<i class="dot"></i>'); else if (!notifCount() && dot) dot.remove(); }
-  if (S.view && S.view.chat) paintThread(false);
+  if (S.view && S.view.chat) paintThread(false); rkPaint(false);
   var nt = $('#nt'); if (nt) { nt.remove(); openNotifs(); }
 }
 function tabBody() { return S.tab === 'chats' ? chatsV() : S.tab === 'stories' ? storiesV() : S.tab === 'calls' ? callsV() : meV(); }
@@ -265,14 +267,74 @@ function reqSec() {
   var out = rout.map(function (id) { return '<div class="row">' + av(id) + '<div class="m"><b>' + esc(person(id).name) + '</b><div class="s">Requested · waiting for them to accept</div></div><button class="pill soft" data-a="cancelreq" data-id="' + id + '">Cancel</button></div>'; }).join('');
   return '<div class="reqs">' + (inn ? '<div class="sec">Friend requests · ' + rin.length + '</div>' + inn : '') + (out ? '<div class="sec">Requested</div>' + out : '') + '</div>';
 }
+
+/* ===== Ranks ===== */
+function rkRead(id) { return +LS.get('halo.rr.' + id) || 0; }
+function rkUnread(id) { var t = rkRead(id); return (S.rmsgs[id] || []).filter(function (m) { return m.from && m.from !== S.me.id && m.t > t; }).length; }
+function rkLast(id) { var l = S.rmsgs[id] || []; return l[l.length - 1]; }
+function rkTot() { return Object.keys(S.ranks).reduce(function (a, k) { return a + (rkUnread(k) ? 1 : 0); }, 0); }
+function rkList() { return Object.keys(S.ranks).map(function (k) { return S.ranks[k]; }).sort(function (a, b) { var la = rkLast(a.id), lb = rkLast(b.id); return ((lb && lb.t) || b.t) - ((la && la.t) || a.t); }); }
+function rkStack(r) { var m = r.members.slice(0, 3); return '<div class="rkav">' + m.map(function (u) { return av(u); }).join('') + '</div>'; }
+function ranksV() {
+  var l = rkList(), h = '<div class="sec" style="display:flex;align-items:center">Your ranks<button class="pill soft" data-a="rknew" style="margin-left:auto;padding:6px 14px">+ New rank</button></div>';
+  if (!l.length) return h + '<div class="empty" style="padding:24px 16px"><div style="font-size:40px">👑</div><h2 style="font-size:20px;margin:8px 0">Start your first rank</h2><p style="margin:0 0 16px">A rank is a group chat with a leader. Pick your crew and go.</p><button class="pill pk" data-a="rknew">Create a rank</button></div>';
+  return h + '<div class="lcard">' + l.map(function (r) { var m = rkLast(r.id), n = rkUnread(r.id), lead = person(r.leader).name.split(' ')[0]; return '<button class="row crow crow2" data-a="rkopen" data-id="' + esc(r.id) + '"><div class="rkemo">' + esc(r.emoji || '👑') + '</div><div class="m"><b>' + esc(r.name) + '</b><div class="s2 ' + (n ? 'u' : '') + '"><span>' + (n ? n + ' new' : r.members.length + ' members') + '</span>' + (m ? '<span class="dt">·</span><span>' + ago(m.t) + '</span>' : '') + (r.streak ? '<span class="fire">🔥 ' + r.streak + '</span>' : '') + '</div><div class="pv">👑 ' + esc(lead) + (m ? ' · ' + esc((m.from ? person(m.from).name.split(' ')[0] + ': ' : '') + (m.x || (m.sticker ? m.sticker : '📷 Photo'))) : '') + '</div></div>' + (n ? '<span class="act"><span class="unread">' + n + '</span></span>' : '') + '</button>'; }).join('') + '</div>';
+}
+function rkNew() {
+  var fr = friends(); if (!fr.length) { toast(null, 'Add a friend first'); return; }
+  modalBox('<b class="mt">New rank</b><input id="rkn" class="in" maxlength="30" placeholder="Rank name (e.g. The Crew)" style="width:100%;margin:8px 0"><p style="margin:4px 0">Pick who is in it. You will be the rank leader.</p><div class="rkpick">' + fr.map(function (f) { return '<label class="rkp"><input type="checkbox" value="' + f + '">' + av(f) + '<span>' + esc(person(f).name) + '</span></label>'; }).join('') + '</div><div class="mrow"><button class="pill soft" data-a="modalx">Cancel</button><button class="pill pk" data-a="rkmake">Create</button></div>');
+}
+function rkMake() {
+  var m = $('.modal'); if (!m) return; var name = ($('#rkn', m).value || '').trim(), ids = Array.prototype.map.call(m.querySelectorAll('.rkpick input:checked'), function (x) { return x.value; });
+  if (!name) { toast(null, 'Give your rank a name'); return; } if (!ids.length) { toast(null, 'Pick at least one friend'); return; }
+  api('POST', '/api/rank', { name: name, members: ids }).then(function (j) { S.ranks[j.rank.id] = j.rank; m.remove(); drawMain(); rkOpen(j.rank.id); }).catch(function (e) { toast(null, e.message); });
+}
+function rkOpen(id) {
+  var r = S.ranks[id]; if (!r) return; var old = $('#rk'); if (old) old.remove();
+  var el = sheet('<div class="bar"><button class="ic" data-a="close" aria-label="Back">' + I('back') + '</button><div class="rkemo" style="width:40px;height:40px;font-size:20px">' + esc(r.emoji || '👑') + '</div><div class="nm" data-a="rkinfo" data-id="' + esc(id) + '" style="cursor:pointer"><b id="rkt"></b><small id="rks"></small></div></div><div class="msgs" id="rms"></div><div class="compose" id="rcmp"><textarea id="rtx" rows="1" placeholder="Message the rank" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea><button class="send" data-a="rksend" id="rsb" aria-label="Send">' + I('send') + '</button></div>', 'rk');
+  el.dataset.rank = id; rkPaint(true); LS.set('halo.rr.' + id, String(Date.now()));
+  var t = $('#rtx', el); t.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); rkSend(); } });
+  t.addEventListener('input', function () { t.style.height = 'auto'; t.style.height = Math.min(110, t.scrollHeight) + 'px'; });
+}
+function rkPaint(force) {
+  var el = $('#rk'); if (!el) return; var id = el.dataset.rank, r = S.ranks[id]; if (!r) { closeTop(); return; }
+  var ms = $('#rms', el), list = S.rmsgs[id] || [], sig = r.name + r.leader + r.members.length + '|' + list.map(function (m) { return m.id; }).join(); if (!force && el._sig === sig) return; el._sig = sig;
+  $('#rkt', el).innerHTML = esc(r.name) + (r.streak ? '<span class="fire">🔥' + r.streak + '</span>' : ''); $('#rks', el).textContent = '👑 ' + person(r.leader).name + ' · ' + r.members.length + ' members';
+  var near = ms.scrollHeight - ms.scrollTop - ms.clientHeight < 140, h = '', last = 0;
+  list.forEach(function (m) { if (m.t - last > 18e5) { h += '<div class="time">' + dayLabel(m.t) + '</div>'; last = m.t; } if (m.sys) { h += '<div class="time">' + esc(m.x) + '</div>'; return; } var mine = m.from === S.me.id; h += '<div class="b ' + (mine ? 'me' : 'th') + '" data-id="' + esc(m.id) + '">' + (mine ? '' : '<small style="display:block;opacity:.7;font-size:11px;margin-bottom:2px">' + esc(person(m.from).name.split(' ')[0]) + (m.from === r.leader ? ' 👑' : '') + '</small>') + (m.img ? '<img class="img" data-a="lb" src="' + m.img + '" alt="Photo">' : '') + (m.sticker ? '<span style="font-size:34px">' + esc(m.sticker) + '</span>' : '') + (m.x ? esc(m.x) : '') + '</div>'; });
+  ms.innerHTML = h || '<div class="empty" style="margin:auto">Say hi to your rank 👋</div>'; if (force || near) ms.scrollTop = ms.scrollHeight;
+  LS.set('halo.rr.' + id, String(Date.now()));
+}
+function rkSend() {
+  var el = $('#rk'); if (!el) return; var t = $('#rtx', el), x = t.value.trim(); if (!x) return; var id = el.dataset.rank; t.value = ''; t.style.height = 'auto';
+  var ck = Math.random().toString(36).slice(2, 12) + Date.now().toString(36), l = S.rmsgs[id] = S.rmsgs[id] || []; l.push({ id: 'tmp' + ck, tmp: ck, rank: id, from: S.me.id, t: Date.now(), x: x }); rkPaint(true);
+  api('POST', '/api/rank/send', { id: id, x: x, ck: ck }).then(function (j) { S.rmsgs[id] = (S.rmsgs[id] || []).filter(function (m) { return m.tmp !== ck; }); if (!S.rmsgs[id].some(function (m) { return m.id === j.msg.id; })) S.rmsgs[id].push(j.msg); beep('sent'); rkPaint(true); poll(); }).catch(function (e) { S.rmsgs[id] = (S.rmsgs[id] || []).filter(function (m) { return m.tmp !== ck; }); rkPaint(true); toast(null, e.message); });
+}
+function rkInfo(id) {
+  var r = S.ranks[id]; if (!r) return; var old = $('.modal'); if (old) old.remove(); var iAmLead = r.leader === S.me.id, votes = r.votes || {}, cnt = {}; Object.keys(votes).forEach(function (v) { cnt[votes[v]] = (cnt[votes[v]] || 0) + 1; });
+  var need = Math.floor(r.members.length / 2) + 1, mine = votes[S.me.id];
+  modalBox('<b class="mt">' + esc(r.emoji || '👑') + ' ' + esc(r.name) + '</b><p>Rank leader: <b>' + esc(person(r.leader).name) + '</b>. Members can vote for a new leader. It takes ' + need + ' of ' + r.members.length + ' votes.</p><div class="rkpick" style="max-height:38vh">' + r.members.map(function (u) { var c = cnt[u] || 0; return '<div class="rkp">' + av(u) + '<span>' + esc(person(u).name) + (u === r.leader ? ' 👑' : '') + (u === S.me.id ? ' (you)' : '') + (c ? ' · ' + c + ' vote' + (c > 1 ? 's' : '') : '') + '</span>' + (u !== r.leader ? '<button class="pill ' + (mine === u ? 'pk' : 'soft') + '" style="padding:5px 12px" data-a="rkvote" data-id="' + esc(id) + '" data-u="' + u + '">' + (mine === u ? 'Voted' : 'Vote') + '</button>' : '') + (iAmLead && u !== S.me.id ? '<button class="pill soft" style="padding:5px 10px;margin-left:4px" data-a="rkkick" data-id="' + esc(id) + '" data-u="' + u + '">Remove</button>' : '') + '</div>'; }).join('') + '</div><div class="mrow">' + (iAmLead ? '<button class="pill soft" data-a="rkadd" data-id="' + esc(id) + '">Add people</button><button class="pill soft" data-a="rkren" data-id="' + esc(id) + '">Rename</button>' : '') + '<button class="pill soft" data-a="rkleave" data-id="' + esc(id) + '" style="color:#d6372b">Leave</button><button class="pill soft" data-a="modalx">Close</button></div>');
+}
+function rkSet(j) { if (j && j.rank) { S.ranks[j.rank.id] = j.rank; rkPaint(true); drawMain(); } }
+function rkAct(k, a, id) {
+  var u = a.dataset.u;
+  if (k === 'rknew') rkNew(); else if (k === 'rkmake') rkMake(); else if (k === 'rkopen') rkOpen(id); else if (k === 'rksend') rkSend(); else if (k === 'rkinfo') rkInfo(id);
+  else if (k === 'rkvote') { var r = S.ranks[id], same = r && r.votes && r.votes[S.me.id] === u; api('POST', '/api/rank/vote', { id: id, 'for': same ? '' : u }).then(function (j) { rkSet(j); rkInfo(id); if (j.won) toast(null, person(j.won).name.split(' ')[0] + ' is the new rank leader'); }).catch(function (e) { toast(null, e.message); }); }
+  else if (k === 'rkkick') { api('POST', '/api/rank/kick', { id: id, user: u }).then(function (j) { rkSet(j); rkInfo(id); }).catch(function (e) { toast(null, e.message); }); }
+  else if (k === 'rkren') { var nn = prompt('Rank name', S.ranks[id].name); if (nn && nn.trim()) api('POST', '/api/rank/edit', { id: id, name: nn.trim() }).then(function (j) { rkSet(j); rkInfo(id); }).catch(function (e) { toast(null, e.message); }); }
+  else if (k === 'rkadd') { var r2 = S.ranks[id], cand = friends().filter(function (f) { return r2.members.indexOf(f) < 0; }); if (!cand.length) { toast(null, 'All your friends are already in'); return; } var o = $('.modal'); if (o) o.remove(); modalBox('<b class="mt">Add people</b><div class="rkpick">' + cand.map(function (f) { return '<label class="rkp"><input type="checkbox" value="' + f + '">' + av(f) + '<span>' + esc(person(f).name) + '</span></label>'; }).join('') + '</div><div class="mrow"><button class="pill soft" data-a="modalx">Cancel</button><button class="pill pk" data-a="rkadd2" data-id="' + esc(id) + '">Add</button></div>'); }
+  else if (k === 'rkadd2') { var m = $('.modal'), ids = Array.prototype.map.call(m.querySelectorAll('.rkpick input:checked'), function (x) { return x.value; }); api('POST', '/api/rank/add', { id: id, members: ids }).then(function (j) { m.remove(); rkSet(j); }).catch(function (e) { toast(null, e.message); }); }
+  else if (k === 'rkleave') { api('POST', '/api/rank/leave', { id: id }).then(function () { delete S.ranks[id]; var m3 = $('.modal'); if (m3) m3.remove(); closeAll(); drawMain(); }).catch(function (e) { toast(null, e.message); }); }
+}
 function chatsV() {
   var by = storyUsers(), pins = pinsGet(), ids = friends().slice().sort(function (a, b) { var pa = pins.indexOf(a) > -1 ? 1 : 0, pb = pins.indexOf(b) > -1 ? 1 : 0; if (pa !== pb) return pb - pa; var la = lastMsg(pair(S.me.id, a)), lb = lastMsg(pair(S.me.id, b)); return ((lb && lb.t) || 0) - ((la && la.t) || 0); });
   var h = installCard() + reqSec() + '<div class="stories"><button class="st" data-a="compose"><div class="add">+</div><span>&nbsp;</span></button>' + friends().filter(function (f) { return by[f]; }).map(function (f) { return '<button class="st" data-a="story" data-id="' + f + '"><div class="ringw ' + (ringState(f) === 'new' ? 'new' : '') + '">' + av(f) + '</div><span>' + esc(person(f).name.split(' ')[0]) + '</span></button>'; }).join('') + '</div>';
   if (!(S.me.np && S.me.np.song)) h += '<button class="sharem" data-a="miniset"><span class="mic">' + SPLOGO + '</span><span class="m"><b>Share what you are playing</b><small>Spotify, Apple Music, YouTube, SoundCloud</small></span><span class="plusb">+</span></button>';
   if (!ids.length) return h + '<div class="empty"><div style="font-size:40px">👋</div><h2 style="font-size:22px;margin:8px 0">Add your first friend</h2><p style="margin:0 0 16px">Search their username, or send them your invite link.</p><button class="pill pk" data-a="add">Find friends</button> <button class="pill soft" data-a="invite">Invite link</button></div>';
   var cf = S.cf || 'all', tot = 0, nst = 0; ids.forEach(function (f) { var id0 = pair(S.me.id, f); tot += unread(id0) ? 1 : 0; nst += streakOf(S.chats[id0]) ? 1 : 0; });
-  var chips = '<div class="chips">' + [['all', 'All'], ['unread', 'Unread' + (tot ? '<b>' + tot + '</b>' : '')], ['streak', 'Streaks' + (nst ? '<b>' + nst + '</b>' : '')]].map(function (x) { return '<button class="chip ' + (cf === x[0] ? 'on' : '') + '" data-a="cf" data-k="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  var chips = '<div class="chips">' + [['all', 'All'], ['unread', 'Unread' + (tot ? '<b>' + tot + '</b>' : '')], ['streak', 'Streaks' + (nst ? '<b>' + nst + '</b>' : '')], ['ranks', 'Ranks' + (rkTot() ? '<b>' + rkTot() + '</b>' : '')]].map(function (x) { return '<button class="chip ' + (cf === x[0] ? 'on' : '') + '" data-a="cf" data-k="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
   var arrow = '<svg viewBox="0 0 24 24" width="13" height="13" style="fill:currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>', bub = '<svg viewBox="0 0 24 24" width="24" height="24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round"><path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H11l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>';
+  if (cf === 'ranks') return h + chips + ranksV();
   var pins = pinsGet(); var list = ids.filter(function (f) { var id1 = pair(S.me.id, f); return cf === 'unread' ? unread(id1) : cf === 'streak' ? streakOf(S.chats[id1]) : true; });
   return h + chips + '<div class="lcard">' + (list.map(function (f) { var id = pair(S.me.id, f), c = S.chats[id], m = lastMsg(id), p = person(f), n = unread(id), s = streakOf(c), vb = vibeOf(p), mine = m && m.from === S.me.id;
     var state = n ? (n + ' new message' + (n === 1 ? '' : 's')) : m ? (mine ? 'Sent' : 'Received') : 'Say hi';
@@ -710,6 +772,7 @@ app.addEventListener('click', function (e) {
   else if (k === 'ctadd') { var cf0 = $('#ctf'); if (cf0) cf0.click(); }
   else if (k === 'volplay') { playTone(toneName('tone'), MSGT, .22); }
   else if (k === 'cf') { S.cf = a.dataset.k; drawMain(); }
+  else if (k.slice(0, 2) === 'rk') rkAct(k, a, id);
   else if (k === 'sec') { S.sec = S.sec || {}; S.sec[a.dataset.k] = !S.sec[a.dataset.k]; refreshMe(); }
   else if (k === 'settings') openSettings();
   else if (k === 'closeset') { closeTop(); }
