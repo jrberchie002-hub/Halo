@@ -57,7 +57,7 @@ function merge(j) {
   j.rows.forEach(function (r) {
     var d = r.data;
     if (r.c === 'chats') S.chats[r.id] = d;
-    else if (r.c === 'msgs') { var l = S.msgs[d.chat] = S.msgs[d.chat] || []; var i = l.findIndex(function (m) { return m.id === d.id; }); if (i < 0) { l.push(d); l.sort(function (a, b) { return a.t - b.t; }); if (d.from !== S.me.id && !S.first) newIn.push(d); } else l[i] = d; }
+    else if (r.c === 'msgs') { var l = S.msgs[d.chat] = S.msgs[d.chat] || []; var i = l.findIndex(function (m) { return m.id === d.id; }); if (i < 0) { l.push(d); l.sort(function (a, b) { return a.t - b.t; }); if (d.from !== S.me.id) delete S.typing[d.from]; if (d.from !== S.me.id && !S.first) newIn.push(d); } else l[i] = d; }
     else if (r.c === 'stories') { if (d.t === 0 || Date.now() - d.t > 864e5) delete S.stories[d.id]; else S.stories[d.id] = d; }
     else if (r.c === 'calls') { S.calls[d.id] = d; callEvent(d); }
     else if (r.c === 'ice') { if (d.to === S.me.id && !S.ice[r.id]) { S.ice[r.id] = d; iceIn(d); } }

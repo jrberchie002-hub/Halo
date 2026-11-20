@@ -1,0 +1,12 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3111); const b = await chromium.launch(); const U = 'http://localhost:3111';
+ async function mk(name, un) { const c = await b.newContext({ viewport: { width: 390, height: 800 } }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); await p.goto(U); await p.click('[data-s=new]'); await p.fill('#a_n', name); await p.fill('#a_u', un); await p.click('#a_go'); await p.waitForSelector('.key'); await p.click('[data-a=enter]'); await p.waitForSelector('.nav'); return { p, errs }; }
+ const A = await mk('Ama', 'ama.t'), B = await mk('Kofi', 'kofi.t');
+ await A.p.click('.top [data-a=add]'); await A.p.fill('#sq', 'kofi'); await A.p.waitForSelector('[data-a=req]'); await A.p.waitForTimeout(500); await A.p.click('[data-a=req]', { force: true });
+ await B.p.waitForSelector('[data-a=notifs] .dot', { timeout: 6000 }); await B.p.click('.top [data-a=notifs]'); await B.p.click('[data-a=accept]');
+ await B.p.waitForSelector('[data-a=chat]', { timeout: 6000 }); await A.p.click('#sr [data-a=close]'); await A.p.waitForSelector('[data-a=chat]', { timeout: 6000 });
+ await A.p.click('[data-a=chat]'); await A.p.fill('#tx', 'hello kofi'); const t0 = Date.now(); await A.p.click('[data-a=send]');
+ await B.p.waitForSelector('.toast', { timeout: 6000 }); console.log('message arrived in', Date.now() - t0, 'ms');
+ B.p.on('console',m=>console.log('console',m.text())); await B.p.waitForTimeout(700); await B.p.click('.toast'); await B.p.waitForTimeout(800); console.log('errs',B.errs); await B.p.screenshot({path:'/tmp/b.png'}); console.log(await B.p.evaluate(()=>document.querySelector('#app').innerHTML.slice(0,600))); await B.p.waitForSelector('.b.th',{timeout:4000}); console.log('bubble:', await B.p.textContent('.b.th'));
+ await B.p.fill('#tx', 'hey ama'); await B.p.click('[data-a=send]'); await A.p.waitForSelector('.b.th', { timeout: 6000 }); await A.p.waitForSelector('.seen', { timeout: 6000 });
+ await A.p.screenshot({ path: '/tmp/halo_thread.png' }); console.log('errors', A.errs, B.errs); await b.close(); srv.close && srv.close(); process.exit(0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
