@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#ff4f7b">
+<meta name="theme-color" content="#f6f1ea">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg">
-<title>Halo</title>
+<title>Halo</title><meta property="og:title" content="Join me on Halo"><meta property="og:description" content="Tap to jump in. Chat, calls and moments with your people."><meta property="og:image" content="/og.png"><meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
-:root{--bg:#f6f1ea;--card:#fffdf9;--ink:#171316;--mute:#7a7077;--line:#e8e0d6;--pink:#ff4f7b;--sun:#ffd23f;--theirs:#efe7dc;--glass:rgba(255,253,249,.78);--shadow:0 8px 28px rgba(60,30,40,.12);--spot:#1db954}
+:root{--bg:#f6f1ea;--card:#fffdf9;--ink:#171316;--mute:#7a7077;--line:#e8e0d6;--pink:#f2a20c;--sun:#ffd23f;--theirs:#efe7dc;--glass:rgba(255,253,249,.78);--shadow:0 8px 28px rgba(60,30,40,.12);--spot:#1db954}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f0c10;--card:#191519;--ink:#f6f0ee;--mute:#a3979e;--line:#2a2429;--theirs:#2a232a;--glass:rgba(25,21,25,.8);--shadow:0 8px 28px rgba(0,0,0,.5);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#0f0c10;--card:#191519;--ink:#f6f0ee;--mute:#a3979e;--line:#2a2429;--theirs:#2a232a;--glass:rgba(25,21,25,.8);--shadow:0 8px 28px rgba(0,0,0,.5);color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -57,7 +57,7 @@ h1,h2,.hd{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;mar
 .sec{padding:12px 18px 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .pill{background:var(--ink);color:var(--card);border-radius:20px;padding:9px 16px;font-weight:700;font-size:13px;transition:transform .15s;display:inline-block;text-decoration:none;text-align:center}
 .pill:active{transform:scale(.94)}.pill.soft{background:var(--bg);color:var(--ink)}.pill.pk{background:var(--pink);color:#fff}.pill.sp{background:var(--spot);color:#06210f}
-.cta{width:100%;height:52px;border-radius:26px;background:var(--pink);color:#fff;font-weight:700;font-size:16px;box-shadow:0 10px 24px rgba(255,79,123,.3);transition:transform .15s}
+.cta{width:100%;height:52px;border-radius:26px;background:var(--pink);color:#fff;font-weight:700;font-size:16px;box-shadow:0 10px 24px rgba(242,162,12,.35);transition:transform .15s}
 .cta:active{transform:scale(.97)}.cta.ghost{background:var(--bg);color:var(--ink);box-shadow:none}.cta:disabled{opacity:.5}
 .stories{display:flex;gap:12px;padding:6px 16px 12px;overflow-x:auto;scrollbar-width:none}
 .stories::-webkit-scrollbar{display:none}
@@ -152,10 +152,10 @@ h1,h2,.hd{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;mar
 .menu{background:var(--bg);border-radius:18px;margin:6px 16px;overflow:hidden}
 .lb{position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.92);display:grid;place-items:center;padding:12px}.lb img{max-width:100%;max-height:100%;border-radius:12px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-</style>
+.nav .badge,.unread,.pill.pk,.cta,.b.me{color:#171316}.send svg{stroke:#171316}.cta.ghost{color:var(--ink)}.spin{width:96px;height:34px;border:7px solid #f2a20c;border-radius:50%;box-shadow:0 0 36px rgba(242,162,12,.7),inset 0 0 14px rgba(242,162,12,.5);animation:spin 1s cubic-bezier(.5,.1,.3,.9) infinite}@keyframes spin{0%{transform:rotateX(60deg) rotate(0)}100%{transform:rotateX(60deg) rotate(360deg)}}.qrc{background:#fff;border-radius:26px;padding:14px;box-shadow:var(--shadow);width:min(78vw,300px);margin:0 auto}.qrc svg{display:block;width:100%;height:auto}</style>
 </head>
 <body>
 <div class="stage"><div class="app" id="app"></div></div>
-<script src="/app.js"></script>
+<script src="/qr.js"></script><script src="/app.js"></script>
 </body>
 </html>
