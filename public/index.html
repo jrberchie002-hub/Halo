@@ -9,6 +9,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Halo"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2) and (orientation:portrait)" href="/splash/s828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2) and (orientation:portrait)" href="/splash/s750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/splash/s1242x2208.png">
 <title>Halo</title><meta property="og:title" content="Halo · Tap to open"><meta property="og:description" content="Tap to jump in. Chat, calls and moments with your people."><meta property="og:image" content="https://halo-chats-three.vercel.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:type" content="website"><meta property="og:site_name" content="Halo"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://halo-chats-three.vercel.app/og.png">
 <script>try{var t=localStorage.getItem("halo.theme")||"light";if(t==="auto")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);var bg=t==="dark"?"#0f0c10":"#efedea";document.documentElement.style.background=bg;var m=document.querySelector('meta[name=theme-color]');if(m)m.content=bg}catch(e){}</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
@@ -128,7 +137,7 @@ h1,h2,.hd{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;mar
 .call .big{width:128px;height:128px;font-size:50px;position:relative}
 .call .big::before,.call .big::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:2px solid rgba(255,255,255,.55);animation:pulse 2s infinite}.call .big::after{animation-delay:1s}
 @keyframes pulse{from{transform:scale(.8);opacity:.9}to{transform:scale(1.5);opacity:0}}
-.call .ctl{display:flex;gap:18px;margin-top:40px}
+.call .ctl{display:flex;gap:18px;margin-top:40px;position:relative;z-index:5}.call{z-index:9000!important}.call .ctl button{touch-action:manipulation}.call .dbg{font-size:12px;opacity:.75;margin-top:6px;min-height:16px}
 .call .ctl button{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center}
 .call .ctl button.on{background:#fff;color:#171316}.call .ctl .end{background:#ff3b4e}.call .ctl .ok{background:#1db954}
 .call svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -315,10 +324,11 @@ video.mv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .nameI{font-size:20px!important}.uh{margin-bottom:2px!important;font-size:13px}.stats{margin-top:8px!important}.stats div{padding:6px 4px!important}.stats b{font-size:16px!important}
 .hero2 .gear{display:none}
 .mchg{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14)!important;color:#fff;font-size:22px!important;font-weight:400;padding:0!important;line-height:1;display:grid;place-items:center}
+.bootlogo{background:var(--bg);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}.bootlogo i{width:60px;height:18px;border:4px solid #e8c76a;border-radius:50%;box-shadow:0 0 14px rgba(232,199,106,.7)}.bootlogo b{font:800 54px 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.03em;color:var(--ink)}
 </style>
 </head>
 <body>
-<div class="stage"><div class="app" id="app"></div></div>
+<div class="stage"><div class="app" id="app"><div class="bootlogo"><i></i><b>Halo</b></div></div></div>
 <script src="/qr.js"></script><script src="/app.js"></script>
 </body>
 </html>
