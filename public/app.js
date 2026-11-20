@@ -573,6 +573,7 @@ function endCall(failed) { var id = CALL && CALL.id; if (id) api('POST', '/api/c
 function cleanup() { stopRing(); if (!CALL) return; clearInterval(CALL.iv); clearTimeout(CALL.ringT); clearTimeout(CALL.connT); try { CALL.pc && CALL.pc.close(); } catch (e) {} try { CALL.local && CALL.local.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} if (CALL.audio) { CALL.audio.remove(); } CALL = null; var el = $('.call'); if (el) el.remove(); refreshLive(); }
 
 /* ---------- events ---------- */
+document.addEventListener('touchmove', function (e) { if (e.touches.length > 1) return; var t = e.target; if (t.closest && t.closest('.body,.msgs,.stories,.chips,.tonel,.wpg,textarea,.edr,.cx,.sv,.modal .mc,[data-scroll]')) return; e.preventDefault(); }, { passive: false });
 app.addEventListener('touchend', function (e) { var b = e.target.closest && e.target.closest('[data-c=end]'); if (b && CALL) { e.preventDefault(); endCall(); } }, { passive: false });
 app.addEventListener('click', function (e) {
   var cc = e.target.closest('[data-c]'); if (cc && CALL) { var k = cc.dataset.c; if (k === 'end') endCall(); else if (k === 'decline') { api('POST', '/api/call/answer', { id: CALL.id, decline: true }).catch(function () {}); cleanup(); } else if (k === 'accept') acceptCall(); else if (k === 'mute') { CALL.muted = !CALL.muted; CALL.local.getAudioTracks().forEach(function (t) { t.enabled = !CALL.muted; }); cc.classList.toggle('on', CALL.muted); } return; }
