@@ -568,7 +568,8 @@ app.addEventListener('click', function (e) {
   else if (k === 'wpphoto') { $('#wpf').click(); }
   else if (k === 'wpall') { var cw2 = S.view && S.view.chat; if (cw2 && wpGet(cw2)) { LS.set('halo.wp.all', wpGet(cw2)); toast(null, 'Wallpaper set for all chats'); } var m3 = $('.modal'); if (m3) m3.remove(); }
   else if (k === 'spopen') { LS.set('halo.spw', String(Date.now())); }
-  else if (k === 'spon') spConnect();
+  else if (k === 'spon') { var sm = document.createElement('div'); sm.className = 'modal'; sm.innerHTML = '<div class="mc"><b class="mt">Connect Spotify</b><p>What email do you use for Spotify? Jay adds it so Spotify lets you in. Give it a few minutes, then tap Continue.</p><input id="spe" type="email" inputmode="email" placeholder="Your Spotify email" autocapitalize="none" autocomplete="email" value="' + esc(S.me.email || '') + '"><div class="mrow"><button class="pill soft" data-a="modalx">Cancel</button><button class="pill pk" data-a="spsend">Continue</button></div></div>'; sm.addEventListener('click', function (e) { if (e.target === sm) sm.remove(); }); app.appendChild(sm); }
+  else if (k === 'spsend') { var ev = ($('#spe').value || '').trim(); if (!/@/.test(ev)) return toast(null, 'Type your Spotify email'); api('POST', '/api/spotify/request', { email: ev }).then(function () { var mm = $('.modal'); if (mm) mm.remove(); spConnect(); }).catch(function (x) { toast(null, x.message); }); }
   else if (k === 'spprev') spCtl('prev'); else if (k === 'spnext') spCtl('next'); else if (k === 'sppp') spCtl('pp'); else if (k === 'splib') openLib();
   else if (k === 'splay') { spApi('PUT', '/me/player/play', { context_uri: a.dataset.u }, function () { toast(null, 'Playing'); closeTop(); }); }
   else if (k === 'spoff') { LS.del('halo.sp'); SPT = null; refreshMe(); }
