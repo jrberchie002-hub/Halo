@@ -508,8 +508,8 @@ function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) {
   if (pr && pr.catch) pr.catch(retry); else au.onerror = retry; vnUpdate(); }
 var MIC = { s: null, t: 0 };
 function micFree() { clearTimeout(MIC.t); if (MIC.s) { MIC.s.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} }); MIC.s = null; } }
-function micGet() { clearTimeout(MIC.t); if (MIC.s && MIC.s.getAudioTracks().length && MIC.s.getAudioTracks().every(function (t) { return t.readyState === 'live'; })) return Promise.resolve(MIC.s.clone()); return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) { MIC.s = st; return st.clone(); }); }
-document.addEventListener('visibilitychange', function () { clearTimeout(MIC.t); if (document.hidden && !CALL) MIC.t = setTimeout(micFree, 90000); });
+function micGet() { clearTimeout(MIC.t); MIC.t = setTimeout(micFree, 20000); if (MIC.s && MIC.s.getAudioTracks().length && MIC.s.getAudioTracks().every(function (t) { return t.readyState === 'live'; })) return Promise.resolve(MIC.s.clone()); return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) { MIC.s = st; return st.clone(); }); }
+document.addEventListener('visibilitychange', function () { clearTimeout(MIC.t); if (document.hidden && !CALL) micFree(); });
 
 function webmPackets(u8) {
   var out = { pk: [], priv: null }, M = { 0x18538067: 1, 0x1F43B675: 1, 0xA0: 1, 0x1654AE6B: 1, 0xAE: 1 };
@@ -937,7 +937,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20e';
+var BUILD = null, CODE = '20f';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false;
 function updReload() { Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); })).then(function () { location.reload(); }); }
