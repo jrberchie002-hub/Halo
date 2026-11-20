@@ -10,5 +10,6 @@ const call = async (method, path, body, tok) => { const r = await app.handle({ m
   assert.strictEqual((await call('POST', '/api/chatwp', { to: idb, wp: 'url(http://evil)' }, ta)).s, 400, 'reject');
   const sy = await call('GET', '/api/sync', null, tb); const row = sy.rows.find(r => r.c === 'chats'); assert.strictEqual(row.data.wp, 'pat:1', 'other side sees it');
   const ice = await call('GET', '/api/ice'); assert.strictEqual(ice.s, 401, 'ice needs sign in');
+  const rm = await call('POST', '/api/unfriend', { to: idb }, ta); assert(rm.ok, 'unfriend'); const me2 = await call('GET', '/api/me', null, tb); assert(!((me2.me || me2).friends || []).includes(ida), 'other side lost friend');
   console.log('chatwp ok');
 })().catch(e => { console.error(e); process.exit(1); });
