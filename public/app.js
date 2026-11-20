@@ -284,7 +284,7 @@ function recStart() {
   if (REC) return; if (!navigator.mediaDevices || !window.MediaRecorder) return toast(null, 'Voice notes are not supported in this browser');
   navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
     var types = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'], mt = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0], mr;
-    try { mr = new MediaRecorder(stream, mt ? { mimeType: mt, audioBitsPerSecond: 24000 } : { audioBitsPerSecond: 24000 }); } catch (e) { stream.getTracks().forEach(function (t) { t.stop(); }); return toast(null, 'Voice notes are not supported here'); }
+    try { mr = new MediaRecorder(stream, mt ? { mimeType: mt, audioBitsPerSecond: 16000 } : { audioBitsPerSecond: 16000 }); } catch (e) { stream.getTracks().forEach(function (t) { t.stop(); }); return toast(null, 'Voice notes are not supported here'); }
     REC = { stream: stream, mr: mr, chunks: [], peaks: [], t0: Date.now() }; var rec0 = REC; mr.ondataavailable = function (e) { if (e.data && e.data.size) rec0.chunks.push(e.data); };
     try { var AC = window.AudioContext || window.webkitAudioContext; REC.ac = new AC(); var an = REC.ac.createAnalyser(); an.fftSize = 512; REC.ac.createMediaStreamSource(stream).connect(an); REC.an = an; REC.buf = new Uint8Array(an.fftSize); } catch (e) {}
     mr.start(250); $('#cmp').hidden = true; $('#tray').hidden = true; $('#recbar').hidden = false; $('#live').innerHTML = new Array(34).fill('<i style="height:8%"></i>').join('');
@@ -293,13 +293,13 @@ function recStart() {
 }
 function recTick() { if (!REC) return; var p = .06; if (REC.an) { REC.an.getByteTimeDomainData(REC.buf); var mx = 0; for (var i = 0; i < REC.buf.length; i++) mx = Math.max(mx, Math.abs(REC.buf[i] - 128)); p = Math.min(1, mx / 70); } REC.peaks.push(p);
   var bars = $('#live') && $('#live').children, last = REC.peaks.slice(-34); if (bars) for (var k = 0; k < bars.length; k++) bars[k].style.height = Math.max(8, (last[last.length - 34 + k] || 0) * 100) + '%';
-  var s = Math.floor((Date.now() - REC.t0) / 1000), tm = $('#rtm'); if (tm) tm.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); if (s >= 60) recSend(); }
+  var s = Math.floor((Date.now() - REC.t0) / 1000), tm = $('#rtm'); if (tm) tm.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); if (s >= 1200) recSend(); }
 function recEnd() { var r = REC; if (!r) return null; REC = null; clearInterval(r.iv); try { r.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} try { r.ac && r.ac.close(); } catch (e) {} var rb = $('#recbar'), cm = $('#cmp'); if (rb) rb.hidden = true; if (cm) cm.hidden = false; return r; }
 function recCancel() { var r = recEnd(); if (r) { try { r.mr.stop(); } catch (e) {} } }
 function recSend() { var r = recEnd(); if (!r) return; var dur = (Date.now() - r.t0) / 1000;
   r.mr.onstop = function () { if (dur < .7 || !r.chunks.length) return toast(null, 'Hold on a bit longer'); var blob = new Blob(r.chunks, { type: r.mr.mimeType || 'audio/webm' }), n = 40, pk = r.peaks, wave = [], mx = Math.max.apply(null, pk.concat([.1]));
     for (var i = 0; i < n; i++) { var from = Math.floor(i * pk.length / n), to = Math.max(from + 1, Math.floor((i + 1) * pk.length / n)), v = 0; for (var j = from; j < to; j++) v = Math.max(v, pk[j] || 0); wave.push(Math.max(8, Math.round(v / mx * 100))); }
-    var fr = new FileReader(); fr.onload = function () { if (fr.result.length > 520000) return toast(null, 'That voice note is too long'); sendRaw({ aud: fr.result, dur: Math.round(dur), wave: wave }); }; fr.readAsDataURL(blob); };
+    var fr = new FileReader(); fr.onload = function () { if (fr.result.length > 3300000) return toast(null, 'That voice note is too long'); sendRaw({ aud: fr.result, dur: Math.round(dur), wave: wave }); }; fr.readAsDataURL(blob); };
   try { r.mr.stop(); } catch (e) { toast(null, 'Could not save the voice note'); } }
 function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (!m.aud || m.aud.indexOf('data:') !== 0) return toast(null, 'This is a sample voice note');
   if (VN && VN.id === id) { if (VN.au.paused) VN.au.play().catch(function () {}); else VN.au.pause(); vnUpdate(); return; }
@@ -507,7 +507,7 @@ app.addEventListener('click', function (e) {
   else if (k === 'locktog') lockToggle(); else if (k === 'unlock') deviceUnlock($('.lock'));
   else if (k === 'links') openLinks(); else if (k === 'linksave') saveLinks();
   else if (k === 'invite') invite();
-  else if (k === 'sharelink') { var iu = inviteUrl(); if (navigator.share) navigator.share({ title: 'Join me on Halo', text: 'Join me on Halo', url: iu }).catch(function () {}); else copyLink(); }
+  else if (k === 'sharelink') { var iu = inviteUrl(); if (navigator.share) navigator.share({ url: iu }).catch(function () {}); else copyLink(); }
   else if (k === 'sharecard') shareCard(); else if (k === 'copylink') copyLink();
   else if (k === 'story') openStory(id, a.dataset.i);
   else if (k === 'compose') openCompose();
