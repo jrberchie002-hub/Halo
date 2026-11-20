@@ -1,6 +1,6 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js');
 (async () => { const srv = await start(3116); const b = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] }); const c = await b.newContext({ viewport: { width: 390, height: 800 }, permissions: ['camera', 'microphone'] }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
- await p.goto('http://localhost:3116'); await p.click('[data-a=demo]'); await p.waitForSelector('.nav');
+ await p.goto('http://localhost:3116/?demo=1'); await p.waitForSelector('.nav');
  await p.click('[data-t=me]'); await p.waitForTimeout(300); await p.screenshot({ path: '/tmp/u_me.png' });
  await p.click('.spot'); await p.waitForSelector('.modal'); await p.screenshot({ path: '/tmp/u_spot.png' }); await p.click('.modal', { position: { x: 20, y: 20 } });
  await p.click('[data-t=stories]'); await p.click('.top [data-a=compose], [data-a=compose]'); await p.waitForSelector('.cx'); await p.waitForTimeout(500); await p.screenshot({ path: '/tmp/u_comp.png' });
