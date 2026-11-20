@@ -741,10 +741,11 @@ function tick() { clearInterval(CALL.iv); CALL.iv = setInterval(function () { if
 function media(video) { if (!video) return micGet(); return navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: 'user' } }); }
 var RELAY = false;
 function loadIce(cb) { if (loadIce.t && Date.now() - loadIce.t < 3000000) return cb(); api('GET', '/api/ice').then(function (j) { if (j.servers && j.servers.length) { RTC.iceServers = j.servers; loadIce.t = Date.now(); } RELAY = !!j.relay; cb(); }).catch(function () { cb(); }); }
-function gathered(pc) { return new Promise(function (r) { if (pc.iceGatheringState === 'complete') return r(); var ch = function () { if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', ch); r(); } }; pc.addEventListener('icegatheringstatechange', ch); setTimeout(r, 2500); }); }
+function gathered(pc) { return new Promise(function (r) { if (pc.iceGatheringState === 'complete') return r(); var ch = function () { if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', ch); r(); } }; pc.addEventListener('icegatheringstatechange', ch); setTimeout(r, 900); }); }
 function startCall(fid, video) {
   if (CALL) return; if (!navigator.mediaDevices || !window.RTCPeerConnection) return toast(null, 'Calls are not supported in this browser');
-  loadIce(function () { media(video).then(function (stream) { CALL = { local: stream, other: fid, kind: video ? 'video' : 'voice' }; var pc = mkPc(null, fid);
+  CALL = { other: fid, kind: video ? 'video' : 'voice', local: null }; callUI({ from: S.me.id, to: fid, kind: CALL.kind, state: 'dialing' }, 'Calling…');
+  loadIce(function () { media(video).then(function (stream) { if (!CALL) { stream.getTracks().forEach(function (t) { t.stop(); }); return; } CALL.local = stream; var pc = mkPc(null, fid);
     return pc.createOffer().then(function (o) { return pc.setLocalDescription(o); }).then(function () { return gathered(pc); }).then(function () { return api('POST', '/api/call', { to: fid, video: !!video, offer: JSON.stringify(pc.localDescription) }); }).then(function (j) { CALL.id = j.call.id; CALL.rec = j.call; (CALL.pend || []).forEach(function (cd) { api('POST', '/api/call/ice', { id: CALL.id, cand: JSON.stringify(cd) }).catch(function () {}); }); CALL.pend = []; callUI(j.call, 'Calling…'); startRing('out'); CALL.ringT = setTimeout(function () { if (CALL && !CALL.t0) { endCall(); toast(null, 'No answer'); } }, 45000); });
   }).catch(function (e) { cleanup(); toast(null, /Permission|denied|NotAllowed/i.test(e.name + e.message) ? 'Allow the microphone to make calls' : (e.message || 'Could not start the call')); }); });
 }
@@ -998,7 +999,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20.20';
+var BUILD = null, CODE = '20.21';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false;
 function updReload() { (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + (u === '/' ? '?' : '?') + 'u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { location.reload(); }); }
