@@ -18,7 +18,7 @@ function memoryStore() {
 
 function supabaseStore(env) {
   const base = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
-  const key = String(env.SUPABASE_SERVICE_KEY || '').trim();
+  const key = String(env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_KEY || '').trim();
   const H = (x) => Object.assign({ apikey: key, 'Content-Type': 'application/json' }, key.startsWith('sb_') ? {} : { Authorization: 'Bearer ' + key }, x || {});
   async function rest(method, p, body, prefer) {
     const r = await fetch(base + '/rest/v1/' + p, { method, headers: H(prefer ? { Prefer: prefer } : {}), body: body ? JSON.stringify(body) : undefined });
