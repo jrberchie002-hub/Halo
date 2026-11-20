@@ -22,7 +22,7 @@ function api(method, path, body) {
     return r.json().catch(function () { return { ok: false, error: 'Server problem (' + r.status + '). Try again in a minute.' }; }).then(function (j) { if (r.status === 401 && S.tok && j.code === 'auth') { logout(true); } if (!r.ok) { var e = new Error(j.error || 'Something went wrong'); e.status = r.status; throw e; } return j; });
   });
 }
-function logout(silent) { miniOpen = false; miniSig = ''; MINI.hidden = true; app.classList.remove('hasmini'); S.demo = false; S.tok = null; S.me = null; LS.del('halo.tok'); try { localStorage.removeItem('halo.snap'); } catch (e) {} S.people = {}; S.chats = {}; S.msgs = {}; S.stories = {}; S.calls = {}; S.stamp = 0; S.first = true; if (!silent) LS.del('halo.key'); drawAuth(); }
+function logout(silent) { miniOpen = false; miniSig = ''; MINI.hidden = true; app.classList.remove('hasmini'); S.demo = false; S.tok = null; S.me = null; LS.del('halo.tok'); S.tok = null; idbTok(); try { localStorage.removeItem('halo.snap'); } catch (e) {} S.people = {}; S.chats = {}; S.msgs = {}; S.stories = {}; S.calls = {}; S.stamp = 0; S.first = true; if (!silent) LS.del('halo.key'); drawAuth(); }
 
 /* ---------- preview mode (no account, sample data) ---------- */
 function demoApi(method, path, b) {
@@ -207,7 +207,8 @@ function saveSpot() { var u = ($('#spl').value || '').trim(); if (u.indexOf('htt
 function openLinks() { var me = S.me, soc = me.soc || {}; sheet('<div class="bar"><button class="ic" data-a="close" aria-label="Back">' + I('back') + '</button><div class="nm"><b>Links</b><small>Friends see these on your profile</small></div></div><div class="body" style="padding-bottom:30px"><label class="field"><span>WhatsApp number</span><input id="s_wa" value="' + esc(soc.wa || '') + '" inputmode="tel"></label><label class="field"><span>Snapchat</span><input id="s_sc" value="' + esc(soc.sc || '') + '" autocapitalize="none"></label><label class="field"><span>Instagram</span><input id="s_ig" value="' + esc(soc.ig || '') + '" autocapitalize="none"></label><label class="field"><span>TikTok</span><input id="s_tt" value="' + esc(soc.tt || '') + '" autocapitalize="none"></label><label class="field"><span>Phone (so friends can find you)</span><input id="c_p" value="' + esc(me.phone || '') + '" inputmode="tel"></label><label class="field"><span>Email (so friends can find you)</span><input id="c_e" value="' + esc(me.email || '') + '" inputmode="email" autocapitalize="none"></label><div style="padding:14px 16px"><button class="cta" data-a="linksave">Save</button></div></div>', 'lk'); }
 function saveLinks() { api('POST', '/api/profile', { soc: { wa: $('#s_wa').value, sc: $('#s_sc').value, ig: $('#s_ig').value, tt: $('#s_tt').value }, phone: $('#c_p').value, email: $('#c_e').value }).then(function (j) { S.me = j.me; S.people[S.me.id] = S.me; toast(null, 'Saved'); closeTop(); }).catch(function (x) { toast(null, x.message); }); }
 /* ---------- main shell ---------- */
-function start() { spBoot(); S.first = true; S.stamp = 0; drawMain(); poll(); enablePush(false); }
+function idbTok() { try { var r = indexedDB.open('halo', 1); r.onupgradeneeded = function () { r.result.createObjectStore('kv'); }; r.onsuccess = function () { try { r.result.transaction('kv', 'readwrite').objectStore('kv').put(S.tok || '', 'tok'); } catch (e) {} }; } catch (e) {} }
+function start() { idbTok(); spBoot(); S.first = true; S.stamp = 0; drawMain(); poll(); enablePush(false); }
 function drawMain() {
   if (!S.me) return; var nb = (S.me.reqIn || []).length;
   var title = { chats: 'Halo', stories: 'Moments', calls: 'Calls', me: 'You' }[S.tab];
