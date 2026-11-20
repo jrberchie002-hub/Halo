@@ -368,6 +368,11 @@ html,body{touch-action:pan-y;overscroll-behavior:none;-webkit-user-select:none;u
 .stories,.chips,.tonel,.wpg{touch-action:pan-x pan-y}
 .app{overflow:clip;contain:layout paint}.body,.msgs{overflow-x:hidden;overscroll-behavior:contain}.top,.bar,.nav,.compose{flex:none}
 .crow2,.row.crow.crow2{border:0!important;outline:0}.top,.stories,.chips,.reqs{border:0!important}
+/* Halo take on the chat list: segmented tabs inside a rounded card list */
+.chips{margin:0 16px 12px!important;padding:4px!important;background:var(--card);border-radius:999px;gap:2px!important;box-shadow:0 2px 14px rgba(30,24,30,.05)}
+.chip{flex:1;justify-content:center;background:transparent!important;color:var(--mute)!important;padding:9px 6px!important}.chip.on{background:var(--bg)!important;color:var(--ink)!important}
+.lcard{margin:0 14px 120px;background:var(--card);border-radius:28px;overflow:hidden;box-shadow:0 2px 14px rgba(30,24,30,.05)}
+:root[data-theme="dark"] .lcard,:root[data-theme="dark"] .chips{background:rgba(255,255,255,.06);box-shadow:none}
 </style>
 </head>
 <body>
