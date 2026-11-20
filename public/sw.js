@@ -6,7 +6,7 @@ self.addEventListener('push', function (e) {
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cl) {
     if (cl.some(function (c) { return c.focused && c.visibilityState === 'visible'; })) return;
     var call = /^call/.test(d.tag || ''), o = { body: d.body || '', icon: '/icon-192.png', badge: '/badge.png', tag: d.tag || 'halo', renotify: true, requireInteraction: call, silent: false, timestamp: Date.now(), vibrate: call ? [400, 200, 400, 200, 400] : [90, 60, 90], data: { url: d.url || '/', from: d.from || '', kind: d.kind || '' } };
-    if (d.kind === 'msg' && d.from) o.actions = [{ action: 'reply', type: 'text', title: 'Reply', placeholder: 'Reply to ' + (d.title || 'them') + '…' }];
+    if (d.kind === 'msg' && d.from) o.actions = [{ action: 'reply', type: 'text', title: 'Reply', placeholder: 'Reply to ' + (d.who || 'them') + '…' }];
     return self.registration.showNotification(d.title || 'Halo', o);
   }));
 });
