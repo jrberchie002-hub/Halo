@@ -476,7 +476,7 @@ var REC = null, VN = null;
 function recStart() {
   if (REC) return; if (!navigator.mediaDevices || !window.MediaRecorder) return toast(null, 'Voice notes are not supported in this browser');
   navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
-    var types = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'], mt = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0], mr;
+    var types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/webm'], mt = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0], mr;
     try { mr = new MediaRecorder(stream, mt ? { mimeType: mt, audioBitsPerSecond: 16000 } : { audioBitsPerSecond: 16000 }); } catch (e) { stream.getTracks().forEach(function (t) { t.stop(); }); return toast(null, 'Voice notes are not supported here'); }
     REC = { stream: stream, mr: mr, chunks: [], peaks: [], t0: Date.now() }; var rec0 = REC; mr.ondataavailable = function (e) { if (e.data && e.data.size) rec0.chunks.push(e.data); };
     try { var AC = window.AudioContext || window.webkitAudioContext; REC.ac = new AC(); var an = REC.ac.createAnalyser(); an.fftSize = 512; REC.ac.createMediaStreamSource(stream).connect(an); REC.an = an; REC.buf = new Uint8Array(an.fftSize); } catch (e) {}
@@ -496,7 +496,9 @@ function recSend() { var r = recEnd(); if (!r) return; var dur = (Date.now() - r
   try { r.mr.stop(); } catch (e) { toast(null, 'Could not save the voice note'); } }
 function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (!m.aud || !/^(data:|https:)/.test(m.aud)) return toast(null, 'This is a sample voice note');
   if (VN && VN.id === id) { if (VN.au.paused) VN.au.play().catch(function () {}); else VN.au.pause(); vnUpdate(); return; }
-  if (VN) { VN.au.pause(); VN = null; } var au = new Audio(m.aud); VN = { id: id, au: au }; au.ontimeupdate = vnUpdate; au.onpause = vnUpdate; au.onplay = vnUpdate; au.onended = function () { VN = null; vnUpdate(); }; au.play().catch(function () { toast(null, 'Could not play this voice note'); VN = null; vnUpdate(); }); }
+  if (VN) { VN.au.pause(); VN = null; } var au = new Audio(m.aud); VN = { id: id, au: au }; au.ontimeupdate = vnUpdate; au.onpause = vnUpdate; au.onplay = vnUpdate; au.onended = function () { VN = null; vnUpdate(); }; au.play().catch(function () { VN = null; vnUpdate(); vnFallback(m.aud); }); }
+var VNX = null;
+function vnFallback(url) { try { var AC = window.AudioContext || window.webkitAudioContext, ctx = new AC(); if (VNX) { try { VNX.stop(); } catch (e) {} } fetch(url).then(function (r) { return r.arrayBuffer(); }).then(function (b) { return new Promise(function (ok, no) { ctx.decodeAudioData(b, ok, no); }); }).then(function (buf) { var src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); VNX = src; if (ctx.resume) ctx.resume(); src.start(0); }).catch(function () { toast(null, 'This voice note was recorded on a phone that your phone cannot play. Ask them to send it again after updating Halo'); }); } catch (e) { toast(null, 'Could not play this voice note'); } }
 function vnUpdate() { document.querySelectorAll('.vn').forEach(function (el) { var on = VN && VN.id === el.dataset.id, f = on && VN.au.duration ? VN.au.currentTime / VN.au.duration : 0, bars = el.querySelectorAll('.wv i'); bars.forEach(function (b, i) { b.classList.toggle('on', on && i < f * bars.length); }); var btn = el.querySelector('.vp'); btn.textContent = on && !VN.au.paused ? '❚❚' : '▶'; }); }
 /* friends */
 function relation(id) { if (friends().indexOf(id) > -1) return 'friends'; if ((S.me.reqIn || []).indexOf(id) > -1) return 'in'; if ((S.me.reqOut || []).indexOf(id) > -1) return 'out'; return 'none'; }
