@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "functions": { "api/index.js": { "maxDuration": 15, "includeFiles": "public/index.html" } },
-  "rewrites": [ { "source": "/i/:u", "destination": "/api/invite?u=:u" }, { "source": "/api/(.*)", "destination": "/api/index.js" } ],
+  "functions": { "api/index.js": { "maxDuration": 15 } },
+  "rewrites": [ { "source": "/i/:u", "destination": "/index.html" }, { "source": "/api/(.*)", "destination": "/api/index.js" } ],
   "headers": [ { "source": "/(.*)", "headers": [
     { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.giphy.com; media-src 'self' blob: data:; connect-src 'self' https://open.spotify.com; frame-src https://open.spotify.com https://w.soundcloud.com https://embed.music.apple.com https://www.youtube-nocookie.com https://www.tiktok.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
     { "key": "X-Content-Type-Options", "value": "nosniff" },
