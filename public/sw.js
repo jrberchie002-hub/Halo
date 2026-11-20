@@ -25,5 +25,5 @@ self.addEventListener('activate', function (e) { e.waitUntil(caches.keys().then(
 self.addEventListener('fetch', function (e) {
   var r = e.request; if (r.method !== 'GET') return; var u = new URL(r.url); if (u.origin !== location.origin || u.pathname.indexOf('/api/') === 0) return;
   var key = r.mode === 'navigate' ? '/index.html' : (STATIC.indexOf(u.pathname) > -1 ? u.pathname : null); if (!key) return;
-  e.respondWith(caches.open(SHELL).then(function (c) { return c.match(key).then(function (hit) { var net = fetch(r.mode === 'navigate' ? '/index.html' : r, { cache: 'no-cache' }).then(function (resp) { if (resp && resp.ok) c.put(key, resp.clone()); return resp; }).catch(function () { return hit; }); return hit || net; }); }));
+  e.respondWith(caches.open(SHELL).then(function (c) { return c.match(key).then(function (hit) { var net = fetch(r.mode === 'navigate' ? '/index.html' : r, { cache: 'no-cache' }).then(function (resp) { if (resp && resp.ok) c.put(key, resp.clone()); return resp; }).catch(function () { return hit; }); if (!hit) return net; return Promise.race([net, new Promise(function (res) { setTimeout(function () { res(hit); }, 1800); })]).then(function (x) { return x || hit; }); }); }));
 });
