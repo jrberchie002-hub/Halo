@@ -684,7 +684,10 @@ function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function (
 /* ---------- automatic updates (keeps you signed in) ---------- */
 var BUILD = null;
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
-function updCheck() { fetch('/api/version', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { if (!j || !j.v || j.v === 'dev') return; if (BUILD === null) { BUILD = j.v; return; } if (j.v !== BUILD) { if (updSafe()) { toast(null, 'Updating Halo…'); Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); })).then(function () { try { navigator.serviceWorker && navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (x) { x.update(); }); }); } catch (e) {} location.reload(); }); } } }).catch(function () {}); }
+var UPD = false;
+function updReload() { Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); })).then(function () { location.reload(); }); }
+function updCheck() { fetch('/api/version', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { if (!j || !j.v || j.v === 'dev') return; if (BUILD === null) { BUILD = j.v; return; } if (j.v !== BUILD) { UPD = true; if (document.hidden && updSafe()) updReload(); } }).catch(function () {}); }
+document.addEventListener('visibilitychange', function () { if (!document.hidden && UPD && updSafe()) { UPD = false; updReload(); } });
 setInterval(updCheck, 60000); document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(updCheck, 500); }); setTimeout(updCheck, 3000);
 /* ---------- boot ---------- */
 try { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js'); } catch (e) {}
