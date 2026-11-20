@@ -4,7 +4,7 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await p.click('[data-t=me]'); await p.waitForTimeout(300); await p.screenshot({ path: '/tmp/u_me.png' });
  await p.click('.spot'); await p.waitForSelector('.modal'); await p.screenshot({ path: '/tmp/u_spot.png' }); await p.click('.modal', { position: { x: 20, y: 20 } });
  await p.click('[data-t=stories]'); await p.click('.top [data-a=compose], [data-a=compose]'); await p.waitForSelector('.cx'); await p.waitForTimeout(500); await p.screenshot({ path: '/tmp/u_comp.png' });
- await p.click('[data-a=ccam]'); await p.waitForSelector('video#cvid'); await p.waitForTimeout(900); await p.click('[data-a=shut]'); await p.waitForTimeout(500); await p.screenshot({ path: '/tmp/u_cam.png' });
+ await p.click('[data-a=ccam]'); await p.waitForSelector('video#cvid'); await p.waitForTimeout(900); await p.click('#shut'); await p.waitForTimeout(500); await p.screenshot({ path: '/tmp/u_cam.png' });
  console.log('cam photo set:', await p.evaluate(() => document.querySelector('#cv').style.backgroundImage.indexOf('data:image/jpeg')>-1));
  // back button behaviour
  const before = await p.evaluate(() => location.href); await p.click('[data-a=close]'); await p.waitForTimeout(300); console.log('compose closed, still on app:', await p.evaluate(() => !!document.querySelector('.nav')));
