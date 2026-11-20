@@ -363,13 +363,24 @@ function chatsV() {
     return '<button class="row crow crow2" data-a="chat" data-id="' + f + '"><div class="ringw ' + (ringState(f) === 'new' ? 'new' : '') + '" style="width:56px;height:56px;position:relative">' + av(f) + (vb ? '<i class="vb">' + esc(vb.e) + '</i>' : '') + '</div><div class="m"><b>' + esc(p.name) + (pins.indexOf(f) > -1 ? ' <span class="pin">📌</span>' : '') + '</b><div class="s2 ' + (n ? 'u' : '') + '"><span class="sti">' + (n ? '' : mine ? arrow : '') + '</span><span>' + state + '</span>' + (m ? '<span class="dt">·</span><span>' + ago(m.t) + '</span>' : '') + (s ? '<span class="fire">🔥 ' + s + '</span>' : '') + '</div>' + (m && !n ? '<div class="pv">' + esc(lt(m)) + '</div>' : '') + '</div><span class="act">' + (n ? '<span class="unread">' + n + '</span>' : bub) + '</span></button>'; }).join('') || '<div class="empty" style="padding:30px 0"><p>Nothing here yet</p></div>') + '</div>';
 }
 function tile(s, who) { return '<button class="tile" data-a="story" data-id="' + s.uid + '" data-i="' + s.id + '" style="background-image:' + (s.img ? 'url(' + s.img + ')' : s.vid ? 'none' : BG[s.bg || 0]) + ';background-color:#171316;' + ((s.views || []).indexOf(S.me.id) > -1 && s.uid !== S.me.id ? 'filter:saturate(.55)' : '') + '">' + (s.vid ? '<video class="mv" src="' + s.vid + '" muted playsinline preload="metadata"></video>' : '') + (s.aud ? '<span class="vchip">' + I('mic') + '</span>' : '') + (s.stickers || []).map(function (k) { return '<span class="stk" style="left:' + k.x * 100 + '%;top:' + k.y * 100 + '%;font-size:' + 26 * k.s + 'px">' + esc(k.e) + '</span>'; }).join('') + '<div class="tx">' + esc((s.text || '').slice(0, 50)) + '</div><small>' + esc(who) + ' · ' + ago(s.t) + '</small></button>'; }
+function dkCard(s, who, pos) { var st = pos === 0 ? '' : pos === 1 ? 'transform:translateY(24px) scale(.94)' : pos === 2 ? 'transform:translateY(48px) scale(.88)' : 'transform:translateY(40px) scale(.86);opacity:0', seen = (s.views || []).indexOf(S.me.id) > -1 && s.uid !== S.me.id;
+  return '<div class="dk" data-uid="' + s.uid + '" data-i="' + s.id + '" style="z-index:' + (10 - pos) + ';' + st + ';background-image:' + (s.img ? 'url(' + s.img + ')' : s.vid ? 'none' : BG[s.bg || 0]) + ';background-color:#171316;' + (seen ? 'filter:saturate(.6)' : '') + '">' + (s.vid ? '<video class="mv" src="' + s.vid + '" muted playsinline preload="metadata"></video>' : '') + (s.stickers || []).map(function (k) { return '<span class="stk" style="left:' + k.x * 100 + '%;top:' + k.y * 100 + '%;font-size:' + 34 * k.s + 'px">' + esc(k.e) + '</span>'; }).join('') + (s.text ? '<div class="dkt">' + esc(s.text.slice(0, 80)) + '</div>' : '') + '<div class="dkw">' + esc(who) + ' · ' + ago(s.t) + '</div></div>'; }
+function deckHtml(list, key, whoFn) { S.dk = S.dk || {}; var n = list.length, i0 = (S.dk[key] || 0) % n, ord = []; for (var k = 0; k < Math.min(n, 4); k++) ord.push(list[(i0 + k) % n]); return '<div class="deck" data-key="' + key + '" data-n="' + n + '">' + ord.map(function (s, pos) { return dkCard(s, whoFn(s), pos); }).reverse().join('') + '</div>' + (n > 1 ? '<div class="dkc">' + (i0 + 1) + ' of ' + n + ' · swipe to see the next</div>' : ''); }
 function storiesV() {
   var all = Object.keys(S.stories).map(function (k) { return S.stories[k]; }), mine = all.filter(function (s) { return s.uid === S.me.id; }).sort(function (a, b) { return b.t - a.t; }), fr = all.filter(function (s) { return s.uid !== S.me.id; }).sort(function (a, b) { return b.t - a.t; });
   var h = '<div style="padding:6px 16px 10px;display:flex"><button class="stadd" data-a="compose" aria-label="Add moment"><div class="ringw">' + av(S.me.id) + '<i class="pl">+</i></div></button></div>';
-  if (mine.length) h += '<div class="sec">Your moment</div><div class="grid">' + mine.map(function (s) { return tile(s, 'You'); }).join('') + '</div>';
+  if (mine.length) h += '<div class="sec">Your moments</div>' + deckHtml(mine, 'mine', function () { return 'You'; });
   h += '<div class="sec">Friends</div>'; if (!fr.length) return h + '<div class="empty">No moments from friends right now.</div>';
-  return h + '<div class="grid">' + fr.map(function (s) { return tile(s, person(s.uid).name.split(' ')[0]); }).join('') + '</div>';
+  return h + deckHtml(fr, 'fr', function (s) { return person(s.uid).name.split(' ')[0]; });
 }
+var dkD = null;
+document.addEventListener('pointerdown', function (e) { var c = e.target.closest && e.target.closest('.deck .dk'); if (!c) return; var d = c.parentNode, top = d.lastElementChild; if (c !== top) return; dkD = { c: c, d: d, x: e.clientX, y: e.clientY, dx: 0, moved: false, id: e.pointerId }; try { c.setPointerCapture(e.pointerId); } catch (x) {} c.style.transition = 'none'; });
+document.addEventListener('pointermove', function (e) { if (!dkD || e.pointerId !== dkD.id) return; dkD.dx = e.clientX - dkD.x; if (Math.abs(dkD.dx) > 8) dkD.moved = true; dkD.c.style.transform = 'translateX(' + dkD.dx + 'px) rotate(' + dkD.dx / 22 + 'deg)'; });
+function dkEnd(e) { if (!dkD || (e.pointerId !== undefined && e.pointerId !== dkD.id)) return; var q = dkD; dkD = null; q.c.style.transition = ''; var n = +q.d.dataset.n;
+  if (!q.moved && e.type === 'pointerup') { q.c.style.transform = ''; openStory(q.c.dataset.uid, q.c.dataset.i); return; }
+  if (Math.abs(q.dx) > 80 && n > 1) { q.c.style.transform = 'translateX(' + (q.dx > 0 ? 130 : -130) + '%) rotate(' + (q.dx > 0 ? 18 : -18) + 'deg)'; q.c.style.opacity = '0'; setTimeout(function () { S.dk = S.dk || {}; S.dk[q.d.dataset.key] = ((S.dk[q.d.dataset.key] || 0) + 1) % n; var bd = $('#bd'); if (bd && S.tab === 'stories') { bd.innerHTML = tabBody(); bd._h = bd.innerHTML; } }, 220); }
+  else q.c.style.transform = ''; }
+document.addEventListener('pointerup', dkEnd); document.addEventListener('pointercancel', dkEnd);
 function callsV() {
   var l = Object.keys(S.calls).map(function (k) { return S.calls[k]; }).filter(function (c) { return c.state === 'ended' || c.missed; }).sort(function (a, b) { return b.t - a.t; });
   if (!l.length) return '<div class="empty"><div style="font-size:40px">📞</div><p>Your calls show up here. Open a chat and tap the phone.</p></div>';
@@ -906,7 +917,7 @@ function applyTheme() { syncStatus(); var t = LS.get('halo.theme') || 'light'; i
 /* swipe between tabs */
 var dbgN = 0, dbgT = 0;
 var TABS = ['chats', 'stories', 'music', 'calls', 'me'], tsw = null;
-app.addEventListener('touchstart', function (e) { var bd = e.target.closest && e.target.closest('#bd'); if (!bd || e.target.closest('.stories,input,textarea') || layers().length) { tsw = null; return; } var t = e.touches[0]; tsw = { x: t.clientX, y: t.clientY }; }, { passive: true });
+app.addEventListener('touchstart', function (e) { var bd = e.target.closest && e.target.closest('#bd'); if (!bd || e.target.closest('.stories,.deck,input,textarea') || layers().length) { tsw = null; return; } var t = e.touches[0]; tsw = { x: t.clientX, y: t.clientY }; }, { passive: true });
 app.addEventListener('touchend', function (e) { if (!tsw) return; var t = e.changedTouches[0], dx = t.clientX - tsw.x, dy = t.clientY - tsw.y; tsw = null; if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6) return; var i = TABS.indexOf(S.tab), n = dx < 0 ? i + 1 : i - 1; if (n < 0 || n >= TABS.length) return; S.tab = TABS[n]; drawMain(); var bd = $('#bd'); if (bd) bd.style.animation = (dx < 0 ? 'slL' : 'slR') + ' .26s cubic-bezier(.2,.9,.3,1)'; }, { passive: true });
 var fullH = window.innerHeight, fullW = window.innerWidth; if (!/[?&]dbg=1/.test(location.search)) LS.del('halo.dbg');
 function typing() { var a2 = document.activeElement; return !!(a2 && /INPUT|TEXTAREA/.test(a2.tagName)); }
@@ -937,7 +948,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20j';
+var BUILD = null, CODE = '20k';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false;
 function updReload() { Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); })).then(function () { location.reload(); }); }
