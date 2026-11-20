@@ -292,6 +292,10 @@ h1,h2,.hd{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;mar
 #mini-slot .mini{pointer-events:auto;margin:0 14px;box-shadow:0 12px 34px rgba(0,0,0,.35)}
 .app:has(.sheet) #mini-slot,.app:has(.sv) #mini-slot{opacity:0;pointer-events:none;transform:translateY(300%)}
 .hasmini .body{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
+video.mv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+:root{--scrim:rgba(255,255,255,.3)}:root[data-theme="dark"]{--scrim:rgba(0,0,0,.5)}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--scrim:rgba(0,0,0,.5)}}
+.app.hasbg .top,.app.hasbg #bd{background:transparent}
+.sring{animation:sdrop .5s cubic-bezier(.2,.9,.3,1.2) both,sglow 2.2s ease-in-out .5s infinite!important}.sword{animation:sfade .5s ease .1s both!important}
 </style>
 </head>
 <body>
