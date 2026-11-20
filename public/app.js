@@ -293,15 +293,15 @@ function recStart() {
 }
 function recTick() { if (!REC) return; var p = .06; if (REC.an) { REC.an.getByteTimeDomainData(REC.buf); var mx = 0; for (var i = 0; i < REC.buf.length; i++) mx = Math.max(mx, Math.abs(REC.buf[i] - 128)); p = Math.min(1, mx / 70); } REC.peaks.push(p);
   var bars = $('#live') && $('#live').children, last = REC.peaks.slice(-34); if (bars) for (var k = 0; k < bars.length; k++) bars[k].style.height = Math.max(8, (last[last.length - 34 + k] || 0) * 100) + '%';
-  var s = Math.floor((Date.now() - REC.t0) / 1000), tm = $('#rtm'); if (tm) tm.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); if (s >= 1200) recSend(); }
+  var s = Math.floor((Date.now() - REC.t0) / 1000), tm = $('#rtm'); if (tm) tm.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); if (s >= 1800) recSend(); }
 function recEnd() { var r = REC; if (!r) return null; REC = null; clearInterval(r.iv); try { r.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} try { r.ac && r.ac.close(); } catch (e) {} var rb = $('#recbar'), cm = $('#cmp'); if (rb) rb.hidden = true; if (cm) cm.hidden = false; return r; }
 function recCancel() { var r = recEnd(); if (r) { try { r.mr.stop(); } catch (e) {} } }
 function recSend() { var r = recEnd(); if (!r) return; var dur = (Date.now() - r.t0) / 1000;
   r.mr.onstop = function () { if (dur < .7 || !r.chunks.length) return toast(null, 'Hold on a bit longer'); var blob = new Blob(r.chunks, { type: r.mr.mimeType || 'audio/webm' }), n = 40, pk = r.peaks, wave = [], mx = Math.max.apply(null, pk.concat([.1]));
     for (var i = 0; i < n; i++) { var from = Math.floor(i * pk.length / n), to = Math.max(from + 1, Math.floor((i + 1) * pk.length / n)), v = 0; for (var j = from; j < to; j++) v = Math.max(v, pk[j] || 0); wave.push(Math.max(8, Math.round(v / mx * 100))); }
-    var fr = new FileReader(); fr.onload = function () { if (fr.result.length > 3300000) return toast(null, 'That voice note is too long'); sendRaw({ aud: fr.result, dur: Math.round(dur), wave: wave }); }; fr.readAsDataURL(blob); };
+    if (blob.size > 1500000 && !S.demo) { toast(null, 'Sending voice note…'); return bigUp(blob, 'aud', extOf(blob, 'aud'), function (u) { if (u) sendRaw({ aud: u, dur: Math.round(dur), wave: wave }); }); } var fr = new FileReader(); fr.onload = function () { if (fr.result.length > 3300000) return toast(null, 'That voice note is too long'); sendRaw({ aud: fr.result, dur: Math.round(dur), wave: wave }); }; fr.readAsDataURL(blob); };
   try { r.mr.stop(); } catch (e) { toast(null, 'Could not save the voice note'); } }
-function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (!m.aud || m.aud.indexOf('data:') !== 0) return toast(null, 'This is a sample voice note');
+function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (!m.aud || !/^(data:|https:)/.test(m.aud)) return toast(null, 'This is a sample voice note');
   if (VN && VN.id === id) { if (VN.au.paused) VN.au.play().catch(function () {}); else VN.au.pause(); vnUpdate(); return; }
   if (VN) { VN.au.pause(); VN = null; } var au = new Audio(m.aud); VN = { id: id, au: au }; au.ontimeupdate = vnUpdate; au.onpause = vnUpdate; au.onplay = vnUpdate; au.onended = function () { VN = null; vnUpdate(); }; au.play().catch(function () { toast(null, 'Could not play this voice note'); VN = null; vnUpdate(); }); }
 function vnUpdate() { document.querySelectorAll('.vn').forEach(function (el) { var on = VN && VN.id === el.dataset.id, f = on && VN.au.duration ? VN.au.currentTime / VN.au.duration : 0, bars = el.querySelectorAll('.wv i'); bars.forEach(function (b, i) { b.classList.toggle('on', on && i < f * bars.length); }); var btn = el.querySelector('.vp'); btn.textContent = on && !VN.au.paused ? '❚❚' : '▶'; }); }
@@ -386,10 +386,13 @@ function openCompose() {
   cv.addEventListener('pointerup', function () { drag = null; });
 }
 function fileToData(file, cb) { var r = new FileReader(); r.onload = function () { cb(r.result); }; r.onerror = function () { cb(null); }; r.readAsDataURL(file); }
+function bigUp(blob, kind, ext, cb) { api('POST', '/api/upload', { kind: kind, ext: ext }).then(function (j) { var fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', blob); return fetch(j.up, { method: 'PUT', body: fd, headers: { 'x-upsert': 'false' } }).then(function (r) { if (!r.ok) throw new Error('Upload failed'); cb(j.url); }); }).catch(function (e) { toast(null, e.message || 'Upload failed'); cb(null); }); }
+function extOf(b, d) { var t = (b.type || '').toLowerCase(); return /mp4|m4a|aac/.test(t) ? (d === 'aud' ? 'm4a' : 'mp4') : /quicktime/.test(t) ? 'mov' : /ogg/.test(t) ? 'ogg' : /wav/.test(t) ? 'wav' : /mpeg/.test(t) ? 'mp3' : 'webm'; }
 function vidMime() { var t = ['video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4']; for (var i = 0; i < t.length; i++) { try { if (MediaRecorder.isTypeSupported(t[i])) return t[i]; } catch (e) {} } return ''; }
 function prepVideo(file, cb) {
   var ok = function (d) { if (!d) return cb(null); if (d.length > 2950000) { toast(null, 'That video is too long. Keep it under 10 seconds'); return cb(null); } cb(d); };
   if (file.size <= 2000000) return fileToData(file, ok);
+  if (file.size <= 45000000 && !S.demo) { toast(null, 'Sending your video…'); return bigUp(file, 'vid', extOf(file, 'vid'), function (u) { cb(u); }); }
   var v = document.createElement('video'), cs = v.captureStream || v.mozCaptureStream; if (!cs || !window.MediaRecorder) { toast(null, 'That video is too big. Record it in Halo (10 seconds) or pick a shorter one'); return cb(null); }
   toast(null, 'Getting your video ready…'); v.src = URL.createObjectURL(file); v.playsInline = true; v.volume = .02;
   v.onloadedmetadata = function () { var st = cs.call(v), ch = [], mt = vidMime(), mr; try { mr = new MediaRecorder(st, mt ? { mimeType: mt, videoBitsPerSecond: 600000, audioBitsPerSecond: 48000 } : { videoBitsPerSecond: 600000 }); } catch (e) { toast(null, 'Could not prepare that video'); return cb(null); }
@@ -406,8 +409,8 @@ function memoRec(btn) {
     var mr; try { mr = new MediaRecorder(st, { audioBitsPerSecond: 24000 }); } catch (e) { st.getTracks().forEach(function (t) { t.stop(); }); return toast(null, 'Voice is not supported here'); }
     var ch = [], t0 = Date.now(); MEMO = { mr: mr }; btn.classList.add('rec'); toast(null, 'Recording. Tap the mic again to stop');
     mr.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
-    mr.onstop = function () { st.getTracks().forEach(function (t) { t.stop(); }); btn.classList.remove('rec'); MEMO = null; var d = Math.round((Date.now() - t0) / 1000); if (d < 1 || !ch.length) return toast(null, 'Too short'); fileToData(new Blob(ch, { type: mr.mimeType || 'audio/webm' }), function (x) { if (!x || x.length > 410000) return toast(null, 'Too long. Keep it under 20 seconds'); C.aud = x; C.adur = d; btn.classList.add('on'); toast(null, 'Voice added to your moment'); }); };
-    mr.start(250); MEMO.iv = setInterval(function () { if (Date.now() - t0 > 20000 && MEMO) { clearInterval(MEMO.iv); try { mr.stop(); } catch (e) {} } }, 500);
+    mr.onstop = function () { st.getTracks().forEach(function (t) { t.stop(); }); btn.classList.remove('rec'); MEMO = null; var d = Math.round((Date.now() - t0) / 1000); if (d < 1 || !ch.length) return toast(null, 'Too short'); fileToData(new Blob(ch, { type: mr.mimeType || 'audio/webm' }), function (x) { if (!x || x.length > 410000 && false) return toast(null, 'Too long. Keep it under a minute'); C.aud = x; C.adur = d; btn.classList.add('on'); toast(null, 'Voice added to your moment'); }); };
+    mr.start(250); MEMO.iv = setInterval(function () { if (Date.now() - t0 > 60000 && MEMO) { clearInterval(MEMO.iv); try { mr.stop(); } catch (e) {} } }, 500);
   }).catch(function () { toast(null, 'Allow the microphone to add your voice'); });
 }
 var CAM = null;
@@ -424,7 +427,7 @@ function startCam() { if (!CAM) return; if (CAM.s) CAM.s.getTracks().forEach(fun
   navigator.mediaDevices.getUserMedia({ video: { facingMode: f, width: { ideal: 720 } }, audio: true }).then(got).catch(function () { navigator.mediaDevices.getUserMedia({ video: { facingMode: f, width: { ideal: 720 } }, audio: false }).then(got).catch(function () { closeTop(); toast(null, 'Allow the camera to take photos'); }); }); }
 function camRec() { if (!CAM || !CAM.s || !window.MediaRecorder) return; var mt = vidMime(), ch = [], mr; try { mr = new MediaRecorder(CAM.s, mt ? { mimeType: mt, videoBitsPerSecond: 600000, audioBitsPerSecond: 48000 } : { videoBitsPerSecond: 600000 }); } catch (e) { return toast(null, 'Video is not supported here'); }
   CAM.mr = mr; mr.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
-  mr.onstop = function () { clearInterval(CAM && CAM.iv); var blob = new Blob(ch, { type: mr.mimeType || 'video/webm' }); fileToData(blob, function (d) { if (!d) return; if (d.length > 2950000) return toast(null, 'That video is too long'); C.vid = d; C.img = null; closeTop(); setMedia(); }); };
+  mr.onstop = function () { clearInterval(CAM && CAM.iv); var blob = new Blob(ch, { type: mr.mimeType || 'video/webm' }); closeTop(); var put = function (d) { if (d) { C.vid = d; C.img = null; setMedia(); } }; if (blob.size > 1800000 && !S.demo) bigUp(blob, 'vid', extOf(blob, 'vid'), put); else fileToData(blob, put); };
   var t0 = Date.now(), ct = $('#camt'); if (ct) ct.hidden = false; var h = $('#camh'); if (h) h.hidden = true; $('#shut').classList.add('rec'); mr.start(300);
   CAM.iv = setInterval(function () { var s = Math.floor((Date.now() - t0) / 1000), e = $('#camts'); if (e) e.textContent = '0:' + String(s).padStart(2, '0'); if (s >= 10 && mr.state === 'recording') mr.stop(); }, 250); }
 function shoot() { var v = $('#cvid'); if (!v || !v.videoWidth) return; var k = Math.min(1, 1000 / Math.max(v.videoWidth, v.videoHeight)), c = document.createElement('canvas'); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); var g = c.getContext('2d'); if (CAM.facing === 'user') { g.translate(c.width, 0); g.scale(-1, 1); } g.drawImage(v, 0, 0, c.width, c.height); C.img = c.toDataURL('image/jpeg', .75); C.vid = null; closeTop(); setMedia(); }
