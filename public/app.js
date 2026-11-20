@@ -498,7 +498,7 @@ function recStart() {
   micGet().then(function (stream) {
     var types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/webm'], mt = types.filter(function (t) { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } })[0], mr;
     try { mr = new MediaRecorder(stream, mt ? { mimeType: mt, audioBitsPerSecond: 16000 } : { audioBitsPerSecond: 16000 }); } catch (e) { stream.getTracks().forEach(function (t) { t.stop(); }); return toast(null, 'Voice notes are not supported here'); }
-    REC = { stream: stream, mr: mr, chunks: [], peaks: [], t0: Date.now(), trText: function () { return ''; } }; var rec0 = REC; srStart(rec0); mr.ondataavailable = function (e) { if (e.data && e.data.size) rec0.chunks.push(e.data); };
+    REC = { stream: stream, mr: mr, chunks: [], peaks: [], t0: Date.now(), trText: function () { return ''; } }; var rec0 = REC; mr.ondataavailable = function (e) { if (e.data && e.data.size) rec0.chunks.push(e.data); };
     try { var AC = window.AudioContext || window.webkitAudioContext; REC.ac = new AC(); var an = REC.ac.createAnalyser(); an.fftSize = 512; REC.ac.createMediaStreamSource(stream).connect(an); REC.an = an; REC.buf = new Uint8Array(an.fftSize); } catch (e) {}
     mr.start(250); $('#cmp').hidden = true; $('#tray').hidden = true; $('#recbar').hidden = false; $('#live').innerHTML = new Array(34).fill('<i style="height:8%"></i>').join('');
     REC.iv = setInterval(recTick, 90);
@@ -517,7 +517,7 @@ function recSend() { var r = recEnd(); if (!r) return; var dur = (Date.now() - r
     var go = function (blob) {
     if (blob.size > 1500000 && !S.demo) { toast(null, 'Sending voice note…'); return bigUp(blob, 'aud', extOf(blob, 'aud'), function (u) { if (u) sendRaw({ aud: u, dur: Math.round(dur), wave: wave, tr: r.trText() }); }); } var fr = new FileReader(); fr.onload = function () { if (fr.result.length > 3300000) return toast(null, 'That voice note is too long'); sendRaw({ aud: fr.result, dur: Math.round(dur), wave: wave, tr: r.trText() }); }; fr.readAsDataURL(blob);
     };
-    if (isIOS || /wav/.test(blob.type)) go(blob); else toWav(blob, function (w) { go(w || blob); }); };
+    if (isIOS || /wav/.test(blob.type)) go(blob); else { var once = false, fin = function (w) { if (once) return; once = true; try { go(w || blob); } catch (e) { toast(null, 'Could not send the voice note'); } }; setTimeout(function () { fin(null); }, 5000); toWav(blob, fin); } };
   try { r.mr.stop(); } catch (e) { toast(null, 'Could not save the voice note'); } }
 function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (!m.aud || !/^(data:|https:)/.test(m.aud)) return toast(null, 'This is a sample voice note');
   if (VN && VN.id === id) { if (VN.au.paused) VN.au.play().catch(function () {}); else VN.au.pause(); vnUpdate(); return; }
@@ -959,7 +959,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20q';
+var BUILD = null, CODE = '20r';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false;
 function updReload() { Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); })).then(function () { location.reload(); }); }
