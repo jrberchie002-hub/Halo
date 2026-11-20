@@ -1,0 +1,4 @@
+process.env.TURN_HOST = '1.2.3.4'; process.env.TURN_SECRET = 'sek'; const crypto = require('crypto'); const { start } = require('../dev.js');
+(async () => { await start(3150); const B = 'http://localhost:3150'; const call = async (m, p, b, t) => (await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
+ const su = await call('POST', '/api/signup', { username: 'icetest', name: 'I', password: 'pass1234' }); const j = await call('GET', '/api/ice', null, su.token);
+ const own = j.servers[0], exp = crypto.createHmac('sha1', 'sek').update(own.username).digest('base64'); console.log('own first', own.urls[1], 'cred ok', own.credential === exp, 'relay', j.relay); process.exit(0); })();
