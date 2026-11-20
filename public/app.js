@@ -142,7 +142,7 @@ function merge(j) {
 function poll() {
   clearTimeout(pollT); if (!S.tok || busy || S.demo) return; busy = true;
   var since = S.resync ? 0 : S.stamp; S.resync = false;
-  api('GET', '/api/sync?since=' + since).then(function (j) { S.online = true; var ft = merge(j); snapSave(); if (ft) { drawMain(); pending(); } else refreshLive(); }).catch(function (e) { if (e.status !== 401) S.online = false; }).then(function () { busy = false; pollT = setTimeout(poll, inCall() ? 700 : document.hidden ? 5000 : 1400); });
+  api('GET', '/api/sync?since=' + since).then(function (j) { S.online = true; var ft = merge(j); snapSave(); if (ft) { drawMain(); pending(); } else refreshLive(); }).catch(function (e) { if (e.status !== 401) S.online = false; }).then(function () { busy = false; pollT = setTimeout(poll, inCall() ? 700 : document.hidden ? 6000 : (S.view || document.querySelector('.sheet')) ? 1400 : 2800); });
 }
 function readInvite() { try { var rq = new URLSearchParams(location.search).get('rank'); if (rq) { LS.set('halo.rinv', rq); history.replaceState(null, '', '/'); } } catch (e) {} try { var m = /^\/i\/([\w.]+)/.exec(location.pathname), u = m ? m[1] : new URLSearchParams(location.search).get('u'); if (u) { LS.set('halo.inv', u.toLowerCase()); history.replaceState(null, '', '/'); } } catch (e) {} return LS.get('halo.inv'); }
 function pending() { var ri = LS.get('halo.rinv'); if (ri && S.me) { LS.del('halo.rinv'); api('POST', '/api/rank/join', { id: ri }).then(function (j) { S.ranks[j.rank.id] = j.rank; S.tab = 'chats'; S.cf = 'ranks'; drawMain(); rkOpen(j.rank.id); toast(null, j.already ? 'You are already in this ring' : 'You joined ' + j.rank.name); }).catch(function (e) { toast(null, e.message); }); } var u = LS.get('halo.inv'); if (!u) return; LS.del('halo.inv'); if (S.me && u === S.me.username) return; api('GET', '/api/search?q=' + encodeURIComponent(u)).then(function (r) { var f = r.users.filter(function (x) { return x.username === u; })[0]; if (f) { S.people[f.id] = S.people[f.id] || f; if (relation(f.id) === 'none') { api('POST', '/api/friend', { to: f.id }).then(function () { S.me.reqOut = (S.me.reqOut || []).concat(f.id); openPerson(f.id); toast(null, 'Request sent to ' + f.name.split(' ')[0]); }).catch(function () { openPerson(f.id); }); } else openPerson(f.id); } }).catch(function () {}); }
@@ -669,12 +669,7 @@ function prepVideo(file, cb) {
   var ok = function (d) { if (!d) return cb(null); if (d.length > 2950000) { toast(null, 'That video is too big for a direct send'); return cb(null); } cb(d); };
   if (file.size <= 2000000) return fileToData(file, ok);
   if (file.size <= 45000000 && !S.demo) { toast(null, 'Sending your video…'); return bigUp(file, 'vid', extOf(file, 'vid'), function (u) { cb(u); }); }
-  var v = document.createElement('video'), cs = v.captureStream || v.mozCaptureStream; if (!cs || !window.MediaRecorder) { toast(null, 'That video is over 45 MB. Pick a shorter one or trim it first'); return cb(null); }
-  toast(null, 'Getting your video ready…'); v.src = URL.createObjectURL(file); v.playsInline = true; v.volume = .02;
-  v.onloadedmetadata = function () { var st = cs.call(v), ch = [], mt = vidMime(), mr; try { mr = new MediaRecorder(st, mt ? { mimeType: mt, videoBitsPerSecond: 600000, audioBitsPerSecond: 48000 } : { videoBitsPerSecond: 600000 }); } catch (e) { toast(null, 'Could not prepare that video'); return cb(null); }
-    mr.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); }; mr.onstop = function () { URL.revokeObjectURL(v.src); fileToData(new Blob(ch, { type: mr.mimeType || 'video/webm' }), ok); }; mr.start(300); v.play().catch(function () {});
-    var stop = function () { if (mr.state === 'recording') mr.stop(); v.pause(); }; v.onended = stop; setTimeout(stop, 10200); };
-  v.onerror = function () { toast(null, 'Could not read that video'); cb(null); };
+  toast(null, 'That video is over 45 MB. Trim it in Photos to the part you want, then pick it again'); cb(null);
 }
 var MEMO = null;
 function memoRec(btn) {
@@ -994,7 +989,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20.13';
+var BUILD = null, CODE = '20.14';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false;
 function updReload() { (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + (u === '/' ? '?' : '?') + 'u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { location.reload(); }); }
