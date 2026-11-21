@@ -8,3 +8,4 @@
 6. **No emoji in UI chrome** (reactions excepted). No popups with long text.
 7. Version bump every release: public/app.js `CODE` and lib/app.js `code`; Halo Music `VER` in music.js plus version.txt (the app auto-updates when they differ), and the SW cache name.
 8. Both Halo Music copies must stay in sync (standalone repo and halo/public/music with path transforms).
+9. Halo chat scale: type 12/14/16, radius 12/16, spacing 8/12/16. Accent is Halo purple (#7b5cff). Run `node test/chatlock.js` too.

@@ -536,6 +536,41 @@ html.nb *,html.nb *::before,html.nb *::after{animation-duration:.001s!important;
 .cfl{margin:0 16px;display:grid;gap:2px}.cfr{display:flex;align-items:center;gap:12px;padding:6px 4px}.cfr .av{width:40px;height:40px}.cfr span{flex:1;font-weight:600;font-size:15px}.cfr .ic{width:38px;height:38px}
 
 .hb0{display:inline-flex;align-items:center;gap:7px;font-style:normal;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#d6bcff}.hb0 i{width:16px;height:8px;border-radius:50%;border:2px solid #cdaaff;box-shadow:0 0 10px rgba(170,110,255,.8)}.gti .hb0{justify-content:center;margin-bottom:3px;display:flex}.call .ctop .hb0{margin-bottom:2px}
+
+/* v20.64 Halo restyle: slim, one scale (12 / 14 / 16, radius 12 / 16, space 8 / 12 / 16) */
+:root{--r1:12px;--r2:16px}
+body,.app{font-size:14px}
+.top{padding:calc(10px + env(safe-area-inset-top,0px)) 16px 4px}
+.top .t,.top h1{font-size:20px!important}
+.ic{width:36px!important;height:36px!important;border-radius:var(--r1)!important;box-shadow:none!important;background:color-mix(in srgb,var(--ink) 6%,transparent)!important}.ic svg{width:18px!important;height:18px!important}
+.search{height:38px!important;border-radius:var(--r1)!important;margin:0 16px 8px!important;font-size:14px;background:color-mix(in srgb,var(--ink) 6%,transparent)!important}
+.av{width:40px;height:40px;font-size:16px}
+.row{padding:8px 16px!important;gap:12px!important}.row b{font-size:15px!important}.row .s,.row small,.row .m span{font-size:13px!important}
+.reqs{margin:4px 16px 8px!important;border-radius:var(--r2)!important;background:color-mix(in srgb,var(--ink) 5%,transparent)!important;padding:4px 0!important}
+.reqs .sec{font-size:11px!important}
+.lcard{margin:0 16px 110px!important;border-radius:var(--r2)!important;box-shadow:none!important;background:transparent!important}
+.lcard .row{border-radius:var(--r1)}
+.chips{margin:0 16px 8px!important;padding:3px!important;border-radius:var(--r1)!important;background:color-mix(in srgb,var(--ink) 6%,transparent)!important;box-shadow:none!important}
+.chip{padding:7px 4px!important;font-size:12px!important;border-radius:9px!important}.chip.on{background:var(--card)!important;color:var(--ink)!important;box-shadow:0 1px 6px rgba(0,0,0,.08)!important}
+.stories{gap:12px!important;padding:4px 16px 8px!important}
+.nav{left:16px!important;right:16px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;padding:4px!important;border-radius:var(--r2)!important;border:0!important;background:var(--glass)!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 8px 28px rgba(30,24,60,.16),inset 0 0 0 1px rgba(120,100,200,.14)!important}
+.nav button{font-size:10px!important;padding:6px 0 5px!important;border-radius:12px!important;gap:1px!important}.nav button svg{width:20px!important;height:20px!important}
+.nav button.on{background:color-mix(in srgb,var(--pink) 16%,transparent)!important;color:var(--pink)!important}
+.cta{height:44px!important;border-radius:var(--r1)!important;font-size:15px!important;box-shadow:none!important}
+.pill,.btn{border-radius:var(--r1)!important}
+/* chat */
+.hd{padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px!important;gap:8px}.hd .av{width:34px;height:34px;font-size:14px}.hd b{font-size:15px!important}
+.msgs{background:linear-gradient(180deg,color-mix(in srgb,var(--pink) 5%,var(--bg)),var(--bg))!important;padding:12px 12px 8px!important;gap:3px!important}
+.msgs:before,.msgs:after{display:none!important}
+.b{max-width:78%!important;padding:7px 12px!important;border-radius:var(--r2)!important;font-size:14.5px;line-height:1.35}
+.b.me{background:linear-gradient(135deg,var(--pink),color-mix(in srgb,var(--pink) 70%,#2b6bff))!important;border-bottom-right-radius:5px!important;color:#fff!important}
+.b:not(.me){border-bottom-left-radius:5px!important}
+.compose{padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))!important;gap:8px!important;border-top:0!important;background:var(--bg)!important}
+.compose textarea,.compose input{border-radius:var(--r1)!important;font-size:14px!important;min-height:38px!important;background:color-mix(in srgb,var(--ink) 6%,transparent)!important}
+.compose .ic,.compose button{width:38px;height:38px}
+.sec,.gt{font-size:11px!important}
+.row .ringw{width:48px!important;height:48px!important}.ringw .av{border-width:2px!important}
+.halo1{background-image:none!important;background:linear-gradient(180deg,color-mix(in srgb,var(--pink) 6%,var(--bg)),var(--bg))!important}
 </style>
 </head>
 <body>
