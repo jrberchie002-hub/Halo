@@ -1,0 +1,16 @@
+const { chromium } = require('playwright'); const O = process.env.OUT;
+(async () => { const b = await chromium.launch(); const c = await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ const svg = (k) => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#${k}"/></svg>`);
+ const ALL = [1,2,3,4,5].map(i => ({ trackId: i, trackName: 'Song ' + i, artistName: 'Artist ' + i, collectionName: 'A', artworkUrl100: svg(['3a2a8e','7a3a8e','2a6a8e','8e3a3a','2a8e5a'][i-1]), previewUrl: 'https://x/p.m4a', trackTimeMillis: 2e5 }));
+ const LRC = '[00:00.00] First line of the song\n[00:04.00] Second line goes here\n[00:08.00] Third line right after\n[00:12.00] And the fourth one\n[00:16.00] Last line of this verse';
+ await p.route(/lrclib/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ syncedLyrics: LRC }) }));
+ await p.route(/itunes\.apple\.com|rss\.apple|audius|googleapis|halo-chats/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(/rss/.test(r.request().url()) ? { feed: { results: ALL.map(t => ({ id: String(t.trackId) })) } } : { results: ALL, data: [] }) }));
+ await p.goto('http://localhost:3199/'); await p.waitForTimeout(3500); await p.click('.inst button', { timeout: 1000 }).catch(() => {});
+ await p.evaluate(() => { window.__n = 0; new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(n => { if (n.nodeType === 1 && (n.matches('img, .row, .ac') || n.querySelector && n.querySelector('img'))) window.__n++; }))).observe(document.querySelector('#main'), { childList: true, subtree: true }); });
+ await p.click('[data-a=nav][data-k=set]'); await p.waitForTimeout(400); await p.screenshot({ path: O + '/hm_set.png' });
+ await p.click('[data-a=nav][data-k=home]'); await p.waitForTimeout(400); const redrawn = await p.evaluate(() => window.__n);
+ console.log('home nodes re-created after settings->home:', redrawn);
+ await p.click('.row >> nth=0'); await p.waitForTimeout(1200); await p.click('#mini [data-a=open]'); await p.waitForTimeout(800); await p.screenshot({ path: O + '/hm_pl.png' });
+ await p.click('#cap'); await p.waitForTimeout(800); const open = await p.evaluate(() => !!document.querySelector('#ly') && !document.querySelector('#ly').hidden && document.querySelectorAll('#ly .lyb p').length); await p.screenshot({ path: O + '/hm_ly.png' });
+ await p.click('#ly .lyb p >> nth=2'); await p.waitForTimeout(500); const t = await p.evaluate(() => document.querySelector('audio') ? document.querySelector('audio').currentTime : -1);
+ console.log('lyric lines:', open, 'errs', errs); await b.close(); })();
