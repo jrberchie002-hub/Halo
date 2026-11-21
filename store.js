@@ -53,7 +53,7 @@ function supabaseStore(env) {
         };
         const all = await Promise.all((colls || []).map(c => one(c, mine.includes(c))));
         return [].concat(...all).sort((a, b) => a.u - b.u);
-      } catch (e) { return this.since(s, colls); }
+      } catch (e) { this.fell = String(e.message || e).slice(0, 80); return this.since(s, colls); }
     },
     async list(c) { return await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&limit=5000'); },
     async chatMsgs(cid) { // filtered on the database; falls back to scanning the collection if the filter is refused
