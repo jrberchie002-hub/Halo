@@ -59,6 +59,10 @@ function supabaseStore(env) {
         return res.sort((a, b) => a.u - b.u);
       } catch (e) { this.fell = String(e.message || e).slice(0, 80); return this.since(s, colls); }
     },
+    async probe2() { // newest write per kind of record, and the oldest message
+      const one = async (c, dir) => { try { const r = await rest('GET', 'halo_records?c=eq.' + c + '&select=u&order=u.' + dir + '&limit=1'); return r && r[0] ? r[0].u / 1000 : 0; } catch (e) { return -1; } };
+      const cs = ['msgs', 'chats', 'sendkeys', 'typing', 'users'], nw = await Promise.all(cs.map(c => one(c, 'desc'))), old = await one('msgs', 'asc'), o = { old }; cs.forEach((c, i) => { o[c] = nw[i]; }); return o;
+    },
     async probe() { return await rest('GET', 'halo_records?c=eq.msgs&select=id,u&order=u.desc&limit=5'); }, // newest message rows in the whole table, ids only
     async list(c) { return await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&limit=5000'); },
     async chatMsgs(cid) { // filtered on the database; falls back to scanning the collection if the filter is refused
