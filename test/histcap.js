@@ -16,9 +16,9 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await B.p.addInitScript(() => { try { localStorage.removeItem('halo.snap'); } catch (e) {} }); await B.p.reload(); await B.p.waitForSelector('[data-a=chat]', { timeout: 10000 }); await B.p.waitForTimeout(1500);
  const s0 = bytes[bytes.length - 1]; ok(!!s0 && s0.j.capped && s0.j.capped.length === 1, 'first sync reports the chat as having older messages');
  const msgRows = s0 ? s0.j.rows.filter(x => x.c === 'msgs').length : 0; ok(msgRows > 0 && msgRows <= 40, 'first sync carries at most 40 messages for the chat (' + msgRows + ')');
- await B.p.click('[data-a=chat]'); await B.p.waitForSelector('#ms .b'); await B.p.waitForTimeout(600);
+ await B.p.click('[data-a=chat]'); await B.p.waitForSelector('#ms .b'); await B.p.waitForTimeout(2200);
  const count = () => B.p.evaluate(() => document.querySelectorAll('#ms .b').length); const c0 = await count();
- ok(c0 <= 40 && c0 > 0, 'thread opens with the newest messages only, no gap (' + c0 + ')'); ok(await B.p.evaluate(() => !!document.querySelector('.earlier')), 'Earlier messages control is shown');
+ ok(c0 >= 30 && c0 < 97, 'thread fills itself with recent history in the background, no tap needed (' + c0 + ')'); ok(await B.p.evaluate(() => !!document.querySelector('.earlier')), 'Earlier messages control is shown');
  const newest = await B.p.evaluate(() => { const l = [...document.querySelectorAll('#ms .b')]; return l[l.length - 1].querySelector('.img') ? 'image' : l[l.length - 1].textContent; }); ok(newest === 'image', 'newest message is the last photo');
  let guard = 0; while (await B.p.evaluate(() => !!document.querySelector('.earlier')) && guard++ < 10) { await B.p.click('.earlier'); await B.p.waitForTimeout(900); }
  const c1 = await count(), truth = await A.p.evaluate(() => document.querySelectorAll('#ms .b').length); ok(c1 === truth && c1 >= 95, 'tapping Earlier messages loads everything, nothing lost (' + c1 + ' of ' + truth + ' on the sender)'); ok(await B.p.evaluate(() => !document.querySelector('.earlier')), 'control disappears when the start is reached');
