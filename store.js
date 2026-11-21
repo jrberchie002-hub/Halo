@@ -13,6 +13,7 @@ function memoryStore() {
     async del(c, id) { rows.delete(c + '\u0000' + id); },
     async since(s, colls) { const out = []; rows.forEach(r => { if (r.u > s && (!colls || colls.includes(r.c))) out.push({ c: r.c, id: r.id, data: clone(r.data), u: r.u }); }); return out.sort((a, b) => a.u - b.u); },
     async list(c) { const out = []; rows.forEach(r => { if (r.c === c) out.push({ c: r.c, id: r.id, data: clone(r.data) }); }); return out; },
+    async chatMsgs(cid) { const out = []; rows.forEach(r => { if (r.c === 'msgs' && r.data.chat === cid) out.push({ c: r.c, id: r.id, data: clone(r.data) }); }); return out; },
   };
 }
 
@@ -40,6 +41,10 @@ function supabaseStore(env) {
       return out;
     },
     async list(c) { return await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&limit=5000'); },
+    async chatMsgs(cid) { // filtered on the database; falls back to scanning the collection if the filter is refused
+      try { const r = await rest('GET', 'halo_records?c=eq.msgs&data-%3E%3Echat=eq.' + q(cid) + '&select=c,id,data&limit=5000'); if (r && r.length) return r; } catch (e) { }
+      return ((await this.list('msgs')) || []).filter(r => r.data && r.data.chat === cid);
+    },
   };
 }
 module.exports = { memoryStore, supabaseStore };
