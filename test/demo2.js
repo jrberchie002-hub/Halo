@@ -1,0 +1,4 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3197); const b = await chromium.launch(); const c = await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.goto('http://localhost:3197/?demo=1'); await p.waitForSelector('.nav'); await p.evaluate(() => localStorage.setItem('halo.pins', JSON.stringify(['k']))); await p.reload(); await p.waitForSelector('.crow'); await p.waitForTimeout(600); await p.screenshot({ path: process.env.OUT + '/p1.png' });
+ await p.click('[data-t=calls]'); await p.waitForTimeout(400); await p.screenshot({ path: process.env.OUT + '/c1.png' }); console.log(await p.$$eval('.crow.pn', e => e.length), errs); await b.close(); process.exit(0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });

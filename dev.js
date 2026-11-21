@@ -14,6 +14,7 @@ function start(port) {
       res.writeHead(r.status, r.headers || {}); return res.end(r.body);
     }
     let f = path.join(__dirname, 'public', u.pathname === '/' ? 'index.html' : u.pathname);
+    if (fs.existsSync(f) && fs.statSync(f).isDirectory() && fs.existsSync(path.join(f, 'index.html'))) f = path.join(f, 'index.html');
     if (!f.startsWith(path.join(__dirname, 'public')) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) f = path.join(__dirname, 'public', 'index.html');
     res.writeHead(200, { 'Content-Type': types[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
   });

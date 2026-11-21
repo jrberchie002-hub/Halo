@@ -1,0 +1,7 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3196); const B = 'http://localhost:3196'; const call = async (t, m, p, b) => (await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
+ const U = {}; for (const n of ['amy', 'ben']) { const j = await call(null, 'POST', '/api/signup', { username: n + 'zz', name: n, password: 'pass1234' }); U[n] = { t: j.token, id: j.me.id }; }
+ await call(U.amy.t, 'POST', '/api/friend', { to: U.ben.id }); await call(U.ben.t, 'POST', '/api/friend', { to: U.amy.id });
+ const b = await chromium.launch(); const c = await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.goto(B); await p.evaluate(([t, id]) => { localStorage.setItem('halo.key', t); localStorage.setItem('halo.pins', JSON.stringify([id])); }, [U.amy.t, U.ben.id]); await p.reload(); await p.waitForSelector('.crow'); await p.waitForTimeout(500); await p.screenshot({ path: process.env.OUT + '/p1.png' });
+ console.log(await p.$$eval('.crow.pn', e => e.length), errs); await b.close(); process.exit(0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });

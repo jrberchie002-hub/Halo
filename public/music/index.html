@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#efedea"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Halo Music">
+<link rel="manifest" href="/music/manifest.webmanifest"><link rel="apple-touch-icon" href="/music/apple-touch-icon.png"><link rel="icon" href="/music/icon-192.png">
+<title>Halo Music</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#efedea;--card:#fff;--ink:#141214;--mute:#86807f;--line:#e5e1dd;--ring:#e8c76a;--ac:#0a84ff}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}input{font:inherit}
+#app{height:100%;display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+.top{display:flex;align-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 8px}
+.logo{position:relative;font-size:26px;font-weight:800;letter-spacing:-.03em;padding-top:10px}.ring{position:absolute;left:2px;top:0;width:24px;height:8px;border:2.5px solid var(--ring);border-radius:50%}
+.ic{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;margin-left:auto}.ic svg,.cb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.seg{display:flex;gap:4px;margin:6px 16px 10px;padding:4px;background:var(--card);border-radius:18px}.seg button{flex:1;padding:10px 0;border-radius:14px;font-weight:700;font-size:14px;color:var(--mute)}.seg button.on{background:var(--ink);color:#fff}
+.sq{margin:0 16px 8px}.sq input{width:100%;border:0;background:var(--card);border-radius:16px;padding:13px 15px;font-size:16px;outline:0}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.sec{padding:12px 20px 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.row{display:flex;align-items:center;gap:12px;width:calc(100% - 32px);margin:0 16px 6px;padding:8px 8px 8px 8px;background:var(--card);border-radius:18px;text-align:left}.row.on{outline:2px solid var(--ink)}
+.art{width:52px;height:52px;border-radius:12px;background:var(--bg);overflow:hidden;display:grid;place-items:center;flex:none}.art img{width:100%;height:100%;object-fit:cover}.art svg{width:22px;height:22px;stroke:var(--mute);fill:none;stroke-width:2}
+.m{flex:1;min-width:0}.m b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}.m small{display:block;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp,.hb,.dl{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none}.pp{background:var(--bg)}.pp svg,.hb svg,.dl svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:2.4}.hb.on svg{fill:#141214}.hb svg{width:19px;height:19px;stroke-width:2}
+.none{margin:6px 16px;padding:16px;border-radius:18px;background:var(--card);color:var(--mute);font-size:14px;line-height:1.4}
+.pill{display:inline-block;border-radius:99px;padding:11px 20px;font-weight:700;font-size:15px;background:var(--ac);color:#fff}.pill.soft{background:var(--bg);color:var(--ink)}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;margin:6px 16px 10px;padding:26px 20px 22px;background:var(--card);border-radius:28px}.hero b{font-size:20px;letter-spacing:-.01em}.hero small{color:var(--mute);font-size:14px;margin-bottom:10px}
+.ctl{display:flex;align-items:center;gap:8px;padding:4px 20px 8px}.ctl span{flex:1;font-size:13px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.cr{text-align:center;color:var(--mute);font-size:12px;padding:12px 20px}
+#mini{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px))}
+#mini .mb{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;border-radius:24px;padding:8px 10px 8px 8px;box-shadow:0 12px 34px rgba(0,0,0,.3)}#mini .art{width:44px;height:44px;background:#2a272c}#mini .m small{color:rgba(255,255,255,.6)}
+#mini .pp{background:#fff}.cb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+#mini .bar{height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 14px;transform:translateY(-1px)}#mini .bar i{display:block;height:100%;width:0;background:#fff;border-radius:2px}
+#pl{position:fixed;inset:0;background:var(--bg);z-index:5;display:flex;flex-direction:column;align-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 28px calc(28px + env(safe-area-inset-bottom,0px));text-align:center;max-width:560px;margin:0 auto}
+#pl .hd{display:flex;width:100%;align-items:center;margin-bottom:18px}#pl .hd .ic{margin:0}#pl .hd .logo{margin-left:12px;font-size:20px}
+.cover{width:min(76vw,330px);aspect-ratio:1;border-radius:28px;background:var(--card);overflow:hidden;display:grid;place-items:center;box-shadow:0 14px 40px rgba(30,24,30,.16)}.cover img{width:100%;height:100%;object-fit:cover}.cover svg{width:64px;height:64px;stroke:var(--mute);fill:none;stroke-width:1.6}
+#pl h2{margin:22px 0 0;font-size:22px;letter-spacing:-.01em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pl p{margin:4px 0 0;color:var(--mute);font-size:15px}
+#sk{width:100%;margin-top:26px;accent-color:var(--ink)}.tm{display:flex;justify-content:space-between;width:100%;color:var(--mute);font-size:12px;font-weight:600}
+.pc{display:flex;align-items:center;gap:22px;margin-top:18px}.pc button{width:56px;height:56px;border-radius:50%;display:grid;place-items:center}.pc svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.pc .big{width:76px;height:76px;background:var(--ink)}.pc .big svg{width:32px;height:32px;stroke:#fff}
+[hidden]{display:none!important}
+</style></head>
+<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i>Music</div><button class="ic" id="sb" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button></div>
+<div class="seg" id="seg"><button data-t="free" class="on">Free music</button><button data-t="liked">Liked</button><button data-t="mine">My songs</button></div>
+<div class="sq" id="sq" hidden><input id="q" placeholder="Search free music" autocomplete="off" autocapitalize="none"></div>
+<div class="main" id="main"></div></div>
+<div id="mini" hidden></div><div id="pl" hidden></div><input type="file" id="ff" accept="audio/*" multiple hidden>
+<script src="/music/music.js"></script></body></html>
