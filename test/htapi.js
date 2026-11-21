@@ -1,0 +1,10 @@
+const { start } = require('../dev.js');
+(async () => { const srv = await start(3137); const B = 'http://localhost:3137';
+ const post = (o) => fetch(B + '/api/ht/play', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify(o) }).then(r => r.status);
+ const T = (id, n, a) => ({ id, name: n, artist: a, art: 'https://is1-ssl.mzstatic.com/x/400x400.jpg', prev: 'https://audio-ssl.itunes.apple.com/p.m4a', full: 200, dur: 30 });
+ for (let i = 0; i < 3; i++) await post(T('i1', 'Golden Hour Drive', 'Kwame Lane'));
+ await post(T('i2', 'Midnight Lagos', 'Ada Waves')); await post({ id: 'i3', name: 'Evil', artist: 'x', art: 'https://evil.example/a.jpg', prev: 'http://evil.example/p.m4a' });
+ const top = await fetch(B + '/api/ht/top?w=top').then(r => r.json()); const rise = await fetch(B + '/api/ht/top?w=rise').then(r => r.json());
+ console.log('top', top.songs.map(s => s.id + ':' + s.name + ' art=' + (s.art ? 'ok' : 'blank') + ' prev=' + (s.prev ? 'ok' : 'blank')).join(' | '));
+ console.log('rise', rise.songs.length, 'cors', (await fetch(B + '/api/ht/top')).headers.get('access-control-allow-origin'));
+ process.exit(0); })();
