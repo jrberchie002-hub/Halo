@@ -464,10 +464,11 @@ function storiesV() {
   var all = Object.keys(S.stories).map(function (k) { return S.stories[k]; }), mine = all.filter(function (s) { return s.uid === S.me.id; }).sort(function (a, b) { return b.t - a.t; }), fr = all.filter(function (s) { return s.uid !== S.me.id; }).sort(function (a, b) { return b.t - a.t; }), by = storyUsers();
   var h = '<div class="stories"><button class="st" data-a="compose"><div class="ringw' + (mine.length ? ' new' : '') + '" style="position:relative">' + av(S.me.id) + '<i class="pl">+</i></div><span>You</span></button>' + friends().filter(function (f) { return by[f]; }).map(function (f) { return '<button class="st" data-a="story" data-id="' + f + '"><div class="ringw ' + (ringState(f) === 'new' ? 'new' : '') + '">' + av(f) + '</div><span>' + esc(person(f).name.split(' ')[0]) + '</span></button>'; }).join('') + '</div>';
   if (!fr.length && !mine.length) return h + '<div class="mempty"><div class="mo"><i class="hr"></i>' + I('story') + '</div><b>No moments yet</b><small>Share a photo, a video or a voice note. Your friends see it for 24 hours.</small><button class="pill pk" data-a="compose">Add a moment</button></div>';
-  if (fr.length) h += '<div class="sec">Friends' + (storyNew() ? ' · ' + storyNew() + ' new' : '') + '</div><div class="grid">' + fr.map(function (s) { return tile(s, person(s.uid).name.split(' ')[0]); }).join('') + '</div>';
-  else h += '<div class="mnone">No moments from friends right now.</div>';
-  if (mine.length) h += '<div class="sec">Yours</div><div class="grid">' + mine.map(function (s) { return tile(s, 'You'); }).join('') + '</div>';
-  return h + '<div style="height:110px"></div>';
+  if (mine.some(function (x) { return !dkDis()[x.id]; })) h += '<div class="sec">Your moments</div>' + deckHtml(mine, 'mine', function () { return 'You'; });
+  else if (mine.length) h += '<div class="sec">Your moments</div>' + deckHtml(mine, 'mine', function () { return 'You'; });
+  h += '<div class="sec">Friends' + (storyNew() ? ' · ' + storyNew() + ' new' : '') + '</div>';
+  if (!fr.length) return h + '<div class="mnone">No moments from friends right now.</div><div style="height:110px"></div>';
+  return h + deckHtml(fr, 'fr', function (s) { return person(s.uid).name.split(' ')[0]; }) + '<div style="height:110px"></div>';
 }
 var dkD = null, dkMovedT = 0;
 document.addEventListener('click', function (e) { if (Date.now() - dkMovedT < 400 && e.target.closest && e.target.closest('.deck')) { e.stopPropagation(); e.preventDefault(); } }, true);
@@ -1202,7 +1203,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20.70';
+var BUILD = null, CODE = '20.71';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName) && String(f.value || '').trim()) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false, PREP = false;
 function updPrep() { if (PREP) return; PREP = 1; (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + '?u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { PREP = 2; }); }
