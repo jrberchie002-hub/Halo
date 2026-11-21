@@ -1,5 +1,8 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js');
-(async () => { const srv = await start(3123); const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] }); const p = await (await b.newContext({ viewport: { width: 390, height: 800 } })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
- await p.goto('http://localhost:3123/?demo=1'); await p.waitForSelector('.nav'); await p.click('.nav [data-t=me]'); await p.click('[data-a=sec][data-k=Music]'); await p.click('[data-a=hm]'); await p.waitForSelector('#hmf', { state: 'attached' });
- await p.setInputFiles('#hmf', '/tmp/t.wav'); await p.waitForSelector('#hml .prow'); await p.click('#hml [data-a=hmplay]'); await p.waitForTimeout(600);
- console.log('rows', await p.$$eval('#hml .prow', e => e.length), 'playing', await p.$eval('#hml .prow', e => e.className), errs); await p.screenshot({ path: '/tmp/hm.png' }); await b.close(); process.exit(0); })();
+(async () => { const srv = await start(3191); const b = await chromium.launch(); const c = await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 }); const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.goto('http://localhost:3191'); await p.click('[data-s=new]'); await p.fill('#a_n', 'Ama'); await p.fill('#a_u', 'ama.t'); await p.fill('#a_p', 'pass1234'); await p.click('#a_go'); await p.click('[data-a=enter]'); await p.waitForSelector('.nav');
+ await p.click('[data-a=music]'); await p.waitForSelector('.hmcard'); await p.waitForTimeout(500); await p.screenshot({ path: process.env.OUT + '/m1.png' });
+ await p.click('.hmcard'); await p.waitForSelector('.hmhero'); await p.waitForTimeout(300); await p.screenshot({ path: process.env.OUT + '/m2.png' });
+ await p.setInputFiles('#hmf', ['/tmp/av/Sunrise Drive.wav', '/tmp/av/Night Bus Home.wav']); await p.waitForSelector('.hmctl', { timeout: 5000 }); await p.waitForTimeout(500);
+ await p.click('[data-a=hmsearch]'); await p.fill('#hmq', 'night'); await p.waitForTimeout(300); const rows = await p.$$eval('#hml .prow', r => r.length); await p.screenshot({ path: process.env.OUT + '/m3.png' });
+ console.log('rows after search', rows, errs); await b.close(); process.exit(0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
