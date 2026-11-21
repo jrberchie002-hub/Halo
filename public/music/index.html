@@ -176,6 +176,15 @@ html,body{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:
 .wpr{width:70px;height:30px;border-radius:50%;border:3px solid #cdaaff;box-shadow:0 0 22px rgba(170,110,255,.9);margin-bottom:8px;animation:wpul 1.8s ease-in-out infinite}
 @keyframes wfade{from{opacity:0}}@keyframes wpin{from{transform:scale(.7) translateY(30px);opacity:0}}@keyframes wpul{50%{transform:scale(1.12);box-shadow:0 0 34px rgba(170,110,255,1)}}
 #sh{overscroll-behavior:contain;touch-action:none}.sheet{overscroll-behavior:contain;touch-action:pan-y}
+
+/* v12 centered dock, hidden scrollbar, auto-hide nav, lighter rendering */
+.main{scrollbar-width:none;-ms-overflow-style:none}.main::-webkit-scrollbar{display:none}
+#dock{left:50%!important;right:auto!important;width:min(100%,560px);transform:translateX(-50%);margin:0!important;box-sizing:border-box}
+#nav{margin:0 auto!important;width:min(100%,360px);transition:transform .25s ease,opacity .2s;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#1d1a2e!important}
+#dock.nh #nav{transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none}
+#mini .mb,.gl{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}#mini .mb{background:#1d1a2e!important}
+.row{contain:layout paint;content-visibility:auto;contain-intrinsic-size:58px}
+.ac,.t1{contain:layout paint}
 </style></head>
 <body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Halo Music</span></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
