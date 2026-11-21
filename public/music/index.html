@@ -89,8 +89,51 @@ svg{display:block}
 .sheet .pill{display:block;width:100%;margin:0 0 8px;text-align:center}
 .inst{position:fixed;left:14px;right:14px;top:calc(10px + env(safe-area-inset-top,0px));z-index:25;display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px 14px;box-shadow:0 14px 34px rgba(0,0,0,.55);font-size:14px;max-width:532px;margin:0 auto}.inst span{flex:1}.inst button{background:var(--gold);color:var(--goldink);font-weight:800;padding:9px 16px;border-radius:12px}
 .full{display:block;width:100%;margin-top:12px;padding:13px;border-radius:16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:var(--ink);font-weight:700;font-size:14px;text-align:center}.sheet a.row{text-decoration:none;color:inherit}
+
+/* v7 clean-up */
+#sh{align-items:center!important;padding:20px}
+.sheet{border-radius:26px!important;max-width:380px!important;max-height:82vh;overflow:auto;padding:22px 0 16px!important;animation:pop .18s ease-out;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08)}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{font-size:19px}.sheet p{font-size:13.5px}
+.sheet .nm{width:calc(100% - 40px);margin:6px 20px 0;display:block}.sheet .pill{width:calc(100% - 40px);margin:10px 20px 0}
+.sheet .mr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 20px;font-size:13.5px}.sheet .mr button{color:#ff6b7a;font-weight:700;font-size:13px}
+.hbd{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--gold);color:var(--goldink);border-radius:6px;padding:2px 6px;margin-right:6px}
+.row{padding:7px 20px;gap:12px}.row .art{width:46px;height:46px;flex:none}.row .m b{font-size:15px}.row .m small{font-size:12.5px}
+.hi b{font-size:22px}
+.feat{position:relative;display:flex;align-items:flex-end;width:calc(100% - 40px);height:150px;margin:10px 20px 4px;border-radius:22px;overflow:hidden;background:var(--card);text-align:left;padding:16px}
+.feat img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.2)}.feat:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(8,6,14,.88),rgba(8,6,14,.1) 70%)}
+.feat .fs{position:relative;z-index:2;display:grid;gap:2px;min-width:0;padding-right:56px}.feat small{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}.feat b{font-size:20px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feat em{font-style:normal;opacity:.8;font-size:13px}
+.feat .fp{position:absolute;z-index:2;right:14px;bottom:14px;width:44px;height:44px;border-radius:14px;background:var(--gold);color:var(--goldink);display:grid;place-items:center}.feat .fp svg{width:20px;height:20px;fill:currentColor;stroke:none}
+.o{width:112px!important}.o .disc{width:112px!important;height:112px!important;border-radius:18px!important}.o b{font-size:13px;margin-top:8px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.o small{font-size:12px}
+.shc{display:flex;align-items:center;gap:14px;width:calc(100% - 40px);margin:14px 20px 4px;padding:14px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(var(--ac,107,61,240),.2),rgba(43,107,255,.12));border:1px solid rgba(255,255,255,.1);text-align:left}.shc i{width:42px;height:42px;border-radius:14px;background:var(--gold);color:var(--goldink);display:grid;place-items:center;flex:none}.shc i svg{width:22px;height:22px}.shc b{display:block;font-size:15px}.shc small{opacity:.7;font-size:12.5px}
+.tip{padding:26px 20px;text-align:center;color:var(--mute);font-size:14px}
+.stg{padding:6px 16px 20px;display:grid;gap:12px}.sc{background:var(--card);border-radius:22px;padding:16px 0 10px;border:1px solid rgba(255,255,255,.05)}.sc h4{margin:0 20px 8px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}.sc p{margin:8px 20px 2px;font-size:13px;color:var(--mute)}.sc p.ab{line-height:1.5;margin-bottom:8px}
+.sc .nm{display:block;width:calc(100% - 40px);margin:0 20px 6px}.sc .fl{padding:6px 20px 6px;flex-wrap:wrap}.sc .sw{padding:6px 20px}
+.sc .fl button{background:var(--card2)}.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 20px;text-align:left}.srow b{display:block;font-size:15px}.srow small{color:var(--mute);font-size:12.5px}.srow svg{width:18px;height:18px;stroke:var(--mute);fill:none;stroke-width:2}
+#nav button{font-size:10.5px}
+/* player: smaller, standard sizes */
+.cvr{width:min(72%,32vh)!important;border-radius:24px!important;margin-top:14px!important}
+#pl h2{font-size:26px!important}#pl p{font-size:15px!important}
+.wv{height:38px!important;margin-top:14px!important;gap:2px!important}
+.tm{font-size:12px}
+
+/* v8 polish */
+#nav{border:0;background:rgba(30,26,46,.82);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.07);padding:5px}
+#nav button{padding:7px 0 6px}
+.inst{top:auto!important;bottom:calc(92px + env(safe-area-inset-bottom,0px));padding:9px 12px!important;border:0!important;box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.08)!important;font-size:12.5px!important}.inst button{padding:7px 14px!important;font-size:13px!important}
+.sc{border:0!important;background:rgba(255,255,255,.045)!important;border-radius:20px!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.sc .nm,input.nm{background:rgba(255,255,255,.07)!important;color:var(--ink)!important;border:0!important;outline:0;border-radius:14px!important;padding:13px 14px!important;font-size:15px}.sc .nm::placeholder{color:var(--mute)}
+.fl button{font-size:12.5px;padding:7px 13px}.fl button.on{background:rgba(255,255,255,.12)!important;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.t1{display:flex;align-items:center;gap:14px;margin:6px 20px 4px;padding:12px;border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.04));box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);cursor:pointer}
+.t1 .ta{width:84px;height:84px;flex:none;border-radius:16px;overflow:hidden;background:var(--card2);display:grid;place-items:center}.t1 .ta img{width:100%;height:100%;object-fit:cover}
+.t1 .tm{flex:1;min-width:0;display:grid;gap:4px}.t1 .tm b{font-size:18px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.t1 .tm small{color:var(--mute);font-size:13px}
+.t1 .tp{width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--goldink);display:grid;place-items:center;flex:none}.t1 .tp svg{width:20px;height:20px;fill:currentColor;stroke:none}.t1.on{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.row{padding:8px 20px}.row .art{width:46px;height:46px}
+.sec{font-size:12px;letter-spacing:.1em;margin-top:18px}
+#sh{align-items:center!important}.sheet{animation:pop .2s ease-out}
+.t1 .tm b{color:var(--ink)}
 </style></head>
-<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Music</span></div><button class="ic" data-a="about" aria-label="About"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button></div>
+<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Halo Music</span></div></div>
 <div class="main" id="main"></div></div>
-<div id="dock"><div id="mini" hidden></div><nav id="nav"></nav></div><div id="pl" hidden></div><div id="wr" hidden></div><div id="splash" hidden><div class="sp"><i class="spr"></i><b>Music</b><small>The music lives with you</small></div></div><div id="sh" hidden></div><input type="file" id="ff" accept="audio/*" multiple hidden>
+<div id="dock"><div id="mini" hidden></div><nav id="nav"></nav></div><div id="pl" hidden></div><div id="wr" hidden></div><div id="splash" hidden><div class="sp"><i class="spr"></i><b>Halo Music</b><small>Music lives here</small></div></div><div id="sh" hidden></div><input type="file" id="ff" accept="audio/*" multiple hidden><input type="file" id="hf" accept="audio/*" hidden><input type="file" id="hc" accept="image/*" hidden>
 <script src="/music/music.js"></script></body></html>
