@@ -9,3 +9,4 @@
 7. Version bump every release: public/app.js `CODE` and lib/app.js `code`; Halo Music `VER` in music.js plus version.txt (the app auto-updates when they differ), and the SW cache name.
 8. Both Halo Music copies must stay in sync (standalone repo and halo/public/music with path transforms).
 9. Halo chat scale: type 12/14/16, radius 12/16, spacing 8/12/16. Accent is Halo purple (#7b5cff). Run `node test/chatlock.js` too.
+10. **Vercel deploy limit.** The free plan refuses builds after too many pushes in a day ("Deployment rate limited, retry in 24 hours"). Batch work into few commits, push once per round, then check `gh api repos/jrberchie002-hub/<repo>/commits/HEAD/status` to confirm "Deployment has completed" before telling Jay it is live. Never claim live without that check.
