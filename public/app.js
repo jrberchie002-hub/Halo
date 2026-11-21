@@ -277,7 +277,7 @@ function openPls() { var el = sheet('<div class="bar"><button class="ic" data-a=
 /* ---------- Spotify strip ---------- */
 var MINI = document.createElement('div'); MINI.className = 'mini'; MINI.hidden = true; var miniSig = '', miniOpen = false;
 var SVC = { 'Spotify': ['#1db954', 'S'], 'YouTube Music': ['#ff0033', 'Y'], 'Apple Music': ['#fa2d48', 'A'], 'Audiomack': ['#e8742a', 'Am'], 'SoundCloud': ['#ff5500', 'Sc'] };
-var SVL = { 'Spotify': 'spotify', 'YouTube Music': 'ytm', 'Apple Music': 'apple', 'Audiomack': 'audiomack' };
+var SVL = { 'Spotify': 'spotify', 'YouTube Music': 'ytm', 'Apple Music': 'apple', 'Audiomack': 'audiomack', 'SoundCloud': 'soundcloud' };
 function svcBadge(n, sz) { sz = sz || 34; var f = SVL[n]; if (f) return '<img class="svb svi" src="/logos/' + f + '.png" alt="' + esc(n) + '" width="' + sz + '" height="' + sz + '" style="width:' + sz + 'px;height:' + sz + 'px;border-radius:' + (f === 'spotify' || f === 'ytm' ? '50%' : Math.round(sz * .23) + 'px') + '">'; var c = SVC[n] || ['#8d878f', '♪']; return '<i class="svb" style="background:' + c[0] + ';width:' + sz + 'px;height:' + sz + 'px;font-size:' + Math.round(sz * .38) + 'px">' + c[1] + '</i>'; }
 function libGet() { try { var l = JSON.parse(LS.get('halo.lib') || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
 function libAdd(it) { var l = libGet().filter(function (x) { return x.link !== it.link; }); l.unshift(it); LS.set('halo.lib', JSON.stringify(l.slice(0, 120))); }
@@ -1064,7 +1064,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20.43';
+var BUILD = null, CODE = '20.44';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName) && String(f.value || '').trim()) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false, PREP = false;
 function updPrep() { if (PREP) return; PREP = 1; (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + '?u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { PREP = 2; }); }
