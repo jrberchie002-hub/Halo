@@ -185,8 +185,11 @@ html,body{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:
 #mini .mb,.gl{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}#mini .mb{background:#1d1a2e!important}
 .row{contain:layout paint;content-visibility:auto;contain-intrinsic-size:58px}
 .ac,.t1{contain:layout paint}
+
+.logo{display:flex;align-items:baseline;gap:8px}.logo .ring{width:21px!important;height:7px!important;left:3px!important;top:0!important;border-width:2.5px!important}.logo em{font-style:normal;font-size:13px;font-weight:600;letter-spacing:0;color:var(--mute)}
+.sp .spw{position:relative;display:inline-block;font-size:60px;letter-spacing:-.04em;margin-bottom:6px;padding-top:6px}.sp .spw .spr{position:absolute;display:block;left:4px;top:-18px;width:50px;height:16px;margin:0;border-width:5px}
 </style></head>
-<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Halo Music</span></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
+<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Music</span><em id="vt"></em></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
-<div id="dock"><div id="mini" hidden></div><nav id="nav"></nav></div><div id="pl" hidden></div><div id="wr" hidden></div><div id="splash" hidden><div class="sp"><i class="spr"></i><b>Halo Music</b><small>Music lives here</small></div></div><div id="sh" hidden></div><input type="file" id="ff" accept="audio/*" multiple hidden><input type="file" id="hf" accept="audio/*" hidden><input type="file" id="hc" accept="image/*" hidden>
+<div id="dock"><div id="mini" hidden></div><nav id="nav"></nav></div><div id="pl" hidden></div><div id="wr" hidden></div><div id="splash" hidden><div class="sp"><b class="spw"><i class="spr"></i>Music</b><small>Music lives here</small></div></div><div id="sh" hidden></div><input type="file" id="ff" accept="audio/*" multiple hidden><input type="file" id="hf" accept="audio/*" hidden><input type="file" id="hc" accept="image/*" hidden>
 <script src="/music/music.js"></script></body></html>
