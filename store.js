@@ -52,9 +52,14 @@ function supabaseStore(env) {
           return out;
         };
         const all = await Promise.all((colls || []).map(c => one(c, mine.includes(c))));
-        return [].concat(...all).sort((a, b) => a.u - b.u);
+        if (s === 0 && (colls || []).includes('msgs')) { // first sync: also ask for the newest messages directly, newest first, so they can never be missed
+          const nw = await rest('GET', 'halo_records?c=eq.msgs&id=like.*' + q(uid) + '*&select=c,id,data,u&order=u.desc&limit=60'); all.push(nw || []);
+        }
+        const seen = new Set(), res = []; [].concat(...all).forEach(r => { const k = r.c + '\u0000' + r.id; if (!seen.has(k)) { seen.add(k); res.push(r); } });
+        return res.sort((a, b) => a.u - b.u);
       } catch (e) { this.fell = String(e.message || e).slice(0, 80); return this.since(s, colls); }
     },
+    async probe() { return await rest('GET', 'halo_records?c=eq.msgs&select=id,u&order=u.desc&limit=5'); }, // newest message rows in the whole table, ids only
     async list(c) { return await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&limit=5000'); },
     async chatMsgs(cid) { // filtered on the database; falls back to scanning the collection if the filter is refused
       try { const r = await rest('GET', 'halo_records?c=eq.msgs&data-%3E%3Echat=eq.' + q(cid) + '&select=c,id,data&limit=5000'); if (r && r.length) return r; } catch (e) { }
