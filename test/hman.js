@@ -1,0 +1,18 @@
+const { chromium } = require('playwright'); const O = process.env.OUT || '/tmp';
+const svg = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#7b5cff"/></svg>');
+const T = (id, n, a) => ({ trackId: id, trackName: n, artistName: a, collectionName: n, artworkUrl100: svg, previewUrl: 'https://x/p' + id + '.m4a', trackTimeMillis: 200000, kind: 'song' });
+const ALL = [T(1, 'Golden Hour Drive', 'Kwame Lane'), T(2, 'Midnight Lagos', 'Ada Waves'), T(3, 'तेरे बिना', 'कोई गायक'), T(4, 'Sunday Rain', 'Nia Sol')];
+(async () => { const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ const J = o => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(o) });
+ await p.addInitScript(() => { localStorage.setItem('hm.cc', JSON.stringify({ 'top|week': [{ id: 'AUDIUSX', name: 'Old Audius Tune', artist: 'Stale', remote: 1 }] })); });
+ await p.route(/halo-chats-three\.vercel\.app\/api\/ht\/top/, r => r.fulfill(J({ ok: true, songs: [{ id: 'i1', name: 'Golden Hour Drive', artist: 'Kwame Lane', art: svg, prev: 'https://x/p1.m4a', dur: 30, n: 9 }, { id: 'i2', name: 'Midnight Lagos', artist: 'Ada Waves', art: svg, prev: 'https://x/p2.m4a', dur: 30, n: 4 }], artists: [{ name: 'Kwame Lane', n: 9 }, { name: 'Ada Waves', n: 4 }] })));
+ await p.route(/itunes\.apple\.com\/search|itunes\.apple\.com\/lookup/, r => r.fulfill(J({ results: ALL })));
+ await p.route(/rss\.applemarketingtools/, r => r.fulfill(J({ feed: { results: ALL.map(t => ({ id: String(t.trackId) })) } })));
+ await p.route(/api\.audius\.co|googleapis|lrclib|youtube|halo-chats-three\.vercel\.app\/api\/m/, r => r.fulfill(J({ data: [], items: [] })));
+ await p.goto('http://localhost:3199/'); await p.waitForTimeout(3500);
+ console.log('chips', await p.$$eval('#cats button', e => e.map(x => x.textContent).slice(0, 4).join(', ')));
+ console.log('home rows', await p.$$eval('.row', e => e.map(x => x.textContent.slice(0, 22)).join(' | ')));
+ await p.evaluate(() => document.querySelector('[data-k=set]').click()); await p.waitForTimeout(500);
+ await p.evaluate(() => document.querySelector('[data-a=htopen]').click()); await p.waitForTimeout(1200);
+ await p.screenshot({ path: O + '/an_sheet.png' });
+ console.log('overflow', await p.evaluate(() => document.documentElement.scrollWidth - innerWidth), 'errs', errs); process.exit(0); })();
