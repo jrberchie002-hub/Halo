@@ -188,6 +188,8 @@
   document.addEventListener('change', function (e) { if (e.target.id === 'nmi') { LS.set('hm.name', e.target.value.trim()); draw(); } });
   draw(); if (S.view === 'home') loadCat(S.cat); loadMfy();
   try { var qp = new URLSearchParams(location.search).get('t'); if (qp) { history.replaceState(null, '', '/music/'); openShared(qp); } } catch (e) {}
+  try { var inFrame = window.top !== window, standalone = navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches); if (!inFrame && !standalone && !LS.get('hm.inst')) setTimeout(function () { var b = document.createElement('div'); b.className = 'inst'; b.innerHTML = '<span><b>Keep Halo Music</b><br>Tap Share, then Add to Home Screen</span><button data-a="instx">OK</button>'; document.body.appendChild(b); }, 2500); } catch (e) {}
+  document.addEventListener('click', function (e) { if (e.target.dataset && e.target.dataset.a === 'instx') { LS.set('hm.inst', '1'); e.target.parentNode.remove(); } });
   if ('serviceWorker' in navigator) { var had = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener('controllerchange', function () { if (had && !window.__rl) { window.__rl = 1; location.reload(); } }); }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/music/sw.js', { scope: '/music/' }).catch(function () {});
 })();
