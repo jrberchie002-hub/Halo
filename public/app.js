@@ -118,7 +118,7 @@ function qdQ(i) { return QD[((i % QD.length) + QD.length) % QD.length]; }
 function qdMine(cid, i) { return (S.msgs[cid] || []).some(function (m) { return m.qd === i && m.from === S.me.id && !m.del; }); }
 function recGet() { try { var l = JSON.parse(LS.get('halo.rec') || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
 function recAdd(t, k) { var l = recGet().filter(function (x) { return !(x.t === t && x.k === k); }); l.unshift({ t: t, k: k }); LS.set('halo.rec', JSON.stringify(l.slice(0, 16))); }
-function recHtml() { var l = recGet(); return l.length ? '<div class="sec" style="padding:2px 4px 6px">Recently used</div><div class="tg" style="max-height:none;margin-bottom:8px">' + l.map(function (x) { return x.t === 'gift' && GIFT[x.k] ? '<button data-a="gift" data-g="' + x.k + '" aria-label="' + GIFT[x.k][1] + '">' + GIFT[x.k][0] + '</button>' : x.t === 'emo' ? '<button data-a="stick" data-e="' + x.k + '">' + x.k + '</button>' : ''; }).join('') + '</div>' : ''; }
+function recHtml() { var l = recGet().filter(function (x) { return x.t === 'gif' || x.t === 'stk'; }); return l.length ? '<div class="sec" style="padding:2px 4px 6px">Recent GIFs and stickers</div><div class="rcg">' + recGet().map(function (x, i) { return x.t === 'gif' ? '<button data-a="gifsend" data-u="' + esc(x.k) + '"><img src="' + esc(x.k) + '" alt="GIF" loading="lazy"></button>' : x.t === 'stk' ? '<button data-a="recstk" data-i="' + i + '"><img src="' + x.k + '" alt="Sticker"></button>' : ''; }).join('') + '</div>' : ''; }
 function giftScan() { if (!S.view || !S.view.chat) return; var list = S.msgs[S.view.chat] || []; list.forEach(function (m) { if (!m.gift || GP[m.id]) return; GP[m.id] = 1; if (GPInit && m.from !== S.me.id && Date.now() - m.t < 30000) gfxPlay(m.gift); }); GPInit = true; }
 var DEFACC = '#0a8dff';
 var ACC = ['#141214', '#ff4d6d', '#ff5fa8', '#f053ff', '#b26bff', '#7b61ff', '#0a8dff', '#1aa9f0', '#19c0ff', '#00c7d6', '#00c796', '#10d160', '#7ed90b', '#f7c100', '#ffa400', '#ff7d12', '#ff4d5a', '#d9be6f', '#d49a68', '#1b5a85'];
@@ -482,9 +482,8 @@ function refreshMe() { var s = $('#setbd'); if (s) s.innerHTML = setV(); if (S.t
 function meV() {
   var me = S.me, np = me.np || {}, v = vibeOf(me);
   return '<div class="hero2 hcard"><button class="ic gear" data-a="settings" aria-label="Settings">' + I('gear') + '</button><button class="avw" data-a="pic" aria-label="Change photo">' + av(me.id) + '<span class="plus">+</span></button><input id="pn" class="nameI" value="' + esc(me.name) + '" maxlength="30" aria-label="Name"><div class="uh">@' + esc(me.username) + '</div><textarea id="pb" rows="1" maxlength="80" placeholder="Add a bio" class="bio">' + esc(me.bio || '') + '</textarea><button class="vibe" data-a="vibe">' + (v ? '<b>' + esc(v.e) + '</b> ' + esc(v.t || 'Vibes') : '<b>+</b> What’s your vibe?') + '</button><div class="stats"><div><b>' + friends().length + '</b><small>Friends</small></div><div><b>' + bestStreak() + '</b><small>Best streak</small></div><div><b>' + Object.keys(S.stories).filter(function (k) { return S.stories[k].uid === me.id; }).length + '</b><small>Moments</small></div></div></div>' +
-    '<div style="padding:0 14px 12px"><button class="spot" data-a="musicopen">' + (np.song ? '<span class="eq"><i></i><i></i><i></i></span><span class="m"><b>' + esc(np.song) + '</b><small>Tap to search another song</small></span>' : SPLOGO + '<span class="m"><b>Share what you are playing</b><small>Search a song and play it here</small></span>') + '</button></div>' +
     '<div style="padding:0 14px 12px"><button class="cta" data-a="invite">Invite a friend</button></div>' +
-    '<div class="gt" style="margin-top:6px">Settings</div>' + setV().replace(/<button class="sr" data-a="closeset"[^>]*><span>Name, photo and bio<\/span><em>›<\/em><\/button>/, '') + '<input type="file" id="pf" accept="image/*" hidden>';
+    setV().replace(/<button class="sr" data-a="closeset"[^>]*><span>Name, photo and bio<\/span><em>›<\/em><\/button>/, '') + '<input type="file" id="pf" accept="image/*" hidden>';
 }
 
 /* ---------- sheets ---------- */
@@ -855,12 +854,13 @@ app.addEventListener('click', function (e) {
   else if (k === 'plus') { var tr = $('#tray'); if (tr.hidden) trayShow('s'); else tr.hidden = true; }
   else if (k === 'tt') trayShow(a.dataset.k);
   else if (k === 'addstk') $('#stkf').click();
-  else if (k === 'mystk') { var dd = myStk()[+a.dataset.i]; if (dd) { sendRaw({ img: dd, stk: 1 }); $('#tray').hidden = true; } }
-  else if (k === 'gifsend') { sendRaw({ gif: a.dataset.u }); $('#tray').hidden = true; }
+  else if (k === 'recstk') { var rr = recGet()[+a.dataset.i]; if (rr && rr.t === 'stk') { sendRaw({ img: rr.k, stk: 1 }); $('#tray').hidden = true; } }
+  else if (k === 'mystk') { var dd = myStk()[+a.dataset.i]; if (dd) { if (dd.length < 90000) recAdd('stk', dd); sendRaw({ img: dd, stk: 1 }); $('#tray').hidden = true; } }
+  else if (k === 'gifsend') { recAdd('gif', a.dataset.u); sendRaw({ gif: a.dataset.u }); $('#tray').hidden = true; }
   else if (k === 'savestk') { var mm = null; (S.msgs[S.view.chat] || []).forEach(function (x) { if (x.id === id) mm = x; }); if (mm && mm.img) toast(null, saveStk(mm.img) ? 'Saved to your stickers' : 'No space left for stickers'); }
   else if (k === 'noop') {}
-  else if (k === 'stick') { recAdd('emo', a.dataset.e); sendRaw({ sticker: a.dataset.e }); }
-  else if (k === 'gift') { recAdd('gift', a.dataset.g); sendRaw({ gift: a.dataset.g }); $('#tray').hidden = true; gfxPlay(a.dataset.g); }
+  else if (k === 'stick') sendRaw({ sticker: a.dataset.e });
+  else if (k === 'gift') { sendRaw({ gift: a.dataset.g }); $('#tray').hidden = true; gfxPlay(a.dataset.g); }
   else if (k === 'wave') { $('#tray').hidden = true; sendRaw({ sticker: '👋', wave: 1 }); }
   else if (k === 'tvideo') { $('#tray').hidden = true; $('#cph3').click(); }
   else if (k === 'tphoto') { $('#tray').hidden = true; $('#cph').click(); } else if (k === 'tcam') { $('#tray').hidden = true; $('#cph2').click(); }
@@ -1061,7 +1061,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '20.41';
+var BUILD = null, CODE = '20.42';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName) && String(f.value || '').trim()) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false, PREP = false;
 function updPrep() { if (PREP) return; PREP = 1; (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + '?u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { PREP = 2; }); }
