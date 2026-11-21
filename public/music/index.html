@@ -154,8 +154,29 @@ svg{display:block}
 #mini .art{width:38px!important;height:38px!important}#mini .pp,#mini .cb{width:36px!important;height:36px!important}
 .gl{width:38px!important;height:38px!important;border:0!important;background:rgba(255,255,255,.1)!important}
 .pill{padding:10px 18px;font-size:13.5px}.full{padding:11px!important;font-size:13px!important;border:0!important;background:rgba(255,255,255,.07)!important}
+
+/* v10 locked + smaller */
+html,body{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
+#app{overflow:hidden;width:100%}.main{overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y}
+.sc,.stg,.sc *{box-sizing:border-box;max-width:100%}
+#pl,#wr{overscroll-behavior:contain}
+.top{padding-bottom:2px;justify-content:space-between}
+.sbt{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);display:grid;place-items:center;color:var(--ink)}.sbt svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+#ttl{font-size:22px!important}.hi b{font-size:21px!important}.hi small{font-size:11px!important}
+.sbox{display:flex;align-items:center;gap:6px;margin:6px 20px 2px;padding:4px;border-radius:14px;background:rgba(255,255,255,.07)}.sbox input{flex:1;background:none!important;border:0;outline:0;color:var(--ink);font-size:15px;padding:9px 6px;min-width:0}.sbk{width:34px;height:34px;display:grid;place-items:center;color:var(--ink);flex:none}.sbk svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2}
+#nav{padding:4px!important;border-radius:20px!important;margin:0 56px}#nav button{padding:6px 0 5px!important;font-size:10px!important;border-radius:16px!important;gap:1px!important}#nav button svg{width:19px!important;height:19px!important}
+.fl button,.chips button{padding:6px 12px!important;font-size:12px!important;border-radius:11px!important}.sec{font-size:11px!important}
+.pill{padding:8px 16px!important;font-size:13px!important;border-radius:12px!important}
+.lst{display:flex;align-items:center;justify-content:space-between;width:calc(100% - 40px);margin:8px 20px 6px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,rgba(140,90,255,.22),rgba(60,110,255,.12));text-align:left}.lst small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}.lst b{display:block;font-size:26px;letter-spacing:-.03em}.lst em{font-style:normal;font-size:12.5px;color:var(--mute)}.lst i svg{width:18px;height:18px;stroke:var(--mute);fill:none;stroke-width:2}
+#pl{inset:auto 0 0 0!important;height:76vh!important;border-radius:26px 26px 0 0!important;box-shadow:0 0 0 100vmax rgba(0,0,0,.55);overflow:hidden}
+.flow{height:min(30vh,250px)!important}.fc{width:min(46vw,200px)!important}
+#pl h2{font-size:20px!important}.wv{height:30px!important}
+.wpop{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.6);display:grid;place-items:center;animation:wfade .25s}.wpc{position:relative;width:min(84vw,320px);padding:30px 22px 20px;border-radius:26px;background:linear-gradient(160deg,#3a2a8e,#15112a 70%);text-align:center;display:grid;justify-items:center;gap:6px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 40px rgba(150,100,255,.35);animation:wpin .5s cubic-bezier(.2,1.2,.3,1)}
+.wpc small{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#d6bcff}.wpc b{font-size:64px;line-height:1;letter-spacing:-.04em}.wpc span{opacity:.8;font-size:14px}.wpc em{font-style:normal;font-size:13px;opacity:.7;margin:4px 0 8px}.wpc .pill{width:100%;margin:2px 0 0!important}
+.wpr{width:70px;height:30px;border-radius:50%;border:3px solid #cdaaff;box-shadow:0 0 22px rgba(170,110,255,.9);margin-bottom:8px;animation:wpul 1.8s ease-in-out infinite}
+@keyframes wfade{from{opacity:0}}@keyframes wpin{from{transform:scale(.7) translateY(30px);opacity:0}}@keyframes wpul{50%{transform:scale(1.12);box-shadow:0 0 34px rgba(170,110,255,1)}}
 </style></head>
-<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Halo Music</span></div></div>
+<body><div id="app"><div class="top"><div class="logo"><i class="ring"></i><span id="ttl">Halo Music</span></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
 <div id="dock"><div id="mini" hidden></div><nav id="nav"></nav></div><div id="pl" hidden></div><div id="wr" hidden></div><div id="splash" hidden><div class="sp"><i class="spr"></i><b>Halo Music</b><small>Music lives here</small></div></div><div id="sh" hidden></div><input type="file" id="ff" accept="audio/*" multiple hidden><input type="file" id="hf" accept="audio/*" hidden><input type="file" id="hc" accept="image/*" hidden>
 <script src="/music/music.js"></script></body></html>

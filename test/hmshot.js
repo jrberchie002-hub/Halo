@@ -12,7 +12,7 @@ const ALL = [T(1, 'Funky Friday', 'Dave', '#3a2a8e'), T(2, 'Starlight', 'Dave', 
  const sh = async n => { await p.waitForTimeout(400); await p.screenshot({ path: S + '/hm_' + n + '.png' }); };
  for (const s of steps) {
   if (s === 'home') await sh('home');
-  if (s === 'search') { await p.click('[data-k=search]'); await p.fill('#q', 'dave'); await p.waitForTimeout(1500); await sh('search'); }
+  if (s === 'search') { await p.click('.sbt'); await p.fill('#q', 'dave'); await p.waitForTimeout(1500); await sh('search'); }
   if (s === 'player') { await p.click('.row >> nth=0'); await p.waitForTimeout(800); await sh('mini'); await p.click('#mini [data-a=open]'); await p.waitForTimeout(600); await sh('player'); }
   if (s === 'add') { await p.click('.row >> nth=0'); await p.waitForTimeout(500); await p.click('#mini [data-a=open]'); await p.waitForTimeout(500); await p.click('#pl [data-a=addpl]').catch(async () => { await p.click('[data-a=pick]'); }); await sh('add'); }
   if (s === 'lib') { await p.click('[data-k=lib]'); await sh('lib'); } if (s === 'set') { await p.click('[data-k=set]'); await sh('set'); }
