@@ -1,4 +1,4 @@
-var C = 'halomusic-shell-v25', F = ['/music/', '/music/index.html', '/music/music.js', '/music/manifest.webmanifest', '/music/icon-192.png'];
+var C = 'halomusic-shell-v26', F = ['/music/', '/music/index.html', '/music/music.js', '/music/manifest.webmanifest', '/music/icon-192.png'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(C).then(function (c) { return Promise.all(F.map(function (u) { return fetch(u, { cache: 'reload' }).then(function (r) { if (r.ok) return c.put(u, r); }).catch(function () {}); })); }).then(function () { return self.skipWaiting(); })); });
 self.addEventListener('activate', function (e) { e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== C && k.indexOf('halomusic-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); })); });
 self.addEventListener('fetch', function (e) { var r = e.request; if (r.method !== 'GET') return; var u = new URL(r.url); if (u.origin !== location.origin) return; var key = r.mode === 'navigate' ? '/music/index.html' : u.pathname; if (F.indexOf(key) < 0) return;
