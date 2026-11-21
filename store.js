@@ -40,6 +40,21 @@ function supabaseStore(env) {
       }
       return out;
     },
+    async sinceFor(s, uid, colls) { // only this person's chats/messages, and ephemeral rows only while they matter; falls back to the full scan if refused
+      try {
+        const WIN = { calls: 36e5, ice: 36e5, typing: 15e3, gsig: 12e4, gcalls: 216e5, stories: 72 * 36e5 }, nowU = Date.now() * 1000, mine = ['chats', 'msgs'];
+        const one = async (c, scoped) => {
+          let out = [], from = Math.max(s, WIN[c] ? nowU - WIN[c] * 1000 : 0);
+          for (let i = 0; i < 20; i++) {
+            const rows = await rest('GET', 'halo_records?c=eq.' + c + '&u=gt.' + from + (scoped ? '&id=like.*' + q(uid) + '*' : '') + '&select=c,id,data,u&order=u.asc&limit=1000');
+            out = out.concat(rows || []); if (!rows || rows.length < 1000) break; from = rows[rows.length - 1].u;
+          }
+          return out;
+        };
+        const all = await Promise.all((colls || []).map(c => one(c, mine.includes(c))));
+        return [].concat(...all).sort((a, b) => a.u - b.u);
+      } catch (e) { return this.since(s, colls); }
+    },
     async list(c) { return await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&limit=5000'); },
     async chatMsgs(cid) { // filtered on the database; falls back to scanning the collection if the filter is refused
       try { const r = await rest('GET', 'halo_records?c=eq.msgs&data-%3E%3Echat=eq.' + q(cid) + '&select=c,id,data&limit=5000'); if (r && r.length) return r; } catch (e) { }

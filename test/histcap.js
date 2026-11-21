@@ -13,7 +13,7 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  let r1 = await send(35, 't', 0); await A.p.waitForTimeout(10500); let r2 = await send(35, 't', 35); await A.p.waitForTimeout(10500); let r3 = await send(25, 'i', 0); ok(r1 === 'ok' && r2 === 'ok' && r3 === 'ok', 'seeded 70 texts and 25 photos: ' + [r1, r2, r3].join(','));
  // fresh phone for B: first sync must be capped
  const bytes = []; B.p.on('response', async r => { if (/api\/sync\?since=0/.test(r.url())) { try { const t = await r.text(); bytes.push({ n: t.length, j: JSON.parse(t) }); } catch (e) {} } });
- await B.p.reload(); await B.p.waitForSelector('[data-a=chat]', { timeout: 10000 }); await B.p.waitForTimeout(1500);
+ await B.p.addInitScript(() => { try { localStorage.removeItem('halo.snap'); } catch (e) {} }); await B.p.reload(); await B.p.waitForSelector('[data-a=chat]', { timeout: 10000 }); await B.p.waitForTimeout(1500);
  const s0 = bytes[bytes.length - 1]; ok(!!s0 && s0.j.capped && s0.j.capped.length === 1, 'first sync reports the chat as having older messages');
  const msgRows = s0 ? s0.j.rows.filter(x => x.c === 'msgs').length : 0; ok(msgRows > 0 && msgRows <= 40, 'first sync carries at most 40 messages for the chat (' + msgRows + ')');
  await B.p.click('[data-a=chat]'); await B.p.waitForSelector('#ms .b'); await B.p.waitForTimeout(600);
