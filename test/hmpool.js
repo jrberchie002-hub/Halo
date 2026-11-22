@@ -21,5 +21,8 @@ const after=await p.evaluate(()=>document.querySelector('#mini').textContent.rep
 console.log(before,'=>',after);
 ck('Painkiller was playing through YouTube',/Painkiller/.test(before));
 ck('leaving the app jumps to a related song that can play with the screen off',/Second Sermon/.test(after));
+await p.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get(){return false}});document.dispatchEvent(new Event('visibilitychange'))});await p.waitForTimeout(1500);
+const back=await p.evaluate(()=>document.querySelector('#mini').textContent.replace(/\s+/g,' '));
+ck('coming back returns to the original song',/Painkiller/.test(back));
 ck('no page errors',errs.length===0);console.log(errs);
 await b.close();process.exit(fails?1:0)})()
