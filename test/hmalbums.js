@@ -1,0 +1,21 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:390,height:800}});let fails=0;const ck=(n,c)=>{console.log(c?'ok  ':'FAIL',n);if(!c)fails++};const errs=[];p.on('pageerror',e=>errs.push(e.message));
+const trk=(id,n)=>({wrapperType:'track',kind:'song',trackId:id,trackName:n,artistName:'Dave',collectionName:'Psychodrama',previewUrl:'http://x/p.m4a',artworkUrl100:'',trackTimeMillis:200000,primaryGenreName:'Hip-Hop'});
+await p.route('**/*',r=>{const u=decodeURIComponent(r.request().url());if(u.includes('localhost'))return r.continue();
+ if(/lookup\?id=42&entity=album/.test(u))return r.fulfill({json:{results:[{wrapperType:'artist'},{wrapperType:'collection',collectionId:901,collectionName:'Psychodrama',artworkUrl100:'',releaseDate:'2019-03-08T00:00:00Z',trackCount:17},{wrapperType:'collection',collectionId:902,collectionName:'Starlight - Single',artworkUrl100:'',releaseDate:'2024-06-01T00:00:00Z',trackCount:1}]}});
+ if(/lookup\?id=901&entity=song/.test(u))return r.fulfill({json:{results:[{wrapperType:'collection'},trk(1,'Streatham'),trk(2,'Black'),trk(3,'Lesley')]}});
+ if(/lookup\?id=42&entity=song/.test(u))return r.fulfill({json:{results:[trk(5,'Starlight'),trk(6,'Location')]}});
+ if(u.includes('entity=musicArtist'))return r.fulfill({json:{results:[{artistId:42,artistName:'Dave',primaryGenreName:'Hip-Hop'}]}});
+ if(u.includes('itunes.apple.com/search'))return r.fulfill({json:{results:[trk(11,'Starlight'),trk(12,'Location')]}});
+ return r.abort()});
+await p.goto('http://localhost:3199/');await p.waitForTimeout(2500);
+await p.click('.vw.on .bub button');await p.waitForTimeout(1500);
+const txt=await p.evaluate(()=>document.querySelector('#sh').textContent);
+ck('artist page lists Latest releases and Albums',/Latest releases/.test(txt)&&/Albums/.test(txt)&&/Psychodrama/.test(txt));
+ck('single is labelled',/Single/.test(txt));
+await p.click('#sh [data-a=alb][data-id="901"]');await p.waitForTimeout(1200);
+const t2=await p.evaluate(()=>document.querySelector('#sh').textContent);
+ck('album page lists its songs',/Streatham/.test(t2)&&/Lesley/.test(t2)&&/Play album/.test(t2));
+await p.click('#sh [data-a=apall]');await p.waitForTimeout(600);
+ck('album plays as a list',await p.evaluate(()=>!!document.querySelector('#mini [data-a=open]')));
+ck('no page errors',errs.length===0);console.log(errs);
+await b.close();process.exit(fails?1:0)})()
