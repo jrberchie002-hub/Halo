@@ -303,9 +303,17 @@ body.insrch .sbt{display:inline-flex!important;visibility:hidden}
  .bub{display:none!important}
  .hbn{display:none!important}
  .sec{font-size:20px!important;letter-spacing:0!important;text-transform:none!important;color:var(--ink)!important;margin-top:14px!important}
- .acards.big,.sqr{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));grid-template-rows:auto;grid-auto-rows:0;overflow:hidden!important;gap:16px;padding:0 20px;margin:0}
- .acards.big .ac{width:auto!important;height:auto!important;aspect-ratio:1/1.2;min-width:0}
- .tq{width:auto!important;min-width:0}.tq span{width:100%!important;height:auto!important;aspect-ratio:1/1}.tq span img{width:100%;height:100%;object-fit:cover}
+ .vw[data-v=home] .acards.big,.vw[data-v=home] .sqr{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));grid-template-rows:auto;grid-auto-rows:0;overflow:hidden!important;gap:16px;padding:0 20px;margin:0}
+ .vw[data-v=home] .acards.big .ac{width:auto!important;height:auto!important;aspect-ratio:1/1.2;min-width:0}
+ .vw[data-v=home] .tq{width:auto!important;min-width:0}.vw[data-v=home] .tq span{width:100%!important;height:auto!important;aspect-ratio:1/1}.vw[data-v=home] .tq span img{width:100%;height:100%;object-fit:cover}
+}
+/* v49 Halo look */
+@media (min-width:900px){
+ .sec::before{width:16px!important;height:6px!important;border-radius:50%!important;background:none!important;border:2px solid #e8c76a;box-sizing:border-box;transform:rotate(-8deg);opacity:.9}
+ .qpt{height:56px;border-radius:28px;background:rgba(123,92,255,.10);padding:0 16px 0 8px;gap:12px}.qpt:hover{background:rgba(123,92,255,.22)}
+ .qpt span{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #b58cff,0 0 10px rgba(181,140,255,.45)}
+ .vw[data-v=home] .acards.big .ac,.vw[data-v=home] .tq span{border-radius:22px}
+ .vw[data-v=home] .acards.big .ac:hover,.vw[data-v=home] .tq:hover span{box-shadow:0 0 0 2px #b58cff,0 0 18px rgba(181,140,255,.5)}
 }
 </style></head>
 <body><div id="app"><div class="top"><div class="logo"><span class="lg"><svg viewBox="3 -2.5 54 60"><ellipse cx="30.5" cy="3.6" rx="14.5" ry="3.9" fill="none" stroke="#b58cff" stroke-width="3.6" transform="rotate(-9 30.5 3.6)"/><path fill="#7b5cff" d="M21 14.5 52 9v10.5L21 25z"/><rect x="21" y="14" width="5.6" height="33" fill="#7b5cff"/><rect x="46.4" y="9" width="5.6" height="33" fill="#7b5cff"/><ellipse cx="16.4" cy="48" rx="8.6" ry="6.3" transform="rotate(-22 16.4 48)" fill="#7b5cff"/><ellipse cx="41.8" cy="43" rx="8.6" ry="6.3" transform="rotate(-22 41.8 43)" fill="#7b5cff"/></svg></span><span id="ttl" class="sr">Music</span><em id="vt"></em></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
