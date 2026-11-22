@@ -1,7 +1,7 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js');
 (async () => { const srv = await start(3139); const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage(); p.on('pageerror', e => console.log('ERR', e.message)); let ok = true; const ck = (n, v) => { console.log(v ? 'ok  ' : 'FAIL', n); if (!v) ok = false; };
  await p.goto('http://localhost:3139/?demo=1'); await p.waitForSelector('.nav', { timeout: 9000 });
- ck('Question of the day card on Chats', !!(await p.$('.qdc')));
+ ck('no Question of the day card', !(await p.$('.qdc')));
  await p.click('[data-a=chat][data-id=k]'); await p.waitForSelector('.b'); await p.waitForTimeout(1500); await p.evaluate(() => { document.activeElement.blur(); document.querySelector('[data-a=plus]').click(); }); await p.waitForTimeout(400);
  const n = await p.$$eval('#eg button[data-a=stick]', e => e.length); ck('many emojis (' + n + ')', n > 300);
  ck('category tabs', (await p.$$('.ecat button')).length >= 8);
