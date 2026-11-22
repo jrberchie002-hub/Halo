@@ -782,8 +782,8 @@ var FS = [22, 28, 38, 52], FF = ["'DM Sans',system-ui,sans-serif", 'Georgia,seri
 function setMedia() { var cv = $('#cv'); if (!cv) return; var o = cv.querySelector('.mv'); if (o) o.remove(); var r = $('#rmm'); if (r) r.remove();
   if (C.vid) { cv.style.backgroundImage = 'none'; var v = document.createElement('video'); v.className = 'mv'; v.src = C.vid; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; cv.insertBefore(v, cv.firstChild); v.play().catch(function () {}); }
   else if (C.img) cv.style.backgroundImage = 'url(' + C.img + ')'; else cv.style.backgroundImage = BG[C.bg];
-  cv.classList.toggle('media', !!(C.vid || C.img)); var ct0 = $('#ct'); if (ct0) ct0.placeholder = (C.vid || C.img) ? 'Add a caption…' : 'Type something';
-  if (C.vid || C.img) { var x = document.createElement('button'); x.id = 'rmm'; x.className = 'rb rmm'; x.setAttribute('data-a', 'rmm'); x.setAttribute('aria-label', 'Remove'); x.innerHTML = I('x'); cv.appendChild(x); } }
+  cv.classList.toggle('media', !!(C.vid || C.img)); if (cv.parentNode) cv.parentNode.classList.toggle('hasm', !!(C.vid || C.img)); var ct0 = $('#ct'); if (ct0) ct0.placeholder = (C.vid || C.img) ? 'Add a caption…' : 'Type something';
+  if (C.vid || C.img) { var x = document.createElement('button'); x.id = 'rmm'; x.className = 'rb rmm'; x.setAttribute('data-a', 'rmm'); x.setAttribute('aria-label', 'Remove photo'); x.innerHTML = I('trash'); cv.appendChild(x); } }
 function openCompose() {
   C = { ttl: 24, bg: 6, img: null, vid: null, aud: null, stk: [], sel: -1, fs: 1, ff: 0 };
   var dots = BG.map(function (b, i) { return '<button class="c ' + (i === 6 ? 'on' : '') + '" data-a="cbg" data-i="' + i + '" style="background:' + b + '" aria-label="Colour ' + (i + 1) + '"></button>'; }).join(''), n = friends().length;
@@ -1285,7 +1285,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '21.46';
+var BUILD = null, CODE = '21.47';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName) && String(f.value || '').trim()) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false, PREP = false;
 function updPrep() { if (PREP) return; PREP = 1; (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + '?u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { PREP = 2; }); }
