@@ -9,6 +9,7 @@ const call = async (method, path, body, tok) => { const r = await app.handle({ m
   assert((await call('POST', '/api/chatwp', { to: idb, wp: 'pat:1' }, ta)).ok, 'set');
   assert.strictEqual((await call('POST', '/api/chatwp', { to: idb, wp: 'url(http://evil)' }, ta)).s, 400, 'reject');
   const sy = await call('GET', '/api/sync', null, tb); const row = sy.rows.find(r => r.c === 'chats'); assert.strictEqual(row.data.wp, 'pat:1', 'other side sees it');
+  const sy2 = await call('GET', '/api/sync', null, tb); assert(sy2.rows.some(r => r.c === 'msgs' && r.data.sys && /changed the chat wallpaper/.test(r.data.x)), 'friend is told who changed it');
   const ice = await call('GET', '/api/ice'); assert.strictEqual(ice.s, 401, 'ice needs sign in');
   const rm = await call('POST', '/api/unfriend', { to: idb }, ta); assert(rm.ok, 'unfriend'); const me2 = await call('GET', '/api/me', null, tb); assert(!((me2.me || me2).friends || []).includes(ida), 'other side lost friend');
   console.log('chatwp ok');
