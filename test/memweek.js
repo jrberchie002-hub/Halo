@@ -1,0 +1,15 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3158); const B = 'http://localhost:3158'; let ok = true; const ck = (n, c) => { console.log(c ? 'PASS' : 'FAIL', n); if (!c) ok = false; };
+ const call = async (t, m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined }); return r.json(); };
+ const j = await call(null, 'POST', '/api/signup', { username: 'benzz', name: 'ben', password: 'pass1234' }); const T = j.token;
+ for (let i = 0; i < 3; i++) await call(T, 'POST', '/api/story', { text: 'day ' + i, bg: i, ttl: 24 });
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 })).newPage(); p.on('pageerror', e => console.log('ERR', e.message));
+ await p.addInitScript(t => localStorage.setItem('halo.tok', t), T); await p.goto(B + '/'); await p.waitForSelector('.nav', { timeout: 9000 });
+ await p.evaluate(() => document.querySelector('[data-a=tab][data-t=stories]').click()); await p.waitForTimeout(1800);
+ ck('weekly memories prompt shown', await p.evaluate(() => !!document.querySelector('.memp') && /Your memories this week/.test(document.body.innerText)));
+ if (process.env.SHOT) await p.screenshot({ path: process.env.SHOT });
+ await p.evaluate(() => document.querySelector('.memp [data-a=mempost]').click()); await p.waitForTimeout(1500);
+ const mem = await call(T, 'GET', '/api/memories'); ck('recap posted as a moment', mem.list.some(m => m.text === 'My week'));
+ ck('prompt gone after posting', await p.evaluate(() => !document.querySelector('.memp')));
+ ck('no overflow', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
