@@ -1,0 +1,5 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); let ok = true; for (const [n, w, h] of [['m', 390, 800], ['d', 1366, 700]]) { const p = await (await b.newContext({ viewport: { width: w, height: h } })).newPage(); await p.goto('http://localhost:3199/'); await p.waitForTimeout(300);
+ await p.evaluate(() => { const s = document.getElementById('splash'); s.hidden = false; s.classList.remove('out'); s.style.opacity = 1; });
+ const r = await p.evaluate(() => { const c = s => { const r = document.querySelector(s).getBoundingClientRect(); return Math.round(r.left + r.width / 2); }; return { page: Math.round(innerWidth / 2), svg: c('.sp .spw svg'), small: c('.sp small') }; }); const good = Math.abs(r.svg - r.page) <= 2 && Math.abs(r.small - r.page) <= 2; console.log(n, JSON.stringify(r), good ? 'ok' : 'FAIL'); if (!good) ok = false; await p.screenshot({ path: '/tmp/sp_' + n + '.png' }); await p.close(); }
+ console.log(ok ? 'SPLASH OK' : 'SPLASH FAIL'); await b.close(); process.exit(ok ? 0 : 1); })();
