@@ -5,7 +5,8 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await p.addInitScript(t => localStorage.setItem('halo.tok', t), j.token || j.t); await p.goto(B + '/'); await p.waitForSelector('.nav', { timeout: 9000 }); await p.waitForTimeout(600);
  await p.evaluate(() => document.querySelector('[data-a=compose]').click()); await p.waitForTimeout(500);
  const c = document => 0;
+ await p.keyboard.type('hello'); await p.screenshot({ path: '/tmp/mt.png' });
  await p.setInputFiles('#cf', { name: 'a.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8BQz0AEYBxVSF+FABJADveWkH6oAAAAAElFTkSuQmCC', 'base64') }); await p.waitForTimeout(1200);
- const o = await p.evaluate(() => { const v = s => { const e = document.querySelector(s); return !!e && getComputedStyle(e).display !== 'none'; }; return { has: document.querySelector('.cx').classList.contains('hasm'), photos: v('.cx .cm'), post: v('.postb'), ow: document.documentElement.scrollWidth }; });
+ const o = await p.evaluate(() => { const v = s => { const e = document.querySelector(s); return !!e && getComputedStyle(e).display !== 'none'; }; return { has: document.querySelector('.cx').classList.contains('hasm'), photos: v('.cx .cact'), post: v('.postb'), ow: document.documentElement.scrollWidth }; });
  console.log(JSON.stringify(o)); ck('media mode on', o.has); ck('photos/camera/voice hidden', !o.photos); ck('post visible', o.post); ck('no overflow', o.ow <= 390);
  await p.screenshot({ path: process.env.SHOT || '/tmp/mm.png' }); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();

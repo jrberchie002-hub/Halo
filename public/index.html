@@ -619,6 +619,23 @@ body,.app{font-size:14px}
 .cx.hasm .cv.media textarea{width:calc(100% - 32px)!important;margin:0 16px!important;height:44px!important;min-height:0;font-size:14px!important;padding:12px 14px!important;box-sizing:border-box;resize:none}
 .cx.hasm .cbot{background:none}
 .cx .rmm{width:36px;height:36px;left:12px!important;right:auto;top:calc(env(safe-area-inset-top,0px) + 70px)!important}
+/* v21.48 compose like a studio: tabs at the bottom, tools on top */
+.cx .ctt,.cx .selbar{display:none}
+.cx .ctop{padding-top:calc(env(safe-area-inset-top,0px) + 10px)}
+.cx .vbar{top:calc(env(safe-area-inset-top,0px) + 10px)!important;right:14px;flex-direction:row!important;gap:8px!important}
+.cx .vbar .rb,.cx .ctop .rb{width:38px;height:38px}
+.cx .cbot{padding:0 16px calc(env(safe-area-inset-bottom,0px) + 8px);gap:10px;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.cx .cpost{display:none;align-items:center;justify-content:space-between;gap:8px}
+.cx.hasc .cpost{display:flex}
+.cx .cpost .postb{margin:0;height:38px;padding:0 20px;font-size:14px}
+.cx .ctabs{display:flex;justify-content:center;gap:4px}
+.cx .ctabs button{background:none;border:0;color:rgba(255,255,255,.7);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;position:relative}
+.cx .ctabs button.on{color:#fff}
+.cx .ctabs button.on::after{content:'';position:absolute;left:50%;bottom:0;width:18px;height:6px;margin-left:-9px;border-radius:50%;border:2px solid #d9a93b;box-sizing:border-box}
+.cx .ctabs button.rec{color:#ff6b60}.cx .ctabs button.on0{color:#fff}
+.cx.hasm .ctabs{display:flex}.cx.hasm .cact{display:none}
+.cx.hasm .cv.media{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 150px)!important}
+.cx .cpost .postb{background:#7b5cff!important;color:#fff!important}.cx.hasm #ctx0::after{display:none}.cx.hasm #ctx0{color:rgba(255,255,255,.7)}
 </style>
 </head>
 <body>
