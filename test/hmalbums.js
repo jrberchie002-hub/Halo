@@ -16,11 +16,11 @@ ck('artist page lists Latest releases and Albums',/Latest releases/.test(txt)&&/
 ck('single is labelled',/Single/.test(txt));
 await p.click('#sh [data-a=alb][data-id="901"]');await p.waitForTimeout(1200);
 const t2=await p.evaluate(()=>document.querySelector('#sh').textContent);
-ck('album page lists its songs',/Streatham/.test(t2)&&/Lesley/.test(t2)&&/Play/.test(t2)&&!/Play album|Play all/.test(t2));
+ck('album page lists its songs',/Streatham/.test(t2)&&/Lesley/.test(t2)&&!/Play album|Play all/.test(t2));
 await p.click('#sh [data-a=apall]');await p.waitForTimeout(600);
-ck('button turns into Pause while it plays',await p.evaluate(()=>document.querySelector('#apbtn').textContent==='Pause'));
+ck('button turns into Pause while it plays',await p.evaluate(()=>document.querySelector('#apbtn').getAttribute('aria-label')==='Pause'&&!document.querySelector('#apbtn').textContent.trim()));
 await p.click('#apbtn');await p.waitForTimeout(400);
-ck('tapping it again pauses and says Play',await p.evaluate(()=>document.querySelector('#apbtn').textContent==='Play'));
+ck('tapping it again pauses and says Play',await p.evaluate(()=>document.querySelector('#apbtn').getAttribute('aria-label')==='Play'&&!document.querySelector('#apbtn').textContent.trim()));
 ck('album plays as a list',await p.evaluate(()=>!!document.querySelector('#mini [data-a=open]')));
 ck('no page errors',errs.length===0);console.log(errs);
 await b.close();process.exit(fails?1:0)})()
