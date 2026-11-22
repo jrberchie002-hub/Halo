@@ -18,7 +18,7 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  const syncs = reqs.filter(u => /api\/sync/.test(u)); const first = syncs[0] || ''; ok(/since=[1-9]\d+/.test(first), 'first refresh asks only for what is new (' + first.slice(0, 40) + ')');
  await B.p.waitForTimeout(1800); ok(reqs.some(u => /since=0&only=stories/.test(u)), 'moments and rings catch up quietly afterwards');
  // my own message is there the instant I reopen, even before the network answers
- await A.p.fill('#tx', 'sent just now'); await A.p.click('[data-a=send]'); await A.p.waitForFunction(() => document.querySelector('#ms .seen') && /Sent/.test(document.querySelector('#ms').textContent), null, { timeout: 5000 });
+ await A.p.fill('#tx', 'sent just now'); await A.p.click('[data-a=send]'); await A.p.waitForFunction(() => document.querySelector('#ms .seen') && document.querySelector('#ms .seen .sm'), null, { timeout: 5000 });
  await A.p.route(/\/api\/sync/, r => r.abort()); const t2 = Date.now(); await A.p.reload(); let mine = 0; while (Date.now() - t2 < 3000) { const has = await A.p.evaluate(() => document.body.textContent.includes('sent just now')); if (has) { mine = Date.now() - t2; break; } await A.p.waitForTimeout(20); }
  ok(mine > 0 && mine < 700, 'my own message shows ' + mine + ' ms after reopening, with the network down');
  console.log('page errors', A.errs, B.errs); await b.close(); srv.close && srv.close(); console.log(fails.length ? 'FAILED ' + fails.length : 'ALL PASS'); process.exit(fails.length ? 1 : 0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
