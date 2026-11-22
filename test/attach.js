@@ -9,4 +9,5 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  ck('sheet closes and sticker tray opens', await p.evaluate(() => !document.querySelector('.modal') && !document.getElementById('tray').hidden));
  await p.evaluate(() => document.querySelector('[data-a=plus]').click()); await p.waitForTimeout(200); await p.evaluate(() => document.querySelector('.modal.at').click()); await p.waitForTimeout(100);
  ck('tap outside closes', await p.evaluate(() => !document.querySelector('.modal')));
+ await p.evaluate(() => document.querySelector('[data-a=emo]').click()); await p.waitForTimeout(200); ck('emoji tray open', await p.evaluate(() => !document.getElementById('tray').hidden)); await p.evaluate(() => document.querySelector('#ms').click()); await p.waitForTimeout(100); ck('tap outside closes emoji tray', await p.evaluate(() => document.getElementById('tray').hidden));
  console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
