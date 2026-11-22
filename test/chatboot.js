@@ -1,0 +1,6 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3135); const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage();
+ await p.route('**/api/**', r => r.abort()); const sh = [];
+ await p.goto('http://localhost:3135/', { waitUntil: 'commit' });
+ for (let i = 0; i < 14; i++) { const r = await p.evaluate(() => { const e = document.querySelector('.wlogo svg, .bootlogo svg'); if (!e) return null; const q = e.getBoundingClientRect(); return { k: e.closest('.wlogo') ? 'welcome' : 'boot', cx: Math.round(q.left + q.width / 2), cy: Math.round(q.top + q.height / 2), w: Math.round(q.width) }; }).catch(() => null); sh.push(JSON.stringify(r)); await p.waitForTimeout(150); }
+ const u=[...new Set(sh)].filter(x=>x!=='null').map(x=>JSON.parse(x)); const pos=new Set(u.map(o=>o.cx+','+o.cy+','+o.w)); console.log(JSON.stringify(u)); const ok=pos.size===1&&u.some(o=>o.k==='welcome'); console.log(ok?'BOOT OK':'BOOT FAIL (logo moves)'); process.exitCode=ok?0:1; await b.close(); srv.close && srv.close(); process.exit(process.exitCode||0); })();
