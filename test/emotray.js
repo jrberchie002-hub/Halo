@@ -1,0 +1,11 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3159); const B = 'http://localhost:3159'; let ok = true; const ck = (n, c) => { console.log(c ? 'PASS' : 'FAIL', n); if (!c) ok = false; };
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, deviceScaleFactor: 2 })).newPage(); p.on('pageerror', e => console.log('ERR', e.message));
+ await p.goto(B + '/?demo=1'); await p.waitForSelector('.nav', { timeout: 9000 }); await p.waitForTimeout(600);
+ await p.evaluate(() => { const e = document.querySelector('[data-a=chat],[data-a=open]'); e && e.click(); }); await p.waitForTimeout(1200);
+ await p.evaluate(() => document.querySelector('[data-a=emo]').click()); await p.waitForTimeout(300); await p.evaluate(() => { document.activeElement && document.activeElement.blur(); document.querySelector('[data-a=tt][data-k=s]').click(); }); await p.waitForTimeout(400);
+console.log(await p.evaluate(() => [document.getElementById('tray').hidden, getComputedStyle(document.getElementById('tray')).display, document.getElementById('tray').getBoundingClientRect().height]));
+ const o = await p.evaluate(() => { const g = document.querySelector('#eg'); return { sw: g.scrollWidth, cw: g.clientWidth, sh: g.scrollHeight, ch: g.clientHeight, dw: document.documentElement.scrollWidth }; }); console.log(JSON.stringify(o));
+ ck('emoji scroll sideways', o.sw > o.cw + 50); ck('no vertical scroll', o.sh <= o.ch + 2); ck('no page overflow', o.dw <= 390);
+ await p.screenshot({ path: '/tmp/et.png' }); await p.evaluate(() => document.querySelector('[data-a=tt][data-k=m2]').click()); await p.waitForTimeout(400); await p.screenshot({ path: '/tmp/st.png' });
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
