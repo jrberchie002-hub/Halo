@@ -326,6 +326,39 @@ body.insrch .sbt{display:inline-flex!important;visibility:hidden}
 /* v57 hero back to the left */
 .hi{text-align:left!important;padding:10px 20px 4px!important}
 button.hta{background:none;border:0;color:inherit;width:100%;text-align:left;font:inherit}.hta span small{display:block;font-size:12px;color:var(--mute,#9a93ad)}.ywk{display:flex;align-items:baseline;gap:10px;margin:0 16px;padding:12px 14px;border:0;border-radius:16px;background:color-mix(in srgb,var(--a3) 14%,var(--bg));color:inherit;width:calc(100% - 32px);text-align:left}.ywk b{font-size:20px}.ywk i{font-style:normal;font-weight:700}
+/* v65 Halo Web: big screens */
+.jri{display:none}
+@media (min-width:900px){
+ .jri{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;margin:8px 20px 14px;padding:22px;border-radius:28px;position:relative;overflow:hidden;isolation:isolate;background:rgba(var(--ar),.10)}
+ .jri::before{content:'';position:absolute;inset:-40px;background:var(--jb) center/cover;filter:blur(46px) saturate(1.4);opacity:.45;z-index:-1}
+ .jfe{display:flex;gap:26px;align-items:center;background:none;border:0;color:var(--ink);text-align:left;min-width:0;padding:0}
+ .jar{flex:none;width:clamp(180px,22vw,280px);aspect-ratio:1;border-radius:22px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.5);display:grid;place-items:center;background:rgba(255,255,255,.06)}.jar img{width:100%;height:100%;object-fit:cover}
+ .jtx{display:flex;flex-direction:column;gap:8px;min-width:0}.jtx small{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#e8c76a}.jtx b{font-size:clamp(26px,3.4vw,44px);line-height:1.05;font-weight:800}.jtx em{font-style:normal;font-size:18px;color:rgba(255,255,255,.8)}
+ .jpl{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:10px;padding:12px 26px;border-radius:26px;background:#fff;color:#141214;font-style:normal;font-weight:800;font-size:15px}.jpl svg{width:16px;height:16px;fill:currentColor}
+ .jl{display:flex;flex-direction:column;gap:6px;justify-content:center}
+ .jr{display:flex;align-items:center;gap:12px;padding:8px;border-radius:14px;background:rgba(255,255,255,.06);color:var(--ink);text-align:left;border:0;min-width:0}.jr:hover{background:rgba(255,255,255,.14)}
+ .jr span{flex:none;width:52px;height:52px;border-radius:10px;overflow:hidden;display:grid;place-items:center}.jr img{width:100%;height:100%;object-fit:cover}
+ .jr b{min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.jr b small{display:block;font-size:12px;font-weight:500;color:var(--mute,#9a93ad)}
+ .qp{display:none!important}
+ .vw[data-v=home] .acards.big,.vw[data-v=home] .sqr{grid-auto-rows:auto!important;overflow:visible!important;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important;gap:22px!important}
+ .vw[data-v=home] .sqr .tq:nth-child(n+13){display:none}
+ .vw[data-v=home] .tq b{font-size:15px}.vw[data-v=home] .tq small{font-size:13px}
+ .sec{font-size:24px!important;margin-top:26px!important}
+ .hi b{font-size:40px!important}
+ /* player: art left, lyrics + controls right */
+ #pl:not([hidden]){display:grid!important;grid-template-columns:minmax(300px,min(46vh,520px)) minmax(0,1fr);column-gap:64px;align-content:center;padding-left:max(48px,calc((100% - 1100px)/2))!important;padding-right:max(48px,calc((100% - 1100px)/2))!important}
+ #pl>.pbg{position:absolute}
+ #pl>.hd{grid-column:1/-1;position:absolute;top:0;left:0;right:0;padding:18px 40px}
+ #pl>.flow{grid-column:1;grid-row:1/9;align-self:center}
+ #pl>h2,#pl>p,#pl>.cap,#pl>.wv,#pl>#sk,#pl>.tm,#pl>.pc,#pl>.note,#pl>small,#pl>div:not(.pbg):not(.hd):not(.flow){grid-column:2}
+ #pl>h2{font-size:clamp(30px,3.2vw,48px)!important;text-align:left!important;margin-top:0!important;align-self:end}
+ #pl>p{font-size:20px!important;text-align:left!important}
+ #pl>.cap{font-size:clamp(20px,2.2vw,32px)!important;line-height:1.25;text-align:left!important;min-height:130px}
+ #pl .fc{width:min(46vh,480px)!important}
+ #pl>.pc{justify-content:flex-start!important;gap:18px}
+}
+
+@media (min-width:900px){#pl>.flow{height:min(48vh,500px)!important;width:100%!important;display:flex!important;align-items:center;justify-content:center;position:relative!important;overflow:visible}#pl .fc.c{position:relative!important;left:auto!important;top:auto!important;transform:none!important;width:100%!important;height:100%!important;aspect-ratio:1}#pl .fc.l,#pl .fc.r,#pl .fc.e{display:none!important}#pl .fc.c img{width:100%;height:100%;object-fit:cover;border-radius:24px}}
 </style></head>
 <body><div id="app"><div class="top"><div class="logo"><span class="lg"><svg viewBox="3 -2.5 54 60"><ellipse cx="30.5" cy="3.6" rx="14.5" ry="3.9" fill="none" style="stroke:var(--a3)" stroke-width="3.6" transform="rotate(-9 30.5 3.6)"/><path style="fill:var(--a)" d="M21 14.5 52 9v10.5L21 25z"/><rect x="21" y="14" width="5.6" height="33" style="fill:var(--a)"/><rect x="46.4" y="9" width="5.6" height="33" style="fill:var(--a)"/><ellipse cx="16.4" cy="48" rx="8.6" ry="6.3" transform="rotate(-22 16.4 48)" style="fill:var(--a)"/><ellipse cx="41.8" cy="43" rx="8.6" ry="6.3" transform="rotate(-22 41.8 43)" style="fill:var(--a)"/></svg></span><span id="ttl" class="sr">Music</span><em id="vt"></em></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
