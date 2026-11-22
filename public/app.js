@@ -58,7 +58,7 @@ function crowned(id) { var now = Date.now(), r = false; Object.keys(S.msgs).forE
 function av(id, extra) { var p = person(id); return '<div class="av' + (crowned(id) ? ' crowned' : '') + '" data-u="' + esc(id) + '" style="background-color:' + AVC[(p.username || p.name || 'x').charCodeAt(0) % AVC.length] + ';' + (p.pic ? 'background-image:url(' + p.pic + ')' : '') + (extra || '') + '">' + (p.pic ? '' : esc((p.name || '?')[0].toUpperCase())) + '</div>'; }
 function pair(a, b) { return [a, b].sort().join('|'); }
 function ago(t) { var m = Math.round((Date.now() - t) / 6e4); if (m < 1) return 'now'; if (m < 60) return m + 'm'; var h = Math.round(m / 60); if (h < 24) return h + 'h'; return Math.round(h / 24) + 'd'; }
-function sentMark(cid, m) { var c = S.chats[cid], fid = String(cid).split('|').filter(function (x) { return x !== S.me.id; })[0] || '', r = (c && c.r && c.r[fid]) || 0, op = r >= m.t; return '<div class="seen"><i class="sm' + (op ? ' op' : '') + '" title="' + (op ? 'Seen' : 'Sent') + '"></i></div>'; }
+function sentMark(cid, m) { var c = S.chats[cid], fid = String(cid).split('|').filter(function (x) { return x !== S.me.id; })[0] || '', r = (c && c.r && c.r[fid]) || 0, op = r >= m.t; return '<div class="seen"><span class="sm' + (op ? ' op' : '') + '">' + (op ? 'Opened' : 'Sent') + '</span></div>'; }
 function dayKey(t) { return new Date(t).toISOString().slice(0, 10); }
 function streakOf(c) { if (!c || !c.streak) return 0; var y = dayKey(Date.now() - 864e5); return c.streakDay >= y ? c.streak : 0; }
 function hidGet() { try { return JSON.parse(localStorage.getItem('halo.hid') || '{}'); } catch (e) { return {}; } }
@@ -1262,7 +1262,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '21.28';
+var BUILD = null, CODE = '21.29';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName) && String(f.value || '').trim()) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false, PREP = false;
 function updPrep() { if (PREP) return; PREP = 1; (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + '?u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { PREP = 2; }); }
