@@ -1,0 +1,16 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3135); const b = await chromium.launch(); const c = await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true }); const p = await c.newPage(); let fails = 0; const ck = (n, v) => { console.log(v ? 'ok  ' : 'FAIL', n); if (!v) fails++; };
+ await p.goto('http://localhost:3135/?demo=1'); await p.waitForSelector('.nav', { timeout: 9000 });
+ const swipe = (x1, y, x2, sel) => p.evaluate(([x1, y, x2, sel]) => { const el = document.querySelector(sel) || document.body; const mk = x => new Touch({ identifier: 1, target: el, clientX: x, clientY: y }); el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [mk(x1)], changedTouches: [mk(x1)] })); el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [mk(x2)] })); }, [x1, y, x2, sel]);
+ await p.click('[data-a=chat][data-id=k]'); await p.waitForSelector('.b'); 
+ ck('chat open', await p.evaluate(() => !!document.querySelector('#th')));
+ await swipe(200, 60, 330, '#th .hd, #th');
+ await p.waitForTimeout(500);
+ ck('swipe right from the header closes the chat', await p.evaluate(() => !document.querySelector('#th')));
+ await p.click('[data-a=chat][data-id=k]'); await p.waitForSelector('.b');
+ await swipe(250, 400, 360, '#ms');
+ await p.waitForTimeout(400);
+ ck('swipe in the middle of messages does not close the chat (reserved for message gestures)', await p.evaluate(() => !!document.querySelector('#th')));
+ await swipe(20, 400, 160, '#ms'); await p.waitForTimeout(500);
+ ck('swipe from the left edge closes it', await p.evaluate(() => !document.querySelector('#th')));
+ console.log(fails ? 'FAIL' : 'ALL PASS'); await b.close(); srv.close && srv.close(); process.exit(fails ? 1 : 0); })();

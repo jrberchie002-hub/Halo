@@ -257,6 +257,32 @@ body{background-image:radial-gradient(70% 38% at 0% 0%,rgba(123,92,255,.34),tran
 .hi b{font-size:19px!important}
 #dock{padding-bottom:calc(2px + env(safe-area-inset-bottom,0px))}
 #nav{width:min(100%,320px)!important}
+/* v44 desktop */
+@media (min-width:900px){
+ #app{max-width:none!important;margin:0!important;padding-left:232px;width:100%}
+ .top{padding:22px 40px 8px!important}
+ .top .logo{position:fixed;left:26px;top:22px;z-index:6}
+ #main{padding:0 24px 130px!important}
+ .vw{max-width:1180px;margin:0 auto}
+ .vw.on{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+ .vw>*{grid-column:1/-1}.vw>.row{grid-column:auto}
+ .hi b{font-size:30px!important}.hi small{font-size:12px!important}
+ .acards.big .ac{width:190px;height:240px}.ac b{font-size:14px}.ac small{font-size:12px}
+ .tq{width:150px}.tq span{width:150px;height:150px}.sqr{gap:16px}.bub{gap:20px}.bub button{width:86px}.bub span{width:80px;height:80px}.bub small{font-size:12px;max-width:86px}
+ .hbn,.hero{margin-left:20px;margin-right:20px}
+ #dock{left:232px!important;right:0!important;width:auto!important;max-width:none!important;transform:none!important;padding:0 24px 14px!important}
+ #mini{max-width:900px;margin:0 auto 10px}
+ #nav{position:fixed!important;left:0;top:0;bottom:0;width:232px!important;max-width:none;margin:0!important;border-radius:0!important;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;padding:92px 14px 20px!important;background:rgba(12,10,22,.78)!important;border-right:1px solid rgba(255,255,255,.07)!important;box-shadow:none!important;transform:none!important;opacity:1!important;pointer-events:auto!important}
+ #dock.nh #nav{transform:none!important;opacity:1!important;pointer-events:auto!important}
+ #nav button{flex:none!important;flex-direction:row!important;justify-content:flex-start;gap:14px!important;padding:12px 16px!important;font-size:14px!important;border-radius:12px!important}
+ #nav button svg{width:20px!important;height:20px!important}
+ #pl{max-width:none!important;left:232px!important;right:0!important;width:auto!important;transform:none!important;margin:0!important;padding-left:max(24px,calc((100% - 640px)/2))!important;padding-right:max(24px,calc((100% - 640px)/2))!important}
+ .top{justify-content:flex-end!important}
+ #pl .fc{width:min(46vh,380px)!important}
+ .sheet{max-width:560px!important}
+ #wr,#ly{max-width:none}
+ .more{grid-column:1/-1}
+}
 </style></head>
 <body><div id="app"><div class="top"><div class="logo"><span class="lg"><svg viewBox="3 -2.5 54 60"><ellipse cx="30.5" cy="3.6" rx="14.5" ry="3.9" fill="none" stroke="#b58cff" stroke-width="3.6" transform="rotate(-9 30.5 3.6)"/><path fill="#7b5cff" d="M21 14.5 52 9v10.5L21 25z"/><rect x="21" y="14" width="5.6" height="33" fill="#7b5cff"/><rect x="46.4" y="9" width="5.6" height="33" fill="#7b5cff"/><ellipse cx="16.4" cy="48" rx="8.6" ry="6.3" transform="rotate(-22 16.4 48)" fill="#7b5cff"/><ellipse cx="41.8" cy="43" rx="8.6" ry="6.3" transform="rotate(-22 41.8 43)" fill="#7b5cff"/></svg></span><span id="ttl" class="sr">Music</span><em id="vt"></em></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
