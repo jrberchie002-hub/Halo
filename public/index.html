@@ -437,7 +437,7 @@ html.nb *,html.nb *::before,html.nb *::after{animation-duration:.001s!important;
 .compose{position:relative}.geye{position:absolute;right:76px;top:-16px;z-index:3;pointer-events:none;animation:epop .45s cubic-bezier(.3,1.7,.5,1) both}.geye .eye{width:14px;height:18px}.geye .pp{width:7px;height:7px;margin:-3.5px 0 0 -3.5px}
 @keyframes epop{0%{transform:scale(.1) translateY(14px);opacity:0}100%{transform:none;opacity:1}}
 .qdc{max-width:82%;padding:12px 14px;border-radius:20px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;gap:4px}.qdc.me{align-self:flex-end}.qdc.th{align-self:flex-start}.qdc small{font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}.qdc b{font-size:14px}.qdc span{font-size:15px}.qdc .pill{margin-top:4px;align-self:flex-start}
-.feye{position:absolute;right:14px;bottom:88px;z-index:7;pointer-events:none;animation:epop .45s cubic-bezier(.3,1.7,.5,1) both;transition:opacity .35s,transform .35s}.feye.gone{opacity:0;transform:translateX(24px)}.feye .eye{width:24px;height:30px;border-width:2px;box-shadow:0 2px 8px rgba(0,0,0,.25)}.feye .eyes{gap:4px}.feye .pp{background:var(--ec,#111);width:13px;height:13px;margin:-6.5px 0 0 -6.5px}
+.feye{position:absolute;left:12px;bottom:84px;z-index:7;pointer-events:none;animation:epop .45s cubic-bezier(.3,1.7,.5,1) both;transition:opacity .35s,transform .35s}.feye.gone{opacity:0;transform:translateX(-24px)}.feye .eye{width:18px;height:23px;border-width:2px;box-shadow:0 2px 8px rgba(0,0,0,.25)}.feye .eyes{gap:4px}.feye .pp{background:var(--ec,#111);width:10px;height:10px;margin:-5px 0 0 -5px}
 .eyedot{width:18px;height:18px;border-radius:50%;display:inline-block;border:2px solid var(--line)}
 .eyes.big .pp{background:#111}
 .svb{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-style:normal;font-weight:800;flex:none;letter-spacing:-.02em}
@@ -596,6 +596,7 @@ body,.app{font-size:14px}
 .time.sysw{display:block;width:100%;background:none;border:0;color:var(--pink);font-weight:600}.time.sysw u{text-decoration:none;font-weight:800}
 /* word status instead of a dot */
 .seen .sm{display:inline!important;width:auto!important;height:auto!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;font-size:11px;font-weight:600;color:var(--mute);letter-spacing:.01em}.seen .sm.op{color:var(--pink)!important}
+.pview{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;overscroll-behavior:none}.pview img{max-width:100%;max-height:100%;object-fit:contain}.pview .ic{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;color:#fff;background:rgba(0,0,0,.4);border-radius:50%}
 </style>
 </head>
 <body>

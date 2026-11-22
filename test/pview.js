@@ -1,0 +1,12 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3141); const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage(); let ok = true; const ck = (n, c) => { console.log(c ? 'PASS' : 'FAIL', n); if (!c) ok = false; };
+ await p.goto('http://localhost:3141/?demo=1'); await p.waitForSelector('.nav', { timeout: 9000 });
+ await p.evaluate(() => document.querySelector('[data-a=tab][data-t=me]').click()); await p.waitForTimeout(400);
+ await p.evaluate(() => { const px = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="red"/></svg>'; window.__t = 1; });
+ const r = await p.evaluate(() => { var a = document.querySelector('[data-a=picv]'); return !!a && !!a.querySelector('[data-a=pic]'); }); ck('avatar view + change badge present', r);
+ await p.evaluate(() => { document.querySelector('[data-a=picv]').click(); }); await p.waitForTimeout(200);
+ ck('no photo opens picker (no viewer)', await p.evaluate(() => !document.querySelector('.pview')));
+ await p.evaluate(() => { var d = document.createElement('div'); d.className = 'pview'; d.setAttribute('data-a', 'pvx'); d.innerHTML = '<img>'; document.getElementById('app').appendChild(d); document.querySelector('.pview').click(); }); await p.waitForTimeout(100);
+ ck('tap closes viewer', await p.evaluate(() => !document.querySelector('.pview')));
+ ck('no horizontal overflow', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
