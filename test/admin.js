@@ -1,0 +1,20 @@
+'use strict';
+const assert = require('assert'); const { memoryStore } = require('../store'); const app = require('../lib/app')({}, memoryStore());
+const call = async (method, path, body, tok) => { const r = await app.handle({ method, path, query: {}, headers: tok ? { authorization: 'Bearer ' + tok } : {}, body: body ? Buffer.from(JSON.stringify(body)) : undefined }); return Object.assign(JSON.parse(r.body), { s: r.status }); };
+(async () => {
+  const A = await call('POST', '/api/signup', { name: 'Jay', username: 'jay.h', password: 'pass1234' }), B = await call('POST', '/api/signup', { name: 'Kojo', username: 'kojo_m', password: 'pass1234' });
+  assert.strictEqual((await call('GET', '/api/admin/overview', null, B.token)).s, 403, 'not admin');
+  assert.strictEqual((await call('POST', '/api/admin/claim', { pin: 'abc' }, A.token)).s, 400, 'short pin');
+  assert((await call('POST', '/api/admin/claim', { pin: 'secret-pin' }, A.token)).ok, 'claim');
+  assert.strictEqual((await call('POST', '/api/admin/claim', { pin: 'wrong-pin1' }, B.token)).s, 403, 'cannot steal');
+  assert.strictEqual((await call('GET', '/api/admin/overview', null, B.token)).s, 403, 'still not admin');
+  const o = await call('GET', '/api/admin/overview', null, A.token); assert.strictEqual(o.users.length, 2);
+  assert((await call('POST', '/api/admin/user', { id: B.me.id, act: 'reset', password: 'newpass9' }, A.token)).ok, 'reset');
+  assert((await call('POST', '/api/login', { username: 'kojo_m', key: 'newpass9' })).ok, 'new password works');
+  assert((await call('POST', '/api/admin/user', { id: B.me.id, act: 'remove' }, A.token)).ok, 'remove');
+  assert.strictEqual((await call('POST', '/api/login', { username: 'kojo_m', key: 'newpass9' })).s, 401, 'removed');
+  const C = await call('POST', '/api/signup', { name: 'Jay2', username: 'jay.new', password: 'pass1234' });
+  assert((await call('POST', '/api/admin/claim', { pin: 'secret-pin' }, C.token)).ok, 'pin takes admin back');
+  assert((await call('GET', '/api/admin/overview', null, C.token)).ok, 'new admin');
+  console.log('admin ok');
+})().catch(e => { console.error(e); process.exit(1); });
