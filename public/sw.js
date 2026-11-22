@@ -24,7 +24,7 @@ self.addEventListener('notificationclick', function (e) {
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cl) { if (cl.length) { try { cl[0].postMessage({ type: 'open', from: dt.from || '', m: dt.m || null }); } catch (x) {} return cl[0].focus(); } return (dt.m ? pmStash(dt.m) : Promise.resolve()).then(function () { return self.clients.openWindow(url); }); }));
 });
 
-var SHELL = 'halo-shell-v1', STATIC = ['/', '/index.html', '/app.js', '/qr.js', '/manifest.webmanifest', '/icon-192.png', '/badge.png', '/icon-512.png', '/apple-touch-icon.png', '/logos/spotify.png', '/logos/ytm.png', '/logos/apple.png', '/logos/audiomack.png', '/logos/soundcloud.png'];
+var SHELL = 'halo-shell-v1', STATIC = ['/', '/index.html', '/app.js', '/boot.js', '/qr.js', '/manifest.webmanifest', '/icon-192.png', '/badge.png', '/icon-512.png', '/apple-touch-icon.png', '/logos/spotify.png', '/logos/ytm.png', '/logos/apple.png', '/logos/audiomack.png', '/logos/soundcloud.png'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(SHELL).then(function (c) { return Promise.all(STATIC.map(function (u) { return fetch(u, { cache: 'reload' }).then(function (r) { if (r.ok) return c.put(u, r); }).catch(function () {}); })); })); });
 self.addEventListener('activate', function (e) { e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== SHELL && k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); })); });
 self.addEventListener('fetch', function (e) {
