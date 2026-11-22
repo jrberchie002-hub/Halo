@@ -1,0 +1,8 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3138); const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage(); let ok = true; const ck = (n, v) => { console.log(v ? 'ok  ' : 'FAIL', n); if (!v) ok = false; };
+ await p.goto('http://localhost:3138/?demo=1'); await p.waitForSelector('.nav', { timeout: 9000 });
+ const tint = await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').includes('color-mix')); ck('default purple tints the background', tint);
+ await p.evaluate(() => { localStorage.setItem('halo.acc', '#141214'); }); await p.reload(); await p.waitForSelector('.nav'); const t2 = await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').includes('color-mix')); ck('neutral swatch stays plain', !t2);
+ await p.evaluate(() => document.querySelector('[data-a=tab][data-t=me]').click()); await p.waitForTimeout(400); await p.evaluate(() => document.querySelector('[data-a=settings]').click()); await p.waitForTimeout(500);
+ await p.evaluate(() => document.querySelector('[data-a=sec][data-k=Account]').click()); await p.waitForTimeout(300); const txt = await p.evaluate(() => (document.querySelector('.sheet') || document.body).innerText); console.log(txt.slice(-300).replace(/\n/g, ' | ')); ck('shows version line', /Halo version 21\.\d+/.test(txt)); ck('no update-now row when up to date', !/Update Halo now/.test(txt)); ck('has Username row', /Username/.test(txt));
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();

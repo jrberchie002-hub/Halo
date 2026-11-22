@@ -1,0 +1,11 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3139); const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage(); p.on('pageerror', e => console.log('ERR', e.message)); let ok = true; const ck = (n, v) => { console.log(v ? 'ok  ' : 'FAIL', n); if (!v) ok = false; };
+ await p.goto('http://localhost:3139/?demo=1'); await p.waitForSelector('.nav', { timeout: 9000 });
+ ck('Question of the day card on Chats', !!(await p.$('.qdc')));
+ await p.click('[data-a=chat][data-id=k]'); await p.waitForSelector('.b'); await p.waitForTimeout(1500); await p.evaluate(() => { document.activeElement.blur(); document.querySelector('[data-a=plus]').click(); }); await p.waitForTimeout(400);
+ const n = await p.$$eval('#eg button[data-a=stick]', e => e.length); ck('many emojis (' + n + ')', n > 300);
+ ck('category tabs', (await p.$$('.ecat button')).length >= 8);
+ await p.evaluate(() => document.querySelector('.ecat button:nth-child(4)').click()); await p.waitForTimeout(1500); ck('category tap scrolls', await p.evaluate(() => document.querySelector('#eg').scrollTop > 0));
+ await p.evaluate(() => document.querySelector('[data-a=tt][data-k=m2]').click()); await p.waitForTimeout(400); ck('Stickers tab has Halo stickers', (await p.$$('.ws button')).length === 24);
+ await p.evaluate(() => document.querySelector('[data-a=tt][data-k=g]').click()); await p.waitForTimeout(300); const gt = await p.$eval('.tg.gf', e => e.innerText); ck('no poop gift', !/Poop/.test(gt) && gt.includes('Rose'));
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();

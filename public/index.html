@@ -34,7 +34,7 @@
 <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait) and (prefers-color-scheme: light)" href="/splash/s1242x2208.png">
 <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait) and (prefers-color-scheme: dark)" href="/splash/s1242x2208-d.png">
 <title>Halo</title><meta property="og:title" content="Halo · Tap to open"><meta property="og:description" content="Tap to jump in. Chat, calls and moments with your people."><meta property="og:image" content="https://halo-chats-three.vercel.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:type" content="website"><meta property="og:site_name" content="Halo"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://halo-chats-three.vercel.app/og.png">
-<script>try{var t=localStorage.getItem("halo.theme")||"light";if(t==="auto")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);var bg=t==="dark"?"#0f0c10":"#efedea";document.documentElement.style.background=bg;var m=document.querySelector('meta[name=theme-color]');if(m)m.content=bg}catch(e){}</script>
+<script>try{var t=localStorage.getItem("halo.theme")||"light";if(t==="auto")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);try{var q=JSON.parse(localStorage.getItem("halo.tint")||"null");if(q)for(var k in q)document.documentElement.style.setProperty(k,q[k])}catch(e){};var bg=t==="dark"?"#0f0c10":"#efedea";document.documentElement.style.background=bg;var m=document.querySelector('meta[name=theme-color]');if(m)m.content=bg}catch(e){}</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{--bg:#efedea;--card:#ffffff;--ink:#141214;--mute:#86807f;--line:#e5e1dd;--bth:#ffffff;--pink:#f1ede6;--on:#0f0c10;--sun:#ffd23f;--theirs:#e6e3df;--glass:rgba(255,255,255,.82);--shadow:0 8px 28px rgba(30,24,30,.10);--spot:#1db954}
@@ -419,7 +419,7 @@ html,body{touch-action:pan-y;overscroll-behavior:none;-webkit-user-select:none;u
 .av.crowned{position:relative;overflow:visible}.av.crowned::before{content:'\1F451';position:absolute;top:-34%;left:50%;transform:translateX(-50%) rotate(-8deg);font-size:.55em;line-height:1;pointer-events:none;z-index:2}
 .vload{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;z-index:6;pointer-events:none}
 .tray input,.tray textarea{font-size:16px!important;color:var(--ink)!important;-webkit-text-fill-color:var(--ink)}
-.tg,.gg{max-height:min(34vh,260px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+.tg,.gg{max-height:min(44vh,330px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
 .tg button,.gg button{touch-action:manipulation}
 .tg.gf{max-height:min(34vh,260px)!important}
 html,body{overscroll-behavior:none}
@@ -588,6 +588,11 @@ body,.app{font-size:14px}
 /* v21.21 one logo, no flicker */
 .bootlogo{background:transparent!important;gap:0!important}.bootlogo svg{display:block}
 .wl{position:relative}.wl .wlogo{position:absolute!important;left:50%;top:50%;margin:0!important;width:150px;height:150px;transform:translate(-50%,-50%)}.wl .wsub{margin-top:0!important;position:absolute;left:0;right:0;top:calc(50% + 92px)}
+.vern{text-align:center;color:var(--mute);font-size:12px;margin-top:12px}
+.ecat{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.ecat::-webkit-scrollbar{display:none}.ecat button{flex:none;font-size:12px;font-weight:700;padding:6px 10px;border-radius:12px;background:var(--bg);color:var(--mute)}
+.tg .elab{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--mute);padding:8px 4px 2px}
+.tg.ms.ws{grid-template-columns:repeat(3,1fr)}.tg.ms.ws button{height:64px}
+.qdc{display:flex;align-items:center;gap:10px;margin:6px 16px 0;padding:9px 12px;border-radius:12px;background:var(--card);text-align:left;color:var(--ink);font-size:14px;font-weight:600;width:calc(100% - 32px)}.qdc i{width:14px;height:6px;border:2px solid var(--halo,#e8c76a);border-radius:50%;box-sizing:border-box;flex:none;transform:rotate(-8deg)}.qdc span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qdc small{display:block;font-size:11px;font-weight:700;color:var(--mute)}.qdc em{font-style:normal;color:var(--mute);font-size:18px}
 </style>
 </head>
 <body>

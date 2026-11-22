@@ -1,0 +1,11 @@
+const { start } = require('../dev.js');
+(async () => { const srv = await start(3137), B = 'http://localhost:3137'; const j = async (p, b, t) => (await fetch(B + p, { method: 'POST', headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: JSON.stringify(b) })).json();
+ const a = await j('/api/signup', { username: 'olduser', name: 'Old', password: 'pass1234' }), c = await j('/api/signup', { username: 'taken1', name: 'T', password: 'pass1234' });
+ let ok = true; const ck = (n, v) => { console.log(v ? 'ok  ' : 'FAIL', n); if (!v) ok = false; };
+ ck('signup', a.ok && c.ok);
+ const r1 = await j('/api/username', { username: 'newname' }, a.token); ck('rename', r1.ok && r1.me.username === 'newname');
+ const r2 = await j('/api/username', { username: 'taken1' }, a.token); ck('taken refused', !r2.ok);
+ const r3 = await j('/api/username', { username: 'a b' }, a.token); ck('bad refused', !r3.ok);
+ const r4 = await j('/api/signup', { username: 'olduser', name: 'New', password: 'pass1234' }); ck('old name freed', r4.ok);
+ const r5 = await j('/api/login', { username: 'newname', key: 'pass1234' }); ck('login with new name', r5.ok);
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
