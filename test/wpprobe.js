@@ -1,7 +1,7 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js'); const O = process.env.OUT || '/tmp';
 (async () => { const srv = await start(3132); const b = await chromium.launch(); const c = await b.newContext({ viewport: { width: 390, height: 800 } }); const p = await c.newPage();
  await p.goto('http://localhost:3132/?demo=1'); await p.waitForSelector('.nav'); await p.click('[data-a=chat][data-id=k]'); await p.waitForSelector('.b'); await p.waitForTimeout(400);
- await p.click('[data-a=plus]'); await p.click('[data-a=tt][data-k=m]'); await p.waitForTimeout(300);
+ await p.click('[data-a=emo]'); await p.click('[data-a=tt][data-k=m]'); await p.waitForTimeout(300);
  console.log('wp visible', await p.$eval('[data-a=wp]', x => x.offsetParent !== null));
  await p.screenshot({ path: O + '/wp_tray.png' });
  await p.click('[data-a=wp]'); await p.waitForSelector('.wpg'); await p.screenshot({ path: O + '/wp_modal.png' });
