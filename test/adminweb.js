@@ -1,0 +1,13 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { await start(3185); const B = 'http://localhost:3185'; const c = async (t, m, p, b) => (await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
+ const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
+ const j = await c(null, 'POST', '/api/signup', { username: 'boss', name: 'Boss', password: 'pass1234' }); await c(j.token, 'POST', '/api/admin/claim', { pin: 'secretpin1' });
+ await c(null, 'POST', '/api/ht/play', { id: 'abc12345', name: 'Terminator', artist: 'Asake' });
+ const br = await chromium.launch(); const p = await (await br.newContext({ viewport: { width: 1366, height: 800 } })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
+ await p.goto(B + '/admin.html'); await p.waitForSelector('#login:not([hidden])'); await p.fill('#u', 'boss'); await p.fill('#p', 'wrong'); await p.click('#go'); await p.waitForTimeout(500); ck('wrong password refused', /./.test(await p.textContent('#er')));
+ await p.fill('#p', 'pass1234'); await p.click('#go'); await p.waitForTimeout(800); console.log('ERR:', await p.textContent('#er'), await p.evaluate(() => document.getElementById('login').hidden)); await p.waitForSelector('#app:not([hidden])'); await p.waitForTimeout(400);
+ ck('shows goal', /of 30,000 streams/.test(await p.textContent('#main'))); ck('shows song', /Terminator/.test(await p.textContent('#main')));
+ await p.click('[data-t=people]'); ck('people table', /@boss/.test(await p.textContent('#main'))); await p.screenshot({ path: '/tmp/adminweb.png' });
+ await p.click('[data-t=live]'); await p.screenshot({ path: '/tmp/adminweb.png' });
+ const p2 = await (await br.newContext()).newPage(); const u2 = await c(null, 'POST', '/api/signup', { username: 'rando', name: 'R', password: 'pass1234' }); await p2.addInitScript(t => localStorage.setItem('halo.tok', t), u2.token); await p2.goto(B + '/admin.html'); await p2.waitForTimeout(800); ck('non-admin sees login, no data', await p2.evaluate(() => !document.getElementById('login').hidden && document.getElementById('app').hidden));
+ ck('no page errors', !errs.filter(e => !/403|401/.test(e)).length); if (errs.length) console.log(errs); await br.close(); process.exit(0); })();

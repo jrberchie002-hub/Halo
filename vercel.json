@@ -7,6 +7,10 @@
   },
   "rewrites": [
     {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
       "source": "/i/:u",
       "destination": "/index.html"
     },

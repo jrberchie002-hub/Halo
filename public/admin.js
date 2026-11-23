@@ -1,0 +1,34 @@
+(function () {
+  var $ = function (i) { return document.getElementById(i); }, tok = null, tab = 'live', data = null, T;
+  try { tok = localStorage.getItem('halo.tok'); } catch (e) {}
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function ago(t) { if (!t) return 'never'; var s = Math.max(0, (Date.now() - t) / 1000); return s < 90 ? 'just now' : s < 5400 ? Math.round(s / 60) + ' min ago' : s < 129600 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' days ago'; }
+  function api(m, p, b) { return fetch(p, { method: m, headers: Object.assign({ 'content-type': 'application/json' }, tok ? { authorization: 'Bearer ' + tok } : {}), body: b ? JSON.stringify(b) : undefined }).then(function (r) { return r.json().then(function (j) { if (!r.ok) { var e = new Error(j.error || 'Error'); e.s = r.status; throw e; } return j; }); }); }
+  function showLogin(msg) { $('app').hidden = true; $('login').hidden = false; $('er').textContent = msg || ''; clearInterval(T); }
+  function load() { return api('GET', '/api/admin/overview').then(function (o) { data = o; $('login').hidden = true; $('app').hidden = false; draw(); $('upd').textContent = 'Updated ' + new Date().toLocaleTimeString(); }).catch(function (e) { if (e.s === 401) showLogin('Sign in to continue'); else if (e.s === 403) showLogin('This account is not the admin. Sign in with the admin account.'); else $('upd').textContent = 'Connection problem, retrying'; }); }
+  function st(n, l) { return '<div class="card"><b>' + (n || 0).toLocaleString() + '</b><small>' + l + '</small></div>'; }
+  function draw() {
+    var o = data, L = o.live || {}, pct = Math.min(100, (L.total || 0) / (L.goal || 30000) * 100), mx = Math.max.apply(null, (L.week || []).map(function (x) { return x.n; }).concat([1])), h = '';
+    $('tabs').innerHTML = [['live', 'Live'], ['people', 'People (' + o.users.length + ')'], ['songs', 'Shared songs'], ['reports', 'Reports (' + (o.reports || []).length + ')']].map(function (t) { return '<button data-t="' + t[0] + '" class="' + (tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('');
+    if (tab === 'live') {
+      h = '<div class="card"><span class="big">' + (L.total || 0).toLocaleString() + '</span> <span class="m">of ' + (L.goal || 30000).toLocaleString() + ' streams</span><div class="bar"><i style="width:' + pct + '%"></i></div><small class="m">' + pct.toFixed(1) + '% of the goal' + (L.since ? ' · counting since ' + new Date(L.since).toLocaleDateString() : '') + '</small></div>'
+        + '<div class="grid">' + st(L.today, 'streams today') + st(L.listeners, 'listeners today') + st(L.online5, 'online now') + st(L.active24, 'active in 24h') + st(L.people, 'people') + st(L.new24, 'new in 24h') + st(L.new7, 'new in 7 days') + st(o.msgs, 'messages') + '</div>'
+        + '<div class="grid" style="grid-template-columns:1fr 1fr"><div class="card"><b style="font-size:15px;margin-bottom:12px">Last 7 days</b><div class="wk">' + (L.week || []).map(function (x) { return '<div><i style="height:' + Math.max(3, Math.round(x.n / mx * 90)) + 'px"></i>' + x.n + '<br>' + x.d.slice(5) + '</div>'; }).join('') + '</div></div>'
+        + '<div class="card"><b style="font-size:15px;margin-bottom:8px">Top songs</b>' + ((L.top || []).map(function (t) { return '<div style="display:flex;gap:8px;padding:4px 0"><span style="flex:1">' + esc(t.name) + ' <small class="m">' + esc(t.artist) + '</small></span><b style="font-size:14px;display:inline">' + t.n + '</b></div>'; }).join('') || '<span class="m">No plays yet</span>') + '</div></div>'
+        + '<p class="m" style="font-size:12px">Refreshes every 20 seconds. A listener is a unique network address. The same person replaying one song counts at most 3 times per 30 minutes.</p>';
+    } else if (tab === 'people') {
+      h = '<table><tr><th>Name</th><th>Username</th><th>Joined</th><th>Last seen</th></tr>' + o.users.map(function (u) { return '<tr><td>' + esc(u.name) + '</td><td>@' + esc(u.username) + '</td><td>' + (u.created ? new Date(u.created).toLocaleDateString() : '') + '</td><td>' + ago(u.seen) + '</td></tr>'; }).join('') + '</table>';
+    } else if (tab === 'songs') {
+      h = '<table><tr><th>Song</th><th>Artist</th><th>Shared</th></tr>' + (o.songs.map(function (g) { return '<tr><td>' + esc(g.name) + '</td><td>' + esc(g.artist) + '</td><td>' + ago(g.t) + '</td></tr>'; }).join('') || '<tr><td colspan="3" class="m">None yet</td></tr>') + '</table>';
+    } else {
+      h = '<table><tr><th>When</th><th>From</th><th>About</th><th>Reason</th><th>Their last messages</th></tr>' + ((o.reports || []).map(function (r) { return '<tr><td>' + ago(r.t) + '</td><td>' + esc(r.fromName) + '</td><td>' + esc(r.toName) + '</td><td>' + esc(r.why) + '</td><td class="m">' + esc(r.snip) + '</td></tr>'; }).join('') || '<tr><td colspan="5" class="m">No reports</td></tr>') + '</table>';
+    }
+    $('main').innerHTML = h;
+  }
+  $('tabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { tab = b.dataset.t; draw(); } });
+  $('out').addEventListener('click', function () { tok = null; try { localStorage.removeItem('halo.tok'); } catch (e) {} showLogin(''); });
+  $('go').addEventListener('click', function () { $('er').textContent = ''; api('POST', '/api/login', { username: $('u').value, key: $('p').value }).then(function (j) { tok = j.token; try { localStorage.setItem('halo.tok', tok); } catch (e) {} $('p').value = ''; start(); }).catch(function (e) { $('er').textContent = e.message; }); });
+  $('p').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('go').click(); });
+  function start() { load().then(function () { clearInterval(T); T = setInterval(function () { if (!$('app').hidden) load(); }, 20000); }); }
+  if (tok) start(); else showLogin('');
+})();
