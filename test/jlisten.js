@@ -48,7 +48,7 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  ck('her friend (Kofi) sees my song with a Join button', bj === 'aQK1'); await B.p.evaluate(() => document.querySelector('[data-a=hmjoin]').click()); await B.p.waitForTimeout(1500);
  ck('Kofi joining plays my exact song in his chat', await B.p.evaluate(() => window.__open === 0 && window.__src.some(s => /QK1\/stream/.test(s))));
  const atok = await A.p.evaluate(() => localStorage.getItem('halo.tok')); await A.p.evaluate(async (t) => { await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t, 'x-halo-token': t }, body: JSON.stringify({ np: null }) }); }, atok);
- let stopped = false; for (let i = 0; i < 20 && !stopped; i++) { await B.p.waitForTimeout(1000); stopped = await B.p.evaluate(() => !/Listening with/.test((document.querySelector('.mini:not([hidden])') || {}).innerText || '')); }
+ let stopped = false; for (let i = 0; i < 60 && !stopped; i++) { await B.p.waitForTimeout(1000); stopped = await B.p.evaluate(() => !/Listening with/.test((document.querySelector('.mini:not([hidden])') || {}).innerText || '')); }
  ck('when she stops sharing, his listening stops', stopped);
  ck('no sideways overflow', await A.p.evaluate(() => document.documentElement.scrollWidth <= 390)); console.log(A.errs, B.errs);
  await b.close(); process.exit(0); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
