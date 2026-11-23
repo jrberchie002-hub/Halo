@@ -8,4 +8,5 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await A.p.click('[data-a=chat]'); await A.p.click('[data-a=call][data-id]:not([data-v])');
  await B.p.waitForSelector('[data-c=accept]', { timeout: 8000 }); await B.p.click('[data-c=accept]');
  const t0 = Date.now(); let ok = false; for (let i = 0; i < 40; i++) { await A.p.waitForTimeout(500); const ta = await A.p.textContent('#cst').catch(() => ''), tb = await B.p.textContent('#cst').catch(() => ''); if (/^\d+:\d\d$/.test(ta) && /^\d+:\d\d$/.test(tb)) { ok = true; break; } }
+ { const cb = await B.p.$$eval('.call [data-c]', e => e.map(x => x.dataset.c)); const okc = cb.includes('mute') && cb.includes('spk') && cb.includes('end') && !cb.includes('accept'); console.log(okc ? 'PASS' : 'FAIL', 'callee sees mute, speaker, end after answering'); if (!okc) ok = false; }
  console.log('both sides connected:', ok, 'in', Date.now() - t0, 'ms', A.errs, B.errs); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })().catch(e => { console.error('FAIL', e.message); process.exit(1); });
