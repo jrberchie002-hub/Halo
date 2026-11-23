@@ -1,0 +1,16 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { await start(3162); const B = 'http://localhost:3162'; const c = async (t, m, p, b) => (await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
+ const j = await c(null, 'POST', '/api/signup', { username: 'delme', name: 'Del', password: 'pass1234' });
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 } })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.addInitScript(t => localStorage.setItem('halo.tok', t), j.token); await p.goto(B + '/'); await p.waitForSelector('.nav'); await p.waitForTimeout(600);
+ const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
+ await p.evaluate(() => document.querySelector('[data-a=tab][data-t=me]').click()); await p.waitForTimeout(400); await p.evaluate(() => document.querySelector('[data-a=settings]').click()); await p.waitForTimeout(600);
+ await p.evaluate(() => { const l = document.querySelectorAll('[data-a=sec][data-k=Account]'); if (l.length) l[l.length - 1].click(); }); await p.waitForTimeout(300);
+ ck('blocked row there', !!(await p.$('[data-a=blocked]'))); ck('delete row there', !!(await p.$('[data-a=delacct]')));
+ await p.evaluate(() => document.querySelector('[data-a=blocked]').click()); await p.waitForSelector('.modal'); ck('blocked modal says none', /No one is blocked/.test(await p.textContent('.modal'))); await p.evaluate(() => document.querySelector('.modal [data-a=modalx]').click());
+ await p.evaluate(() => document.querySelector('[data-a=delacct]').click()); await p.waitForSelector('#delcf'); await p.fill('#delcf', 'nope'); await p.evaluate(() => document.querySelector('[data-a=delacct2]').click()); await p.waitForTimeout(400);
+ ck('wrong word keeps account', (await c(j.token, 'GET', '/api/sync?since=0')).me != null);
+ await p.fill('#delcf', 'delete'); await p.evaluate(() => document.querySelector('[data-a=delacct2]').click()); await p.waitForTimeout(1200);
+ const r = await fetch(B + '/api/sync?since=0', { headers: { authorization: 'Bearer ' + j.token } }); ck('account gone', r.status === 401);
+ console.log((await p.evaluate(() => document.body.innerText.slice(0, 120))).replace(/\n/g, ' ')); ck('back at sign in', !(await p.$('.nav')));
+ ck('no page errors', !errs.length); await b.close(); process.exit(0); })();

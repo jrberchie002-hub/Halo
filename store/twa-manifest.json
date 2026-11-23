@@ -1,0 +1,26 @@
+{
+ "packageId": "com.halo.chat",
+ "host": "YOURDOMAIN",
+ "name": "Halo",
+ "launcherName": "Halo",
+ "display": "standalone",
+ "orientation": "portrait",
+ "themeColor": "#7b5cff",
+ "navigationColor": "#7b5cff",
+ "backgroundColor": "#efedea",
+ "enableNotifications": true,
+ "startUrl": "/",
+ "iconUrl": "https://YOURDOMAIN/icon-512.png",
+ "maskableIconUrl": "https://YOURDOMAIN/icon-maskable-512.png",
+ "appVersion": "1.0.0",
+ "appVersionCode": 1,
+ "signingKey": {
+  "path": "./halo.keystore",
+  "alias": "halo"
+ },
+ "fallbackType": "customtabs",
+ "features": {},
+ "webManifestUrl": "https://YOURDOMAIN/manifest.webmanifest",
+ "fullScopeUrl": "https://YOURDOMAIN/",
+ "minSdkVersion": 21
+}

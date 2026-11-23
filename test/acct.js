@@ -1,0 +1,18 @@
+const { start } = require('../dev.js');
+(async () => { await start(3161); const B = 'http://localhost:3161'; const c = async (t, m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined }); return { s: r.status, ...(await r.json().catch(() => ({}))) }; };
+ const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
+ const a = await c(null, 'POST', '/api/signup', { username: 'acta', name: 'Acta', password: 'pass1234' }), b = await c(null, 'POST', '/api/signup', { username: 'actb', name: 'Actb', password: 'pass1234' });
+ const aid = a.me.id, bid = b.me.id;
+ await c(a.token, 'POST', '/api/friend', { to: bid }); await c(b.token, 'POST', '/api/friend', { to: aid });
+ let me = (await c(a.token, 'GET', '/api/sync?since=0')).me; ck('friends', (me.friends || []).includes(bid));
+ await c(a.token, 'POST', '/api/send', { to: bid, x: 'hello there' });
+ const r = await c(b.token, 'POST', '/api/report', { to: aid, why: 'Spam' }); ck('report ok', r.ok);
+ const ad = await c(b.token, 'POST', '/api/block', { to: aid }); ck('block ok', ad.ok);
+ me = (await c(b.token, 'GET', '/api/sync?since=0')).me; ck('block lists them and unfriends', (me.blocked || []).some(x => x.id === aid) && !(me.friends || []).includes(aid));
+ await c(a.token, 'POST', '/api/friend', { to: bid }); me = (await c(b.token, 'GET', '/api/sync?since=0')).me; ck('blocked cannot re-request', !(me.reqIn || []).includes(aid));
+ await c(b.token, 'POST', '/api/block', { to: aid, off: 1 }); me = (await c(b.token, 'GET', '/api/sync?since=0')).me; ck('unblock', !(me.blocked || []).length);
+ ck('delete needs confirm', (await c(b.token, 'POST', '/api/account/delete', {})).s === 400);
+ const d = await c(b.token, 'POST', '/api/account/delete', { confirm: 'DELETE' }); ck('delete ok', d.ok);
+ ck('token dead after delete', (await c(b.token, 'GET', '/api/sync?since=0')).s === 401);
+ ck('name freed', (await c(null, 'POST', '/api/signup', { username: 'actb', name: 'Actb2', password: 'pass1234' })).ok !== false);
+ process.exit(0); })();

@@ -1,0 +1,12 @@
+{
+ "appId": "com.halo.chat",
+ "appName": "Halo",
+ "webDir": "public",
+ "server": {
+  "url": "https://YOURDOMAIN",
+  "cleartext": false
+ },
+ "ios": {
+  "contentInset": "always"
+ }
+}
