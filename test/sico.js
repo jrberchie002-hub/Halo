@@ -1,0 +1,14 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { await start(3154); const B = 'http://localhost:3154'; const c = async (t, m, p, b) => (await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
+ const j = await c(null, 'POST', '/api/signup', { username: 'ssz', name: 'S', password: 'pass1234' });
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 } })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.addInitScript(t => localStorage.setItem('halo.tok', t), j.token); await p.goto(B + '/'); await p.waitForSelector('.nav'); await p.waitForTimeout(600);
+ const ck = (n, c) => console.log(c ? 'PASS' : 'FAIL', n);
+ await p.evaluate(() => document.querySelector('[data-a=tab][data-t=me]').click()); await p.waitForTimeout(400); await p.evaluate(() => document.querySelector('[data-a=settings]').click()); await p.waitForTimeout(800); await p.screenshot({ path: '/tmp/prev4/sico0.png' }); console.log((await p.$$eval('[data-a]', e => e.map(x => x.dataset.a).slice(0, 40))).join(',')); await p.evaluate(() => { const l = document.querySelectorAll('[data-a=sec][data-k=Calls]'); l[l.length - 1].click(); }); await p.waitForTimeout(400); await p.waitForSelector('[data-a=sico]'); await p.evaluate(() => { const l = document.querySelectorAll('[data-a=sico]'); l[l.length - 1].click(); }); await p.waitForSelector('[data-a=sicoset][data-e="⭐"]'); await p.evaluate(() => document.querySelector('.modal [data-a=sicoset][data-e="⭐"]').click()); await p.waitForTimeout(900);
+ const me = (await c(j.token, 'GET', '/api/sync?since=0&only=stories')).me;
+ ck('saved on the account', me.sico === '⭐');
+ await p.reload(); await p.waitForSelector('.nav'); await p.waitForTimeout(600); await p.evaluate(() => document.querySelector('[data-a=tab][data-t=me]').click()); await p.waitForTimeout(400); await p.evaluate(() => document.querySelector('[data-a=settings]').click()); await p.evaluate(() => { const l = document.querySelectorAll('[data-a=sec][data-k=Calls]'); l[l.length - 1].click(); }); await p.waitForSelector('[data-a=sico]');
+ ck('stays after reopening', /⭐/.test(await p.textContent('[data-a=sico]')));
+ await p.evaluate(() => { const l = document.querySelectorAll('[data-a=sico]'); l[l.length - 1].click(); }); await p.evaluate(() => document.querySelector('.modal [data-a=sicoset][data-e=""]').click()); await p.waitForTimeout(800);
+ ck('back to ring', !(await c(j.token, 'GET', '/api/sync?since=0&only=stories')).me.sico);
+ ck('no page errors', !errs.length); await b.close(); process.exit(0); })();
