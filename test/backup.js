@@ -1,0 +1,11 @@
+const { start } = require('../dev.js');
+(async () => { await start(3198); const B = 'http://localhost:3198'; const c = async (t, m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined }); return { s: r.status, ...(await r.json().catch(() => ({}))) }; }; const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
+ const a = await c(null, 'POST', '/api/signup', { username: 'jay', name: 'Jay', password: 'pass1234' }), h = await c(null, 'POST', '/api/signup', { username: 'her', name: 'Her', password: 'pass1234' });
+ await c(a.token, 'POST', '/api/friend', { to: h.me.id }); await c(h.token, 'POST', '/api/friend', { to: a.me.id }); await c(a.token, 'POST', '/api/admin/claim', { pin: 'secretpin1' });
+ for (let i = 0; i < 11; i++) await c((i % 2 ? a : h).token, 'POST', '/api/send', { to: (i % 2 ? h : a).me.id, x: 'msg ' + i, ck: 'bbbbbbb' + i + 'x' });
+ const cid = [a.me.id, h.me.id].sort().join('|'); const hist = await c(a.token, 'GET', '/api/history?chat=' + encodeURIComponent(cid) + '&before=' + (Date.now() + 120000)); ck('history returns all 11', (hist.msgs || []).length === 11);
+ const o = await c(a.token, 'GET', '/api/admin/overview'); ck('overview says storage + counts', !!o.storage && o.msgs === 11 && o.backups === 11);
+ const ex = await (await fetch(B + '/api/admin/export', { headers: { authorization: 'Bearer ' + a.token } })).json(); ck('export has 11 messages', ex.messages.length === 11 && ex.backups.length === 11);
+ const rs = await c(a.token, 'POST', '/api/admin/restore', {}); ck('restore ok, nothing missing', rs.ok && rs.restored === 0);
+ const rs2 = await c(h.token, 'POST', '/api/admin/restore', {}); ck('non admin refused', rs2.s === 403);
+ process.exit(0); })();
