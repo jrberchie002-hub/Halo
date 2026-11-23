@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:390,height:800}});let fails=0;const ck=(n,c)=>{console.log(c?'ok  ':'FAIL',n);if(!c)fails++};const errs=[];p.on('pageerror',e=>errs.push(e.message));
+const trk=(id,n,a)=>({wrapperType:'track',kind:'song',trackId:id,trackName:n,artistName:a||'Black Sherif',collectionName:'Alb',previewUrl:'http://127.0.0.1:1/p.m4a',artworkUrl100:'',trackTimeMillis:200000,primaryGenreName:'Hip-Hop'});
+await p.route('**/*',r=>{const u=decodeURIComponent(r.request().url());if(u.includes('localhost'))return r.continue();
+ if(/lookup\?id=4242&entity=song/.test(u))return r.fulfill({headers:{'access-control-allow-origin':'*'},json:{results:[trk(4242,'Friends Song','Kofi Kinaata')]}});
+ if(u.includes('itunes.apple.com'))return r.fulfill({headers:{'access-control-allow-origin':'*'},json:{results:[trk(31,'Home song')]}});
+ if(/halo-chats|vercel\.app\/api/.test(u))return r.fulfill({headers:{'access-control-allow-origin':'*'},json:{ok:true,people:[]}});
+ return r.abort()});
+await p.addInitScript(()=>{HTMLMediaElement.prototype.play=function(){(window.__as=window.__as||[]).push(this);return Promise.resolve()}});
+await p.goto('http://localhost:3199/#join=i4242&f=friend-1');await p.waitForTimeout(3500);
+const st=await p.evaluate(()=>({mini:!document.querySelector('#mini').hidden,title:(document.querySelector('#mini b')||{}).textContent,folbar:!!document.querySelector('.folbar'),hash:location.hash}));console.log(JSON.stringify(st));
+ck('join link starts the friend\'s song',st.mini&&/Friends Song/.test(st.title||''));ck('follow bar shows while following',st.folbar);ck('link cleaned from address bar',st.hash==='');
+await p.evaluate(()=>{const f=document.querySelector('[data-a=folstop]');f&&f.click()});await p.waitForTimeout(500);
+ck('Stop following removes the bar',!(await p.evaluate(()=>!!document.querySelector('.folbar'))));
+ck('no sideways overflow',await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));ck('no page errors',errs.length===0);console.log(fails?'SOME FAIL':'ALL PASS',errs);await b.close();process.exit(fails?1:0)})();

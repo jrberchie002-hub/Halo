@@ -1,0 +1,10 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3193); let ok = true; const ck = (n, c) => { console.log(c ? 'PASS' : 'FAIL', n); if (!c) ok = false; };
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true })).newPage();
+ await p.goto('http://localhost:3193/?demo=1'); await p.waitForSelector('.nav'); await p.waitForTimeout(800);
+ const scan = async (label) => { const r = await p.evaluate(() => [...document.querySelectorAll('.sring')].filter(e => !e.closest('#splash') && !e.classList.contains('spin')).map(e => getComputedStyle(e).animationName).filter(n => n && n !== 'none')); ck(label + ': no ring blinks', r.length === 0); return r; };
+ await scan('chats'); await p.evaluate(() => document.querySelector('[data-a=chat],[data-a=open]').click()); await p.waitForTimeout(900); await scan('chat');
+ await p.click('#th .nm'); await p.waitForSelector('#pr'); await p.waitForTimeout(500); const n = await p.evaluate(() => document.querySelectorAll('#pr .sring').length); await scan('profile (' + n + ' rings)');
+ await p.click('#pr [data-a=close]').catch(() => {}); await p.click('#th [data-a=close]').catch(() => {}); await p.waitForTimeout(300);
+ await p.evaluate(() => { const t = [...document.querySelectorAll('.nav button')].pop(); t && t.click(); }); await p.waitForTimeout(700); await scan('My Halo');
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();

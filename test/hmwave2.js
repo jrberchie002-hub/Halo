@@ -1,0 +1,18 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:390,height:800}});let fails=0;const ck=(n,c)=>{console.log(c?'ok  ':'FAIL',n);if(!c)fails++};const errs=[];p.on('pageerror',e=>errs.push(e.message));
+const trk=(id,n,a)=>({wrapperType:'track',kind:'song',trackId:id,trackName:n,artistName:a||'Black Sherif',collectionName:'Alb',previewUrl:'http://127.0.0.1:1/p.m4a',artworkUrl100:'',trackTimeMillis:200000,primaryGenreName:'Hip-Hop'});
+await p.route('**/*',r=>{const u=decodeURIComponent(r.request().url());if(u.includes('localhost'))return r.continue();
+ if(u.includes('itunes.apple.com/search')||u.includes('lookup'))return r.fulfill({json:{results:[trk(31,'Home song','Black Sherif'),trk(32,'Another','Black Sherif'),trk(33,'Third','Black Sherif')]}});
+ return r.abort()});
+await p.addInitScript(()=>{HTMLMediaElement.prototype.play=function(){(window.__as=window.__as||[]).push(this);return Promise.resolve()};HTMLMediaElement.prototype.pause=function(){}});
+await p.goto('http://localhost:3199/');await p.waitForTimeout(2500);
+await p.evaluate(()=>document.querySelector('[data-a=pick]').click());await p.waitForTimeout(800);
+await p.evaluate(()=>{(window.__as||[]).forEach(a=>a.dispatchEvent(new Event('play')))});await p.waitForTimeout(600);
+await p.evaluate(()=>document.querySelector('#mini [data-a=open]').click());await p.waitForTimeout(900);
+const hs=()=>p.$$eval('#wv i',e=>e.slice(0,40).map(x=>Math.round(x.getBoundingClientRect().height*10)).join(','));
+const live=await p.evaluate(()=>document.querySelector('#pl').classList.contains('live'));const h1=await hs();await p.waitForTimeout(450);const h2=await hs();
+ck('player has bars',(await p.$$('#wv i')).length>20);ck('marked live while playing',live);ck('bars are moving',h1!==h2);ck('no sideways overflow',await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+await p.screenshot({path:'/tmp/prev4/wv_a.png',clip:{x:0,y:520,width:390,height:230}});await p.waitForTimeout(420);await p.screenshot({path:'/tmp/prev4/wv_b.png',clip:{x:0,y:520,width:390,height:230}});
+await p.evaluate(()=>document.querySelector('#pl [data-a=pp]').click());await p.evaluate(()=>{(window.__as||[]).forEach(a=>a.dispatchEvent(new Event('pause')))});await p.waitForTimeout(900);
+const h3=await hs();await p.waitForTimeout(450);const h4=await hs();
+ck('stops when paused',!(await p.evaluate(()=>document.querySelector('#pl').classList.contains('live')))&&h3===h4);
+ck('no page errors',errs.length===0);console.log(fails?'SOME FAIL':'ALL PASS',errs);await b.close();process.exit(fails?1:0)})();
