@@ -3,7 +3,7 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await p.goto('http://localhost:3145/?demo=1'); await p.waitForSelector('.nav'); await p.evaluate(() => document.querySelector('[data-a=chat],[data-a=open]').click()); await p.waitForTimeout(900);
  await p.evaluate(() => document.querySelector('[data-a=plus]').click()); await p.waitForTimeout(400);
  const o = await p.evaluate(() => ({ n: document.querySelectorAll('.atsh button').length, over: document.documentElement.scrollWidth > innerWidth, w: document.querySelector('.atsh').getBoundingClientRect().width, emo: !!document.querySelector('.emo') }));
- ck('10 actions (no My song, no eyes)', o.n === 10); ck('no overflow', !o.over); ck('emoji button in composer', o.emo);
+ ck('9 actions (no My song, eyes or wave)', o.n === 9); ck('no overflow', !o.over); ck('emoji button in composer', o.emo);
  if (process.env.SHOT) await p.screenshot({ path: process.env.SHOT });
  await p.evaluate(() => document.querySelector('.atsh [data-a=attt][data-k=m2]').click()); await p.waitForTimeout(300);
  ck('sheet closes and sticker tray opens', await p.evaluate(() => !document.querySelector('.modal') && !document.getElementById('tray').hidden));
