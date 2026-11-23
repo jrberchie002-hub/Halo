@@ -23,8 +23,8 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await A.p.evaluate(() => { const m = document.querySelector('.modal'); if (m) m.remove(); });
  await A.p.click('#pr [data-a=close]'); await A.p.waitForSelector('#th textarea'); await A.p.fill('#th textarea', 'hello old message'); await A.p.keyboard.press('Enter'); await A.p.waitForTimeout(1500);
  let bgot = false; for (let i = 0; i < 10 && !bgot; i++) { await B.p.waitForTimeout(800); bgot = await B.p.evaluate(() => /hello old message/.test(document.body.innerText)); }
- await B.p.evaluate(() => { const o = Date.now; window.__o = o; Date.now = () => o() + 25 * 36e5; }); await B.p.waitForTimeout(6000);
- const stillThere = await B.p.evaluate(() => /hello old message/.test(document.body.innerText)); await B.p.evaluate(() => { Date.now = window.__o; });
+ await B.p.route('**/api/sync*', async r => { const resp = await r.fetch(); const j = await resp.json(); if (j.now) j.now += 25 * 36e5; await r.fulfill({ response: resp, body: JSON.stringify(j) }); }); await B.p.waitForTimeout(6000);
+ const stillThere = await B.p.evaluate(() => /hello old message/.test(document.body.innerText)); await B.p.unroute('**/api/sync*');
  const ck = (n, c) => console.log(c ? 'PASS' : 'FAIL', n);
  ck('B received the message first', bgot); ck('after 25h it is gone for B', !stillThere);
  ck('starts on Forever', /Forever/.test(before)); ck('switches to 24 hours', /24 hours/.test(after)); ck('friend sees the change in the chat', bsees); ck('switches back to Forever', /Forever/.test(back)); console.log(A.errs, B.errs);
