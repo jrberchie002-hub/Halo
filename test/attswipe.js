@@ -1,0 +1,12 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3162); let ok = true; const ck = (n, c) => { console.log(c ? 'PASS' : 'FAIL', n); if (!c) ok = false; };
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true })).newPage();
+ await p.goto('http://localhost:3162/?demo=1'); await p.waitForSelector('.nav'); await p.evaluate(() => document.querySelector('[data-a=chat],[data-a=open]').click()); await p.waitForTimeout(900);
+ await p.evaluate(() => document.querySelector('[data-a=plus]').click()); await p.waitForTimeout(300);
+ const before = await p.evaluate(() => ({ layers: document.querySelectorAll('.sheet,.sv').length, modal: !!document.querySelector('.modal.at') }));
+ const r = await p.evaluate(async () => { const c = document.querySelector('.atchips'), q = c.getBoundingClientRect(), y = q.top + q.height / 2; const mk = (t, x) => { const o = new Touch({ identifier: 1, target: c, clientX: x, clientY: y }); return new TouchEvent(t, { touches: t === 'touchend' ? [] : [o], changedTouches: [o], bubbles: true, cancelable: true }); };
+  let prevented = false; const f = []; c.dispatchEvent(mk('touchstart', 60)); for (let x = 60; x <= 260; x += 20) { const e = mk('touchmove', x); c.dispatchEvent(e); if (e.defaultPrevented) prevented = true; } c.dispatchEvent(mk('touchend', 260));
+  c.dispatchEvent(mk('touchstart', 300)); for (let x = 300; x >= 120; x -= 20) { const e = mk('touchmove', x); c.dispatchEvent(e); if (e.defaultPrevented) prevented = true; } c.dispatchEvent(mk('touchend', 120));
+  return { prevented, layers: document.querySelectorAll('.sheet,.sv').length, modal: !!document.querySelector('.modal.at'), ow: document.documentElement.scrollWidth }; });
+ ck('chat open before', before.layers > 0 && before.modal); ck('swipe on chips is not blocked', !r.prevented); ck('chat stays open', r.layers === before.layers); ck('plus sheet stays open', r.modal); ck('no page overflow', r.ow <= 390);
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
