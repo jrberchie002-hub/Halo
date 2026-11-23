@@ -1,0 +1,15 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { const srv = await start(3198); const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true })).newPage(); let ok = true; const ck = (n, c) => { console.log(c ? 'PASS' : 'FAIL', n); if (!c) ok = false; };
+ await p.goto('http://localhost:3198/?demo=1'); await p.waitForSelector('.nav'); await p.evaluate(() => { const t = [...document.querySelectorAll('.nav button')].pop(); t.click(); }); await p.waitForTimeout(600);
+ await p.evaluate(() => document.querySelector('[data-a=vibe]').click()); await p.waitForSelector('#vbe');
+ ck('field starts empty (star is only a hint)', await p.evaluate(() => document.getElementById('vbe').value === '' && document.getElementById('vbe').placeholder === '✨'));
+ await p.click('#vbe'); await p.keyboard.insertText('😂'); ck('a new emoji stands alone', await p.evaluate(() => document.getElementById('vbe').value === '😂'));
+ await p.keyboard.insertText('🔥'); ck('typing another replaces it, nothing stacks', await p.evaluate(() => document.getElementById('vbe').value === '🔥'));
+ await p.fill('#vbe', '✨😂'); await p.dispatchEvent('#vbe', 'input'); ck('even a pasted pair keeps only the last one', await p.evaluate(() => document.getElementById('vbe').value === '😂'));
+ await p.fill('#vbt', 'Feeling like a legend'); await p.click('[data-a=vibeown]'); await p.waitForTimeout(700);
+ await p.evaluate(() => document.querySelector('[data-a=vibe]').click()); await p.waitForSelector('.vgrid');
+ ck('my vibe is saved in the list', await p.evaluate(() => [...document.querySelectorAll('.vgrid [data-a=vibeset]')].some(b => b.dataset.e === '😂' && b.dataset.t === 'Feeling like a legend')));
+ ck('saved vibe comes first', await p.evaluate(() => document.querySelector('.vgrid [data-a=vibeset]').dataset.t === 'Feeling like a legend'));
+ await p.reload(); await p.waitForSelector('.nav'); await p.evaluate(() => { const t = [...document.querySelectorAll('.nav button')].pop(); t.click(); }); await p.waitForTimeout(500); await p.evaluate(() => document.querySelector('[data-a=vibe]').click()); await p.waitForSelector('.vgrid');
+ ck('still there after reopening the app', await p.evaluate(() => [...document.querySelectorAll('.vgrid [data-a=vibeset]')].some(b => b.dataset.t === 'Feeling like a legend')));
+ console.log(ok ? 'ALL PASS' : 'SOME FAIL'); await b.close(); srv.close && srv.close(); process.exit(ok ? 0 : 1); })();
