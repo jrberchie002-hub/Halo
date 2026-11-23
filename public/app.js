@@ -62,7 +62,7 @@ function sentMark(cid, m) { var c = S.chats[cid], fid = String(cid).split('|').f
 function dayKey(t) { return new Date(t).toISOString().slice(0, 10); }
 function streakOf(c) { if (!c || !c.streak) return 0; var y = dayKey(Date.now() - 864e5); return c.streakDay >= y ? c.streak : 0; }
 function hidGet() { try { return JSON.parse(localStorage.getItem('halo.hid') || '{}'); } catch (e) { return {}; } }
-function chatList(id) { var l = S.msgs[id] || [], c = +LS.get('halo.clr.' + id) || 0, hd = hidGet(), rt = S.chats[id] && S.chats[id].ret, cut = rt ? Date.now() - rt * 36e5 : 0; return (c || cut || Object.keys(hd).length) ? l.filter(function (m) { return m.t > c && m.t > cut && !hd[m.id]; }) : l; }
+function chatList(id) { var l = S.msgs[id] || [], c = +LS.get('halo.clr.' + id) || 0, hd = hidGet(), rt = S.chats[id] && S.chats[id].ret, cut = rt ? Date.now() + (S.off || 0) - rt * 36e5 : 0; // server time, so a wrong phone clock never hides messages return (c || cut || Object.keys(hd).length) ? l.filter(function (m) { return m.t > c && m.t > cut && !hd[m.id]; }) : l; }
 function pinsGet() { try { return JSON.parse(LS.get('halo.pins') || '[]'); } catch (e) { return []; } }
 function lastMsg(id) { var l = chatList(id); return l[l.length - 1]; }
 function unread(id) { var c = S.chats[id], r = (c && c.r && c.r[S.me.id]) || 0; return chatList(id).filter(function (m) { return m.from !== S.me.id && m.t > r; }).length; }
@@ -204,7 +204,7 @@ function merge(j) {
   });
   if (prevMe && !S.first) (S.me.friends || []).forEach(function (f) { if ((prevMe.friends || []).indexOf(f) < 0 && (prevMe.reqOut || []).indexOf(f) >= 0) { var pp = S.people[f]; toast(f, (pp ? pp.name.split(' ')[0] : 'Someone') + ' accepted your request', 1); sysNotify('Halo', (pp ? pp.name : 'Someone') + ' accepted your friend request'); } });
   if (j.capped && j.capped.length) { S.cap = S.cap || {}; var minT = {}; j.rows.forEach(function (r) { if (r.c === 'msgs' && r.data && r.data.chat) minT[r.data.chat] = Math.min(minT[r.data.chat] === undefined ? Infinity : minT[r.data.chat], r.data.t); }); j.capped.forEach(function (c) { S.cap[c] = 1; if (minT[c] !== undefined && S.msgs[c]) S.msgs[c] = S.msgs[c].filter(function (m) { return m.tmp || m.t >= minT[c]; }); }); } // the server window sets where the thread starts: older cached messages would leave a gap, so they load through Earlier messages instead
-  if (!j.only) S.stamp = (j.now && j.stamp > (j.now + 120000) * 1000) ? 0 : j.stamp; var firstTime = S.first; S.first = false;
+  if (j.now) S.off = j.now - Date.now(); if (!j.only) S.stamp = (j.now && j.stamp > (j.now + 120000) * 1000) ? 0 : j.stamp; var firstTime = S.first; S.first = false;
   newIn.forEach(function (m) { var open = S.view && S.view.chat === pair(S.me.id, m.from); if (open) { api('POST', '/api/read', { chat: m.chat }).catch(function () {}); beep('in', m.chat); } else { beep('in', m.chat); toast(m.from, lt(m), 1); sysNotify(person(m.from).name, lt(m)); } });
   return firstTime;
 }
@@ -1237,7 +1237,7 @@ app.addEventListener('click', function (e) {
   else if (k === 'cmwp') { var om = $('.modal'); if (om) om.remove(); S.wpT = { chat: pair(S.me.id, id), fid: id }; openWp(); }
   else if (k === 'cttoneset') { var cid4 = pair(S.me.id, id), nm4 = a.dataset.n; if (nm4) { LS.set('halo.ct.' + cid4, nm4); playTone(nm4, MSGT, .2); } else LS.del('halo.ct.' + cid4); document.querySelectorAll('.modal .tonel button').forEach(function (b) { var on = b.dataset.n === nm4; b.classList.toggle('on', on); b.querySelector('i').textContent = on ? '✓' : '▶'; }); }
   else if (k === 'cmclear') confirmBox('Clear this chat?', 'This clears the messages on your phone only. ' + person(id).name.split(' ')[0] + ' still keeps theirs.', 'cmclear2', id, 'Clear');
-  else if (k === 'cmclear2') { window.__uc = Date.now(); var cid5 = pair(S.me.id, id); LS.set('halo.clr.' + cid5, String(Date.now())); var mx2 = $('.modal'); if (mx2) mx2.remove(); if (S.view && S.view.chat === cid5) { var th = $('#th'); if (th) closeTop(); } drawMain(); toast(null, 'Chat cleared'); }
+  else if (k === 'cmclear2') { window.__uc = Date.now(); var cid5 = pair(S.me.id, id); LS.set('halo.clr.' + cid5, String(Date.now() + (S.off || 0))); var mx2 = $('.modal'); if (mx2) mx2.remove(); if (S.view && S.view.chat === cid5) { var th = $('#th'); if (th) closeTop(); } drawMain(); toast(null, 'Chat cleared'); }
   else if (k === 'tourgo') tourOpen(+id || 0);
   else if (k === 'tourx') { var tm = $('.modal'); if (tm) tm.remove(); }
   else if (k === 'tour') tourOpen(0);
