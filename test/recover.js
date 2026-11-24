@@ -1,4 +1,4 @@
-const { chromium } = require('playwright'); const { start } = require('../dev.js');
+const crypto = require('crypto'); process.env.OWNER_RESET_HASH = crypto.createHash('sha256').update('TESTPHRASE').digest('hex'); const { chromium } = require('playwright'); const { start } = require('../dev.js');
 (async () => { const srv = await start(3140); const B = 'http://localhost:3140'; let fail = 0; const ok = (n, c) => { console.log((c ? 'PASS ' : 'FAIL ') + n); if (!c) fail = 1; };
  const post = async (p, b) => { const r = await fetch(B + p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }); return { s: r.status, j: await r.json().catch(() => ({})) }; };
  await post('/api/signup', { username: 'jay', name: 'Jay', password: 'oldpass1', phone: '0244123456' });
@@ -12,6 +12,12 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  ok('new password works', (await post('/api/login', { username: 'jay', key: 'newpass1' })).s === 200);
  ok('old password no longer works', (await post('/api/login', { username: 'jay', key: 'oldpass1' })).s === 401);
  let last = 0; for (let i = 0; i < 6; i++) last = (await post('/api/recover', { username: 'jay', contact: '0244000000', password: 'zzzzzz' })).s; ok('guessing is rate limited', last === 429);
+ await post('/api/signup', { username: 'amazing1', name: 'Call Me Amazing', password: 'lost1' }); await post('/api/signup', { username: 'twin1', name: 'Twin', password: 'x1x1x1' }); await post('/api/signup', { username: 'twin2', name: 'Twin', password: 'x2x2x2' });
+ ok('dev reset: wrong phrase refused', (await post('/api/recover', { owner: 'WRONG', username: 'call me amazing', password: 'fresh12' })).s === 401);
+ const dv = await post('/api/recover', { owner: 'test-phrase', username: 'Call Me Amazing', password: 'fresh12' }); ok('dev reset by account name works', dv.s === 200 && dv.j.username === 'amazing1');
+ ok('dev reset: new password logs in', (await post('/api/login', { username: 'amazing1', key: 'fresh12' })).s === 200);
+ const tw = await post('/api/recover', { owner: 'TESTPHRASE', username: 'twin', password: 'fresh12' }); ok('dev reset: two matches lists usernames', tw.s === 409 && /twin1/.test(tw.j.error) && /twin2/.test(tw.j.error));
+ ok('dev reset by username works', (await post('/api/recover', { owner: 'TESTPHRASE', username: 'twin2', password: 'fresh12' })).s === 200);
  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
  await post('/api/signup', { username: 'ama', name: 'Ama', password: 'amapass1', email: 'ama@example.com' });
  await p.goto(B + '/'); await p.waitForTimeout(1500); await p.click('[data-a=au][data-s=login]').catch(() => {}); await p.waitForSelector('[data-s=forgot]', { timeout: 5000 }); await p.click('[data-s=forgot]');

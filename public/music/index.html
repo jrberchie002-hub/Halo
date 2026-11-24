@@ -397,13 +397,12 @@ body.insrch::before{background:transparent!important;z-index:-1!important}.vw[da
 .rsh{justify-content:flex-start!important}.rsh button{margin-left:auto}
 div.sec:has(.hl)::before{display:none!important}
 .rsug{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 8px}.rsug button{font-size:13px;font-weight:600;padding:8px 14px;border-radius:99px;border:0;background:rgba(255,255,255,.08);color:var(--ink)}div.sec::before{display:none!important}.plnw i.halo{display:none!important}
-.cg{display:grid;grid-auto-flow:column;grid-auto-columns:84px;gap:12px;padding:4px 20px 8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}.cg::-webkit-scrollbar{display:none}.cg.two{grid-template-rows:repeat(2,auto);gap:10px 12px}
-.rt{position:relative;display:block;width:84px;padding-top:8px;text-align:center;font-size:13.5px}
-.rt u{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;box-sizing:border-box;padding:0 8px;background:var(--c);color:var(--t);text-decoration:none;font-weight:700;font-size:inherit;line-height:1.15;letter-spacing:-.01em;overflow-wrap:anywhere}
-.rt i{position:absolute;z-index:1;top:0;left:50%;width:34px;height:11px;margin-left:-17px;border:2.5px solid #e8c76a;border-radius:50%;box-sizing:border-box;transform:rotate(-8deg)}
-.rt:active u{transform:scale(.96)}
-.ch{display:flex;align-items:center;gap:10px;padding:2px 12px 4px}.ch b{font-size:26px;letter-spacing:-.02em}.ch .ic{margin:0;flex:none}
-.cplay{display:flex;align-items:center;gap:14px;padding:6px 20px 10px}.cplay .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 20px}.cplay .pill svg{width:16px;height:16px;fill:currentColor}.cplay small{color:var(--mute);font-size:13px}
+.decs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 20px 8px}
+.dec{position:relative;min-width:0;height:96px;border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:var(--card2);color:var(--ink)}
+.dec b{font-size:16px;letter-spacing:-.01em}.dec small{font-size:12px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dec i{position:absolute;top:12px;left:12px;width:22px;height:9px;border:2px solid currentColor;border-radius:50%;opacity:.9;box-sizing:border-box}
+.dec.d90{background:#2a1d5c;color:#d9c8ff}.dec.d00{background:#1d2a3d;color:#a9d0ff}.dec.dgz{background:#7b5cff;color:#14092e}
+@media (min-width:900px){.decs{max-width:760px}}
 </style></head>
 <body><div id="app"><div class="top"><div class="logo"><span class="lg"><svg viewBox="3 -2.5 54 60"><ellipse cx="30.5" cy="3.6" rx="14.5" ry="3.9" fill="none" style="stroke:var(--a3)" stroke-width="3.6" transform="rotate(-9 30.5 3.6)"/><path style="fill:var(--a)" d="M21 14.5 52 9v10.5L21 25z"/><rect x="21" y="14" width="5.6" height="33" style="fill:var(--a)"/><rect x="46.4" y="9" width="5.6" height="33" style="fill:var(--a)"/><ellipse cx="16.4" cy="48" rx="8.6" ry="6.3" transform="rotate(-22 16.4 48)" style="fill:var(--a)"/><ellipse cx="41.8" cy="43" rx="8.6" ry="6.3" transform="rotate(-22 41.8 43)" style="fill:var(--a)"/></svg></span><span id="ttl" class="sr">Music</span><em id="vt"></em></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
