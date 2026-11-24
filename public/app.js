@@ -14,6 +14,7 @@ var AVC = ['#c98a0a', '#171316', '#b4541a', '#7a5c2e', '#d4572a', '#4a3b30', '#a
 var STK = ['🔥', '😂', '😍', '🥹', '😎', '💀', '🙌', '❤️', '✨', '🎧', '📍', '🍕', '🎉', '👀', '💯', '🫶'];
 
 var S = { tok: LS.get('halo.tok'), ranks: {}, rmsgs: {}, me: null, people: {}, chats: {}, msgs: {}, stories: {}, calls: {}, ice: {}, typing: {}, stamp: 0, resync: false, tab: 'chats', view: null, q: '', first: true, seenNotif: +LS.get('halo.sn') || 0, online: true, sig: '' };
+try { if (/[?&]dbg=1/.test(location.search)) window.__S = S; } catch (e) {}
 
 /* ---------- api ---------- */
 function api(method, path, body) {
@@ -62,7 +63,13 @@ function sentMark(cid, m) { var c = S.chats[cid], fid = String(cid).split('|').f
 function dayKey(t) { return new Date(t).toISOString().slice(0, 10); }
 function streakOf(c) { if (!c || !c.streak) return 0; var y = dayKey(Date.now() - 864e5); return c.streakDay >= y ? c.streak : 0; }
 function hidGet() { try { return JSON.parse(localStorage.getItem('halo.hid') || '{}'); } catch (e) { return {}; } }
-function chatList(id) { var l = S.msgs[id] || [], c = +LS.get('halo.clr.' + id) || 0, hd = hidGet(), rt = S.chats[id] && S.chats[id].ret, sn = Date.now() + (S.off || 0); return l.some(function (m) { return m.exp; }) || c || Object.keys(hd).length ? l.filter(function (m) { return m.t > c && !(m.exp && m.exp <= sn) && !hd[m.id]; }) : l; }
+var KEEP = {}; /* lock-in: a real message this screen has already shown can never silently drop out of a chat; only delete, hide-for-me, clear chat or expiry remove it */
+function keepLock(id) { var l = S.msgs[id] || [], me = S.me && S.me.id; if (KEEP.__u !== me) KEEP = { __u: me }; var k = KEEP[id] || (KEEP[id] = { m: {}, n: 0 }), rn = 0, i, x;
+  for (i = 0; i < l.length; i++) { x = l[i]; if (!x || x.tmp || !x.id) continue; rn++; if (!k.m[x.id]) k.n++; k.m[x.id] = x; }
+  if (k.n <= rn) return l;
+  var all = Object.keys(k.m).map(function (z) { return k.m[z]; }).concat(l.filter(function (z) { return z && z.tmp; })).sort(function (a, b) { return a.t - b.t; });
+  S.keepFix = (S.keepFix || 0) + 1; if (!k.log || Date.now() - k.log > 60000) { k.log = Date.now(); try { clog('keep restored ' + (k.n - rn) + ' of ' + k.n + ' in ' + id.slice(-6) + ' list=' + l.length); } catch (e) {} } return all; }
+function chatList(id) { var l = keepLock(id), c = +LS.get('halo.clr.' + id) || 0, hd = hidGet(), rt = S.chats[id] && S.chats[id].ret, sn = Date.now() + (S.off || 0); return l.some(function (m) { return m.exp; }) || c || Object.keys(hd).length ? l.filter(function (m) { return m.t > c && !(m.exp && m.exp <= sn) && !hd[m.id]; }) : l; }
 function pinsGet() { try { return JSON.parse(LS.get('halo.pins') || '[]'); } catch (e) { return []; } }
 function lastMsg(id) { var l = chatList(id); return l[l.length - 1]; }
 function unread(id) { var c = S.chats[id], r = (c && c.r && c.r[S.me.id]) || 0; return chatList(id).filter(function (m) { return m.from !== S.me.id && m.t > r; }).length; }
@@ -192,7 +199,7 @@ function merge(j) {
   j.rows.forEach(function (r) {
     var d = r.data;
     if (r.c === 'chats') { S.chats[r.id] = d; if (S.view && S.view.chat === r.id) { var shx = $('#th'); if (shx) applyWp(shx); } }
-    else if (r.c === 'msgs') { var l = S.msgs[d.chat] = S.msgs[d.chat] || []; if (d.from === S.me.id) { l = S.msgs[d.chat] = l.filter(function (m) { return !(m.tmp && m.x === (d.x || '') && !d.img && !d.vid && !d.aud); }); } var i = l.findIndex(function (m) { return m.id === d.id; }); if (i < 0) { l.push(d); l.sort(function (a, b) { return a.t - b.t; }); if (d.from !== S.me.id) delete S.typing[d.from]; if (d.from !== S.me.id && !S.first) newIn.push(d); } else if (!(d.stub && l[i] && !l[i].stub)) l[i] = d; }
+    else if (r.c === 'msgs') { var l = S.msgs[d.chat] = S.msgs[d.chat] || []; if (d.from === S.me.id) { l = S.msgs[d.chat] = l.filter(function (m) { return !(m.tmp && ((d.ck && m.tmp === d.ck) || (m.x === (d.x || '') && !d.img && !d.vid && !d.aud))); }); } var i = l.findIndex(function (m) { return m.id === d.id; }); if (i < 0) { l.push(d); l.sort(function (a, b) { return a.t - b.t; }); if (d.from !== S.me.id) delete S.typing[d.from]; if (d.from !== S.me.id && !S.first) newIn.push(d); } else if (!(d.stub && l[i] && !l[i].stub)) l[i] = d; }
     else if (r.c === 'stories') { if (d.t === 0 || Date.now() - d.t > (d.ttl || 24) * 36e5) delete S.stories[d.id]; else S.stories[d.id] = d; }
     else if (r.c === 'calls') { S.calls[d.id] = d; callEvent(d); }
     else if (r.c === 'gcalls') { gcEvent(d); }
@@ -740,7 +747,7 @@ function recSend() { var r = recEnd(); if (!r) return; var dur = (Date.now() - r
     };
     if (/wav/.test(blob.type)) go(blob); else { var once = false, fin = function (w) { if (once) return; once = true; try { go(w || blob); } catch (e) { toast(null, 'Could not send the voice note'); } }; setTimeout(function () { fin(null); }, 5000); toWav(blob, fin); } };
   try { r.mr.stop(); } catch (e) { toast(null, 'Could not save the voice note'); } }
-function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (!m.aud || !/^(data:|https:)/.test(m.aud)) return toast(null, 'This is a sample voice note'); vnUnlock();
+function vnToggle(id) { var m = null; Object.keys(S.msgs).forEach(function (c) { S.msgs[c].forEach(function (x) { if (x.id === id) m = x; }); }); if (!m) return; if (m.tmp) return toast(null, 'Still sending'); if (!m.aud || !/^(data:|https:)/.test(m.aud)) return toast(null, 'This is a sample voice note'); vnUnlock();
   if (VN && VN.id === id) { if (VN.au.paused) VN.au.play().catch(function () {}); else VN.au.pause(); vnUpdate(); return; }
   if (VN) { VN.au.pause(); VN = null; }
   var wire = function (au) { VN = { id: id, au: au }; au.ontimeupdate = vnUpdate; au.onpause = vnUpdate; au.onplay = vnUpdate; au.onended = function () { vnNext(au); }; return au; };
@@ -1386,7 +1393,7 @@ function openLib() { if (!SPT) return; var el = sheet('<div class="bar"><button 
   if (SPT.e < Date.now() && SPT.r) spToken({ grant_type: 'refresh_token', refresh_token: SPT.r }, function (ok) { if (ok) run(); }); else run(); }
 function spRow() { spLoad(); var cid = SPC; if (cid === null) { spCfg(function () { refreshMe(); }); return ''; } if (!cid) return ''; return '<button class="sr" data-a="' + (SPT ? 'spoff' : 'spon') + '"><span><b>Spotify</b><br><small style="color:var(--mute)">' + (SPT ? 'Connected. Shows what you play' : 'Show what you are playing automatically') + '</small></span>' + (SPT ? tog(true) : '<em>›</em>') + '</button>'; }
 /* ---------- automatic updates (keeps you signed in) ---------- */
-var BUILD = null, CODE = '22.4';
+var BUILD = null, CODE = '22.5';
 function updSafe() { if (CALL || REC || MEMO || CAM) return false; if ($('#th') || $('.sheet') || $('.call') || $('.gcall')) return false; var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName) && String(f.value || '').trim()) return false; if ($('.sheet#cp') || $('.sheet#cam') || $('.modal')) return false; return true; }
 var UPD = false, PREP = false;
 function updPrep() { if (PREP) return; PREP = 1; (window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('halo-shell') === 0; }).map(function (k) { return caches.delete(k); })); }).catch(function () {}) : Promise.resolve()).then(function () { return navigator.serviceWorker && navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update().catch(function () {}); }).catch(function () {}); }).then(function () { return Promise.all(['/', '/index.html', '/app.js', '/qr.js'].map(function (u) { return fetch(u + '?u=' + Date.now(), { cache: 'reload' }).catch(function () {}); })); }).then(function () { PREP = 2; }); }

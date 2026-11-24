@@ -1,0 +1,13 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js');
+(async () => { await start(3144); const B = 'http://localhost:3144'; let fail = 0; const ck = (n, c) => { console.log((c ? 'PASS ' : 'FAIL ') + n); if (!c) fail = 1; };
+ const c = async (t, m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined }); return r.json(); };
+ const a = await c(null, 'POST', '/api/signup', { username: 'jay', name: 'Jay', password: 'pass1234' }), h = await c(null, 'POST', '/api/signup', { username: 'her', name: 'Her', password: 'pass1234' });
+ await c(a.token, 'POST', '/api/friend', { to: h.me.id }); await c(h.token, 'POST', '/api/friend', { to: a.me.id });
+ const br = await chromium.launch({ args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', '--autoplay-policy=no-user-gesture-required'] }); const ctx = await br.newContext({ viewport: { width: 390, height: 800 }, permissions: ['microphone'] }); const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ let slow = true; await p.route(/\/api\/send/, async r => { if (!slow) return r.continue(); const resp = await r.fetch(); await new Promise(x => setTimeout(x, 4500)); r.fulfill({ response: resp }); }); // the server saves it, the answer is slow: the next poll brings the real note first
+ await p.addInitScript(t => localStorage.setItem('halo.tok', t), a.token); await p.goto(B + '/'); await p.waitForSelector('.crow2'); await p.click('.crow2'); await p.waitForSelector('#mbtn');
+ await p.click('#mbtn'); await p.waitForTimeout(1500); await p.click('[data-a=recsend]'); let max = 0, seen = []; for (let i = 0; i < 40; i++) { await p.waitForTimeout(150); const n = await p.$$eval('.b.vn', e => e.length); max = Math.max(max, n); seen.push(n); }
+ ck('never two voice bubbles for one note (max ' + max + ')', max === 1); ck('one voice note stays at the end', (await p.$$eval('.b.vn', e => e.length)) === 1);
+ slow = false; await p.click('#mbtn'); await p.waitForTimeout(1500); await p.click('[data-a=recsend]'); await p.waitForTimeout(2500); await p.click('#mbtn'); await p.waitForTimeout(1500); await p.click('[data-a=recsend]'); await p.waitForTimeout(2500);
+ const sv = await c(h.token, 'GET', '/api/sync?since=0'); ck('three notes saved on the server even with identical sound', (sv.rows || []).filter(r => r.c === 'msgs' && r.data.aud).length === 3); ck('three shown on screen', (await p.$$eval('.b.vn', e => e.length)) === 3);
+ ck('no page errors ' + errs.join('|'), !errs.length); await br.close(); process.exit(fail); })();
