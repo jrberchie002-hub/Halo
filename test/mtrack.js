@@ -1,7 +1,7 @@
 const { chromium } = require('playwright'); const { start } = require('../dev.js'); const http = require('http'); const fs = require('fs'); const path = require('path');
 (async () => { const srv = await start(3141); const B = 'http://localhost:3141'; let fail = 0; const ok = (n, c) => { console.log((c ? 'PASS ' : 'FAIL ') + n); if (!c) fail = 1; };
  const post = async (p, b, t) => { const r = await fetch(B + p, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, t ? { authorization: 'Bearer ' + t } : {}), body: JSON.stringify(b) }); return { s: r.status, j: await r.json().catch(() => ({})) }; };
- const su = await post('/api/signup', { username: 'boss', name: 'Boss', password: 'bosspass1' }); const tok = su.j.token;
+ const su = await post('/api/signup', { username: 'callmeamazing', name: 'Call Me Amazing', password: 'bosspass1' }); await post('/api/signup', { username: 'sneaky', name: 'Sneaky', password: 'sneaky12' }); const sn = await post('/api/login', { username: 'sneaky', key: 'sneaky12' }); const sc = await post('/api/admin/claim', { pin: 'sneakypin1' }, sn.j.token); ok('another account cannot claim admin', sc.s === 403); const tok = su.j.token;
  await post('/api/admin/claim', { pin: 'adminpin1' }, tok);
  const id1 = 'abcdefgh12345', id2 = 'zyxwvuts98765';
  await fetch(B + '/api/m/hit', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ d: id1, ev: 'open', src: 'qr' }) });
