@@ -1,0 +1,18 @@
+const { chromium } = require('playwright'); const { start } = require('../dev.js'); const http = require('http'); const fs = require('fs'); const path = require('path');
+(async () => { const srv = await start(3141); const B = 'http://localhost:3141'; let fail = 0; const ok = (n, c) => { console.log((c ? 'PASS ' : 'FAIL ') + n); if (!c) fail = 1; };
+ const post = async (p, b, t) => { const r = await fetch(B + p, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, t ? { authorization: 'Bearer ' + t } : {}), body: JSON.stringify(b) }); return { s: r.status, j: await r.json().catch(() => ({})) }; };
+ const su = await post('/api/signup', { username: 'boss', name: 'Boss', password: 'bosspass1' }); const tok = su.j.token;
+ await post('/api/admin/claim', { pin: 'adminpin1' }, tok);
+ const id1 = 'abcdefgh12345', id2 = 'zyxwvuts98765';
+ await fetch(B + '/api/m/hit', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ d: id1, ev: 'open', src: 'qr' }) });
+ await fetch(B + '/api/m/hit', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ d: id1, ev: 'play', src: 'qr' }) });
+ await fetch(B + '/api/m/hit', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ d: id2, ev: 'open', src: 'web' }) });
+ await fetch(B + '/api/m/hit', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ d: id2, ev: 'install', src: 'web' }) });
+ await fetch(B + '/api/m/hit', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ d: 'x', ev: 'open' }) });
+ const ov = await (await fetch(B + '/api/admin/overview', { headers: { authorization: 'Bearer ' + tok } })).json(); const m = ov.music || {};
+ ok('two people counted, junk id ignored', m.people === 2); ok('one came by QR', m.qr === 1); ok('one added to phone', m.installed === 1); ok('one played', m.played === 1); ok('opened today = 2', m.today === 2); ok('opens = 2', m.opens === 2);
+ const hc = await post('/api/handoff', {}, tok); const used = await post('/api/handoff/use', { code: hc.j.code }); ok('app code signs the admin page in', used.s === 200 && !!used.j.token);
+ const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+ await p.goto(B + '/admin.html'); await p.waitForSelector('#gc', { timeout: 6000 }); const c2 = (await post('/api/handoff', {}, tok)).j.code; await p.fill('#c', c2); await p.click('#gc'); await p.waitForSelector('#app:not([hidden])', { timeout: 6000 }).then(() => ok('admin page opens with a code', true)).catch(() => ok('admin page opens with a code', false));
+ await p.waitForTimeout(500); ok('Music visitors card shows', /Halo Music visitors/.test(await p.innerText('body'))); await p.screenshot({ path: '/tmp/aud/admin95.png' }); ok('no page errors ' + errs.join('|'), !errs.length);
+ await b.close(); srv.close && srv.close(); process.exit(fail); })();
