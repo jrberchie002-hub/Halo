@@ -15,7 +15,7 @@ const { chromium } = require('playwright'); const { start } = require('../dev.js
  await A.p.click('.modal [data-a=cmret]'); await A.p.waitForSelector('[data-a=cmretset]'); await A.p.click('[data-a=cmretset][data-h="24"]'); await A.p.waitForTimeout(1200);
  await A.p.click('#pr [data-a=chatmenu]'); await A.p.waitForSelector('.modal [data-a=cmret]');
  const after = await A.p.evaluate(() => document.querySelector('.modal [data-a=cmret] em').textContent);
- let bsees = false; for (let i = 0; i < 12 && !bsees; i++) { await B.p.waitForTimeout(1000); bsees = await B.p.evaluate(() => /hide after 24 hours/.test(document.body.innerText)); }
+ let bsees = false; for (let i = 0; i < 12 && !bsees; i++) { await B.p.waitForTimeout(1000); bsees = await B.p.evaluate(() => /delete after 24 hours/.test(document.body.innerText)); }
  await A.p.click('.modal [data-a=cmret]'); await A.p.waitForSelector('[data-a=cmretset]'); await A.p.click('[data-a=cmretset][data-h="0"]'); await A.p.waitForTimeout(1200); await A.p.click('#pr [data-a=chatmenu]'); await A.p.waitForSelector('.modal [data-a=cmret]');
  const back = await A.p.evaluate(() => document.querySelector('.modal [data-a=cmret] em').textContent);
 

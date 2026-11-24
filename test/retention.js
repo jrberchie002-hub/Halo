@@ -1,0 +1,18 @@
+const { start } = require('../dev.js');
+(async () => { await start(3202); const B = 'http://localhost:3202'; const c = async (t, m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined }); return { s: r.status, ...(await r.json().catch(() => ({}))) }; }; const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
+ const a = await c(null, 'POST', '/api/signup', { username: 'jay', name: 'Jay', password: 'pass1234' }), h = await c(null, 'POST', '/api/signup', { username: 'her', name: 'Her', password: 'pass1234' });
+ await c(a.token, 'POST', '/api/friend', { to: h.me.id }); await c(h.token, 'POST', '/api/friend', { to: a.me.id }); await c(a.token, 'POST', '/api/admin/claim', { pin: 'secretpin1' });
+ const cid = [a.me.id, h.me.id].sort().join('|'), send = (x, k) => c(a.token, 'POST', '/api/send', { to: h.me.id, x, ck: k }), set = (hh) => c(a.token, 'POST', '/api/chatret', { to: h.me.id, h: hh });
+ const m0 = await send('forever one', 'fffffff001'); ck('forever: no expiry', m0.msg && !m0.msg.exp);
+ await set(24); const m1 = await send('gone in 24h', 'fffffff002'); const d1 = m1.msg.exp - m1.msg.t; ck('24h: exp = sent + 24h', d1 === 24 * 36e5);
+ await set(72); const m2 = await send('gone in 72h', 'fffffff003'); ck('72h: exp = sent + 72h', m2.msg.exp - m2.msg.t === 72 * 36e5);
+ await set(0); const m3 = await send('forever two', 'fffffff004'); ck('back to forever: no expiry', !m3.msg.exp);
+ const T = Date.now(), cl = async (add) => c(null, 'GET', '/api/cron/cleanup?at=' + (T + add));
+ const before = await c(a.token, 'GET', '/api/history?chat=' + encodeURIComponent(cid) + '&before=' + (T + 1e6)); ck('all 4 messages + system notes present', ['forever one', 'gone in 24h', 'gone in 72h', 'forever two'].every(t => before.msgs.some(m => m.x === t)));
+ const r1 = await cl(25 * 36e5); ck('after 25h: only the 24h message removed', r1.removed === 1);
+ const h1 = await c(a.token, 'GET', '/api/history?chat=' + encodeURIComponent(cid) + '&before=' + (T + 1e6)); const xs = h1.msgs.map(m => m.x); ck('24h message really gone, 72h and forever kept', !xs.includes('gone in 24h') && xs.includes('gone in 72h') && xs.includes('forever one') && xs.includes('forever two'));
+ const ex1 = await (await fetch(B + '/api/admin/export', { headers: { authorization: 'Bearer ' + a.token } })).json(); ck('also gone from the backup copy', !ex1.backups.some(m => m.x === 'gone in 24h') && !ex1.messages.some(m => m.x === 'gone in 24h'));
+ const r2 = await cl(73 * 36e5); ck('after 73h: the 72h message removed, forever stays', r2.removed === 1); const h2 = await c(a.token, 'GET', '/api/history?chat=' + encodeURIComponent(cid) + '&before=' + (T + 1e6)); const xs2 = h2.msgs.map(m => m.x); ck('forever messages survive', xs2.includes('forever one') && xs2.includes('forever two') && !xs2.includes('gone in 72h'));
+ const r3 = await cl(3650 * 864e5); ck('even after 10 years forever messages stay', r3.removed === 0);
+ const rs = await c(a.token, 'POST', '/api/admin/restore', {}); const h3 = await c(a.token, 'GET', '/api/history?chat=' + encodeURIComponent(cid) + '&before=' + (T + 1e6)); ck('restore cannot bring expired messages back', !h3.msgs.some(m => /gone in/.test(m.x)));
+ process.exit(0); })();

@@ -9,7 +9,7 @@ function memoryStore() {
   return {
     kind: 'memory',
     async get(c, id) { const r = rows.get(c + '\u0000' + id); return r ? clone(r.data) : null; },
-    async put(c, id, data) { const u = stamp(); rows.set(c + '\u0000' + id, { c, id, data: clone(data), u }); return u; },
+    async put(c, id, data) { let u = stamp(); if (data && data.__u) { u = data.__u; data = Object.assign({}, data); delete data.__u; } rows.set(c + '\u0000' + id, { c, id, data: clone(data), u }); return u; }, // __u: lets tests write a row with an older stamp, like a slow database does
     async del(c, id) { rows.delete(c + '\u0000' + id); },
     async since(s, colls) { const out = []; rows.forEach(r => { if (r.u > s && (!colls || colls.includes(r.c))) out.push({ c: r.c, id: r.id, data: clone(r.data), u: r.u }); }); return out.sort((a, b) => a.u - b.u); },
     async list(c) { const out = []; rows.forEach(r => { if (r.c === c) out.push({ c: r.c, id: r.id, data: clone(r.data) }); }); return out; },

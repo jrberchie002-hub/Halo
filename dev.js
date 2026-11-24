@@ -3,7 +3,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const { supabaseStore, memoryStore } = require('./store');
 const makeApp = require('./lib/app');
-const E = process.env, app = makeApp(E, E.SUPABASE_URL ? supabaseStore(E) : memoryStore());
+const E = process.env, store = E.SUPABASE_URL ? supabaseStore(E) : memoryStore(), app = makeApp(E, store);
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 function start(port) {
   const srv = http.createServer(async (req, res) => {
@@ -20,5 +20,5 @@ function start(port) {
   });
   return new Promise(r => srv.listen(port, () => r(srv)));
 }
-module.exports = { start };
+module.exports = { start, store };
 if (require.main === module) start(+E.PORT || 3000).then(() => console.log('Halo on http://localhost:' + (+E.PORT || 3000)));
