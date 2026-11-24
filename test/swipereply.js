@@ -1,0 +1,15 @@
+const dev = require('../dev.js'); const { chromium } = require('playwright');
+let fails = 0; const ck = (n, ok) => { console.log((ok ? 'PASS ' : 'FAIL ') + n); if (!ok) fails++; };
+(async () => { await dev.start(3218); const B = 'http://localhost:3218';
+ const c = async (t, m, p, b) => (await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
+ const a = await c(null, 'POST', '/api/signup', { username: 'jay', name: 'Jay', password: 'pass1234' }), h = await c(null, 'POST', '/api/signup', { username: 'naa', name: 'Naa', password: 'pass1234' });
+ await c(a.token, 'POST', '/api/friend', { to: h.me.id }); await c(h.token, 'POST', '/api/friend', { to: a.me.id }); await c(h.token, 'POST', '/api/send', { to: a.me.id, x: 'swipe me please', ck: 'swk0000001' });
+ const br = await chromium.launch(); const ctx = await br.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }); const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
+ await pg.addInitScript(t => { localStorage.setItem('halo.tok', t); localStorage.setItem('halo.tour', '1'); }, a.token); await pg.goto(B + '/'); await pg.waitForSelector('.crow2'); await pg.tap('.crow2'); await pg.waitForTimeout(2000);
+ const box = await (await pg.$('#ms .b.th')).boundingBox(); const x0 = box.x + 80, y0 = box.y + box.height / 2;
+ await pg.evaluate(([x0, y0]) => { const el = document.elementFromPoint(x0, y0); const mk = (x) => [new Touch({ identifier: 1, target: el, clientX: x, clientY: y0 })]; el.dispatchEvent(new TouchEvent('touchstart', { touches: mk(x0), bubbles: true })); for (let d = 5; d <= 110; d += 15) el.dispatchEvent(new TouchEvent('touchmove', { touches: mk(x0 + d), bubbles: true })); el.dispatchEvent(new TouchEvent('touchend', { touches: [], bubbles: true })); }, [x0, y0]);
+ await pg.waitForTimeout(600);
+ ck('reply bar opens on that message', await pg.$eval('#rplb', e => /swipe me please/.test(e.textContent)).catch(() => false));
+ ck('the message menu did not open', !(await pg.$('.msgmenu, .mm')));
+ const ov = await pg.evaluate(() => document.documentElement.scrollWidth - innerWidth); ck('no sideways overflow', ov === 0);
+ ck('no page errors ' + errs.join(' | '), !errs.length); await br.close(); console.log(fails ? 'FAILED' : 'ALL PASS'); process.exit(fails ? 1 : 0); })();
