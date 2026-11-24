@@ -397,6 +397,23 @@ body.insrch::before{background:transparent!important;z-index:-1!important}.vw[da
 .rsh{justify-content:flex-start!important}.rsh button{margin-left:auto}
 div.sec:has(.hl)::before{display:none!important}
 .rsug{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 8px}.rsug button{font-size:13px;font-weight:600;padding:8px 14px;border-radius:99px;border:0;background:rgba(255,255,255,.08);color:var(--ink)}div.sec::before{display:none!important}.plnw i.halo{display:none!important}
+/* v91 polish: flat ground, quiet type, docked nav */
+html,body{background:var(--bg)!important}
+.hi small{text-transform:none!important;letter-spacing:0!important;font-weight:600!important;font-size:13px!important;color:var(--mute)!important}
+.sec,.sc h4{text-transform:none!important;letter-spacing:0!important;font-size:13px!important;font-weight:600!important;color:var(--mute)!important}
+.whero small{letter-spacing:0!important;font-weight:600!important}
+@media (max-width:899px){#dock{padding:0 0 env(safe-area-inset-bottom,0px)!important}
+#dock #mini{margin:0 10px 8px!important}
+#nav,.soft #nav,.round #nav{border-radius:0!important;background:var(--bg)!important;border:0!important;border-top:1px solid rgba(255,255,255,.08)!important;box-shadow:none!important;padding:4px 8px!important}
+#nav button,.soft #nav button,.round #nav button{border-radius:12px!important}
+#nav button.on{background:none!important;color:var(--gold)!important}
+#nav{width:100%!important;margin:0!important}}
+.chips{gap:18px!important;padding:6px 20px 0!important;border-bottom:1px solid rgba(255,255,255,.08)}
+.chips button,.fl button{background:none!important;border-radius:0!important;padding:8px 0!important;font-size:14px!important;font-weight:600!important;color:var(--mute)!important;border-bottom:2px solid transparent;margin-bottom:-1px}
+.chips button.on,.fl button.on{background:none!important;color:var(--ink)!important;border-bottom-color:var(--gold)}
+.hero,.whero,.sc{box-shadow:none!important}
+.fl button.on{box-shadow:none!important}
+html::before,body::before{background:none!important}
 </style></head>
 <body><div id="app"><div class="top"><div class="logo"><span class="lg"><svg viewBox="3 -2.5 54 60"><ellipse cx="30.5" cy="3.6" rx="14.5" ry="3.9" fill="none" style="stroke:var(--a3)" stroke-width="3.6" transform="rotate(-9 30.5 3.6)"/><path style="fill:var(--a)" d="M21 14.5 52 9v10.5L21 25z"/><rect x="21" y="14" width="5.6" height="33" style="fill:var(--a)"/><rect x="46.4" y="9" width="5.6" height="33" style="fill:var(--a)"/><ellipse cx="16.4" cy="48" rx="8.6" ry="6.3" transform="rotate(-22 16.4 48)" style="fill:var(--a)"/><ellipse cx="41.8" cy="43" rx="8.6" ry="6.3" transform="rotate(-22 41.8 43)" style="fill:var(--a)"/></svg></span><span id="ttl" class="sr">Music</span><em id="vt"></em></div><button class="sbt" data-a="nav" data-k="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>
 <div class="main" id="main"></div></div>
