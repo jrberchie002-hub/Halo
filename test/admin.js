@@ -1,5 +1,5 @@
 'use strict';
-const assert = require('assert'); const { memoryStore } = require('../store'); const app = require('../lib/app')({}, memoryStore());
+const assert = require('assert'); const { memoryStore } = require('../store'); const app = require('../lib/app')({ ADMIN_USERNAME: 'jay.h' }, memoryStore());
 const call = async (method, path, body, tok) => { const r = await app.handle({ method, path, query: {}, headers: tok ? { authorization: 'Bearer ' + tok } : {}, body: body ? Buffer.from(JSON.stringify(body)) : undefined }); return Object.assign(JSON.parse(r.body), { s: r.status }); };
 (async () => {
   const A = await call('POST', '/api/signup', { name: 'Jay', username: 'jay.h', password: 'pass1234' }), B = await call('POST', '/api/signup', { name: 'Kojo', username: 'kojo_m', password: 'pass1234' });

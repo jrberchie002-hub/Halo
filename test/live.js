@@ -1,4 +1,4 @@
-const { chromium } = require('playwright'); const { start } = require('../dev.js');
+process.env.ADMIN_USERNAME = 'boss'; const { chromium } = require('playwright'); const { start } = require('../dev.js');
 (async () => { await start(3180); const B = 'http://localhost:3180'; const c = async (t, m, p, b) => (await fetch(B + p, { method: m, headers: { 'content-type': 'text/plain', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined })).json();
  const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
  const j = await c(null, 'POST', '/api/signup', { username: 'boss', name: 'Boss', password: 'pass1234' });

@@ -1,4 +1,4 @@
-const { start } = require('../dev.js');
+process.env.ADMIN_USERNAME = 'jay'; const { start } = require('../dev.js');
 (async () => { await start(3198); const B = 'http://localhost:3198'; const c = async (t, m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'content-type': 'application/json', ...(t ? { authorization: 'Bearer ' + t } : {}) }, body: b ? JSON.stringify(b) : undefined }); return { s: r.status, ...(await r.json().catch(() => ({}))) }; }; const ck = (n, v) => console.log(v ? 'PASS' : 'FAIL', n);
  const a = await c(null, 'POST', '/api/signup', { username: 'jay', name: 'Jay', password: 'pass1234' }), h = await c(null, 'POST', '/api/signup', { username: 'her', name: 'Her', password: 'pass1234' });
  await c(a.token, 'POST', '/api/friend', { to: h.me.id }); await c(h.token, 'POST', '/api/friend', { to: a.me.id }); await c(a.token, 'POST', '/api/admin/claim', { pin: 'secretpin1' });
