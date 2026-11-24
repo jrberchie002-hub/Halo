@@ -4,7 +4,7 @@ const call = async (method, path, body, tok) => { const r = await app.handle({ m
 (async () => {
   const A = await call('POST', '/api/signup', { name: 'Jay', username: 'jay.h', password: 'pass1234' }), B = await call('POST', '/api/signup', { name: 'Kojo', username: 'kojo_m', password: 'pass1234' });
   assert.strictEqual((await call('GET', '/api/admin/overview', null, B.token)).s, 403, 'not admin');
-  assert.strictEqual((await call('POST', '/api/admin/claim', { pin: 'abc' }, A.token)).s, 400, 'short pin');
+  assert.strictEqual((await call('GET', '/api/admin/state', null, A.token)).admin, true, 'named admin is admin at once, no PIN');
   assert((await call('POST', '/api/admin/claim', { pin: 'secret-pin' }, A.token)).ok, 'claim');
   assert.strictEqual((await call('POST', '/api/admin/claim', { pin: 'wrong-pin1' }, B.token)).s, 403, 'cannot steal');
   assert.strictEqual((await call('GET', '/api/admin/overview', null, B.token)).s, 403, 'still not admin');
