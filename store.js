@@ -13,7 +13,7 @@ function memoryStore() {
     async del(c, id) { rows.delete(c + '\u0000' + id); },
     async since(s, colls) { const out = []; rows.forEach(r => { if (r.u > s && (!colls || colls.includes(r.c))) out.push({ c: r.c, id: r.id, data: clone(r.data), u: r.u }); }); return out.sort((a, b) => a.u - b.u); },
     async list(c) { const out = []; rows.forEach(r => { if (r.c === c) out.push({ c: r.c, id: r.id, data: clone(r.data) }); }); return out; },
-    async chatMsgs(cid) { const out = []; rows.forEach(r => { if (r.c === 'msgs' && r.data.chat === cid) out.push({ c: r.c, id: r.id, data: clone(r.data) }); }); return out; },
+    async chatMsgs(cid, c = 'msgs') { const out = []; rows.forEach(r => { if (r.c === c && r.data.chat === cid) out.push({ c: r.c, id: r.id, data: clone(r.data) }); }); return out; },
   };
 }
 
@@ -64,10 +64,10 @@ function supabaseStore(env) {
       const cs = ['msgs', 'chats', 'sendkeys', 'typing', 'users'], nw = await Promise.all(cs.map(c => one(c, 'desc'))), old = await one('msgs', 'asc'), o = { old }; cs.forEach((c, i) => { o[c] = nw[i]; }); return o;
     },
     async probe() { return await rest('GET', 'halo_records?c=eq.msgs&select=id,u&order=u.desc&limit=5'); }, // newest message rows in the whole table, ids only
-    async list(c) { return await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&limit=5000'); },
-    async chatMsgs(cid) { // filtered on the database; falls back to scanning the collection if the filter is refused
-      try { const r = await rest('GET', 'halo_records?c=eq.msgs&data-%3E%3Echat=eq.' + q(cid) + '&select=c,id,data&limit=5000'); if (r && r.length) return r; } catch (e) { }
-      return ((await this.list('msgs')) || []).filter(r => r.data && r.data.chat === cid);
+    async list(c) { let out = []; for (let i = 0; i < 40; i++) { const r = await rest('GET', 'halo_records?c=eq.' + q(c) + '&select=c,id,data&order=id.asc&limit=1000&offset=' + (i * 1000)); out = out.concat(r || []); if (!r || r.length < 1000) break; } return out; },
+    async chatMsgs(cid, c = 'msgs') { // filtered on the database; falls back to scanning the collection if the filter is refused
+      try { const r = await rest('GET', 'halo_records?c=eq.' + q(c) + '&data-%3E%3Echat=eq.' + q(cid) + '&select=c,id,data&limit=20000'); if (r && r.length) return r; } catch (e) { }
+      return ((await this.list(c)) || []).filter(r => r.data && r.data.chat === cid);
     },
   };
 }
