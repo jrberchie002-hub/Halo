@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "crons": [{ "path": "/api/cron/cleanup", "schedule": "0 4 * * *" }],
+  "crons": [{ "path": "/api/cron/cleanup", "schedule": "0 4 * * *" }, { "path": "/api/cron/backup", "schedule": "30 3 * * *" }],
   "functions": {
     "api/index.js": {
       "maxDuration": 15
