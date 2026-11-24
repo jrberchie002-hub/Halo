@@ -1,0 +1,13 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); let fail = 0; const ok = (n, c) => { console.log((c ? 'PASS ' : 'FAIL ') + n); if (!c) fail = 1; };
+ const svg = c => 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="' + c + '"/></svg>');
+ const res = []; for (let i = 0; i < 24; i++) res.push({ wrapperType: 'track', kind: 'song', trackId: 1000 + i, trackName: 'Song ' + i, artistName: 'Artist ' + (i % 8), collectionName: 'Album', artworkUrl100: svg(['#7b5cff', '#d9a93b', '#3b7dd9'][i % 3]), previewUrl: 'https://x/p' + i + '.m4a', trackTimeMillis: 200000, primaryGenreName: 'Pop', country: 'GHA' });
+ const m = await (await b.newContext({ viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true })).newPage(); const errs = []; m.on('pageerror', e => errs.push(e.message));
+ await m.route(/itunes\.apple\.com/, r => { const u = new URL(r.request().url()), t = u.searchParams.get('term') || 'X', ent = u.searchParams.get('entity'); const rs = ent === 'musicArtist' ? [{ wrapperType: 'artist', artistId: 5, artistName: t }] : res.map(x => Object.assign({}, x, { artistName: t, trackId: x.trackId + t.length * 100 + t.charCodeAt(0) * 1000, trackName: t + ' hit ' + x.trackId })); r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ resultCount: rs.length, results: rs }) }); });
+ await m.route(/audius|googleapis|lrclib|halo-chats/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"results":[],"data":[]}' }));
+ await m.goto('http://localhost:3199/'); await m.waitForTimeout(3500);
+ const has = await m.$('.decs'); ok('decade cards on home', !!has);
+ if (has) { await has.scrollIntoViewIfNeeded(); await m.waitForTimeout(300); await m.screenshot({ path: '/tmp/aud/decs.png' });
+  await m.click('.dec.d90'); await m.waitForTimeout(2500); ok('90s tab selected', await m.evaluate(() => { const o = document.querySelector('#cats button.on'); return o && o.textContent === '90s'; })); ok('main scrolled to top', await m.evaluate(() => document.querySelector('#main').scrollTop === 0)); ok('no decade cards inside a decade tab', !(await m.$('.decs'))); await m.screenshot({ path: '/tmp/aud/d90.png' }); }
+ const lock = await m.evaluate(() => ({ dw: document.documentElement.scrollWidth, iw: innerWidth })); ok('sideways lock', lock.dw <= lock.iw); ok('no page errors ' + errs.join('|'), !errs.length);
+ await b.close(); process.exit(fail); })();
